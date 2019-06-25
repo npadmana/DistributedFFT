@@ -11,10 +11,13 @@ compopts="${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3"
 
 
 [examples]
-examples = ["MPI/fftw-mpi.chpl"]
+examples = ["MPI/fftw-mpi.chpl","Comm/plane.chpl"]
 
 [examples.fftw-mpi]
 compopts="${MPI_CHPL_FLAGS} -lfftw3_mpi -lfftw3_threads -lfftw3"
-execopts="-nl 4"
+
+[examples.plane]
+compopts=""
+
 
 [tests]
