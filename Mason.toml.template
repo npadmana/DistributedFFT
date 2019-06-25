@@ -1,0 +1,20 @@
+
+[brick]
+name = "DistributedFFT"
+version = "0.1.0"
+chplVersion = "1.20.0"
+authors = ["nikhil.padmanabhan@gmail.com"]
+
+compopts="${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3"
+
+[dependencies]
+
+
+[examples]
+examples = ["MPI/fftw-mpi.chpl"]
+
+[examples.fftw-mpi]
+compopts="${MPI_CHPL_FLAGS} -lfftw3_mpi -lfftw3_threads -lfftw3"
+execopts="-nl 4"
+
+[tests]
