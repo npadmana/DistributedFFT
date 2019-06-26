@@ -1,0 +1,6 @@
+Numlocales= 16 Ng=   128    Max diff : 0.00e+00   Elapsed time  :   0.0199
+Numlocales= 16 Ng=   512    Max diff : 0.00e+00   Elapsed time  :     0.14
+Numlocales= 16 Ng=  1024    Max diff : 0.00e+00   Elapsed time  :     1.23
+Numlocales= 16 Ng=  1536    Max diff : 0.00e+00   Elapsed time  :      3.9
+Numlocales= 16 Ng=  2048    Max diff : 0.00e+00   Elapsed time  :     9.72
+Numlocales= 16 Ng=  2560    Max diff : 0.00e+00   Elapsed time  :     18.8
