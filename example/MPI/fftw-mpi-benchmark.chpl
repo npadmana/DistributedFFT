@@ -77,7 +77,7 @@ coforall loc in Locales {
                                    Ng : c_ptrdiff,
                                    Ng : c_ptrdiff,
                                    Aptr, Aptr,
-                                   CHPL_COMM_WORLD, FFTW_FORWARD, FFTW_ESTIMATE);
+                                   CHPL_COMM_WORLD, FFTW_FORWARD, FFTW_MEASURE);
     Barrier(CHPL_COMM_WORLD);
   }
 }

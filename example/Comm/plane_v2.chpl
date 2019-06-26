@@ -10,6 +10,8 @@ config const Ng=256;
 assert((Ng%numLocales)==0,"numLocales should divide Ng");
 const SlabSize = Ng/numLocales;
 
+config const noOp=true;
+
 // Define the domain for the grid. Note that the Ng+2 on the last
 // dimension is how FFTW handles the real to complex transforms and how
 // it packs in the complex data.
@@ -39,7 +41,7 @@ coforall loc in Locales {
       myPlane = arr[{0.. #Ng,j..j,0.. #Ng}];
 
       // Do the 1D FFTs here
-      myPlane *= 2;
+      if !noOp then myPlane *= 2;
 
       // Push back the pencil here
       arr[{0.. #Ng,j..j,0.. #Ng}] = myPlane;
@@ -49,8 +51,9 @@ coforall loc in Locales {
 tt.stop();
 
 
+const truth = if noOp then 1.0 else 2.0;
 // We should do some validation at the end here.
-const diff = max reduce abs(arr)-2.0;
+const diff = max reduce abs(arr)-truth;
 
 writef("Numlocales=%3i Ng=%6i  ",numLocales, Ng);
 writef("  Max diff : %6.2er ",diff);
