@@ -55,8 +55,7 @@
 // Chapel FFTW module for some common routines. We also
 // require MPI here. 
 use MPI;
-use FFTW;
-use FFTW.C_FFTW;
+use DistributedFFT; 
 use SysCTypes;
 require "fftw3-mpi.h";
 
@@ -95,8 +94,6 @@ coforall loc in Locales {
    use that here.
 */
 
-use BlockDist;
-
 // The grid size
 config const Ng=256;
 assert((Ng%numLocales)==0,"numLocales should divide Ng");
@@ -104,11 +101,7 @@ assert((Ng%numLocales)==0,"numLocales should divide Ng");
 // Define the domain for the grid. Note that the Ng+2 on the last
 // dimension is how FFTW handles the real to complex transforms and how
 // it packs in the complex data.
-const Space = {0.. #Ng, 0.. #Ng, 0.. #(Ng+2)};
-// Set up the slab decomposition of the array
-const targetLocales = reshape(Locales, {0.. #numLocales, 0..0, 0..0});
-const D : domain(3) dmapped Block(boundingBox=Space,
-                                  targetLocales=targetLocales)=Space;
+const D = newSlabDom((Ng,Ng,Ng+2));
 
 // Define the arrays
 var A, B : [D] real;
