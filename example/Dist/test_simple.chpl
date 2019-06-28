@@ -23,8 +23,11 @@ writef("Time to warm up planner.... %r\n",timeit.elapsed());
 fillRandom(arr_local, 11);
 fillRandom(arr, 11);
 
-
+timeit.clear(); timeit.start();
 execute(local_plan);
+timeit.stop();
+writef("Time to locally execute FFT = %r\n",timeit.elapsed());
+
 timeit.clear(); timeit.start();
 doFFT(arr, FFTW_FORWARD);
 timeit.stop();
