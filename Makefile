@@ -4,7 +4,8 @@ EXAMPLES=target/example/fftw-mpi-benchmark \
 	target/example/plane_v2 \
 	target/example/FFTW/fftw-plan-timings \
 	target/example/Dist/time_warmup \
-	target/example/Dist/test_simple
+	target/example/Dist/test_simple \
+	target/example/Dist/time_simple \
 
 
 # The following are experimental flags for better performance
