@@ -11,7 +11,7 @@ var arr, arr_save : [Dom] complex;
 var arr_local : [{0.. #Ng, 0.. #Ng, 0.. #Ng}] complex;
 
 // Local plan
-var local_plan = plan_dft(arr_local, FFTW_FORWARD, FFTW_ESTIMATE);
+var local_plan = plan_dft(arr_local, FFTW_FORWARD, FFTW_MEASURE);
 
 var timeit : Timer;
 
