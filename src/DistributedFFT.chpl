@@ -7,6 +7,9 @@ prototype module DistributedFFT {
   use RangeChunk;
   use FFTW;
   use FFTW.C_FFTW;
+  require "npFFTW.h";
+
+  extern proc isNullPlan(plan : fftw_plan) : c_int;
 
   init_FFTW_MT();
 
@@ -42,6 +45,10 @@ prototype module DistributedFFT {
 
     proc execute() {
       FFTW.execute(plan);
+    }
+
+    proc isValid : bool {
+      return isNullPlan(plan)==0;
     }
   }
 
@@ -142,10 +149,14 @@ prototype module DistributedFFT {
         nn[1] = myDom.dim(3).size : c_int;
         var idist = (nn[0]*nn[1]):c_int;
         var nnp = c_ptrTo(nn[0]);
+        // Assume that the warmup routine has been run with the same
+        // array, so all we need is WISDOM
         var plan_yz = new FFTWplan(numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
                                  nnp, stride, idist,
                                  c_ptrTo(arr[localIndex]), nnp, stride, idist,
                                  sign, FFTW_WISDOM_ONLY);
+        if !plan_yz.isValid then
+          halt("Error! Plan generation failed! Did you run the warmup routine?");
 
         // Execute the plan
         plan_yz.execute();
