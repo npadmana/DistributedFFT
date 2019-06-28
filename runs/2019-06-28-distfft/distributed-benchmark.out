@@ -1,0 +1,6 @@
+numLocales=16 Ng= 128 diff=0.00e+00 planTime=    0.52 runTime(F)=   0.045 runTime(B)=   0.024
+numLocales=16 Ng= 512 diff=0.00e+00 planTime=     1.4 runTime(F)=    0.23 runTime(B)=    0.14
+numLocales=16 Ng=1024 diff=0.00e+00 planTime=     1.5 runTime(F)=     1.1 runTime(B)=    0.85
+numLocales=16 Ng=1536 diff=0.00e+00 planTime=     3.1 runTime(F)=     3.5 runTime(B)=     2.9
+numLocales=16 Ng=2048 diff=0.00e+00 planTime=     6.9 runTime(F)=     7.1 runTime(B)=     6.8
+numLocales=16 Ng=2560 diff=0.00e+00 planTime=     8.7 runTime(F)=      13 runTime(B)=      12
