@@ -1,6 +1,6 @@
-numLocales=16 Ng= 128 planTime=    0.88 runTime=   0.021 destroyTime=  0.0006
-numLocales=16 Ng= 512 planTime=      22 runTime=    0.23 destroyTime= 0.00096
-numLocales=16 Ng=1024 planTime=      86 runTime=     1.5 destroyTime= 0.00088
-numLocales=16 Ng=1536 planTime= 1.7e+02 runTime=     4.8 destroyTime= 0.00095
-numLocales=16 Ng=2048 planTime= 3.2e+02 runTime=      13 destroyTime=  0.0012
-numLocales=16 Ng=2560 planTime= 5.3e+02 runTime=      22 destroyTime=  0.0012
+numLocales=16 Ng= 128 planTime=    0.87 runTime=   0.021 destroyTime= 0.00051
+numLocales=16 Ng= 512 planTime=      22 runTime=    0.19 destroyTime= 0.00095
+numLocales=16 Ng=1024 planTime=      86 runTime=     1.5 destroyTime=  0.0009
+numLocales=16 Ng=1536 planTime= 1.7e+02 runTime=     4.8 destroyTime= 0.00092
+numLocales=16 Ng=2048 planTime= 3.1e+02 runTime=      12 destroyTime=  0.0013
+numLocales=16 Ng=2560 planTime= 5.3e+02 runTime=      22 destroyTime=  0.0011

@@ -1,0 +1,6 @@
+numLocales=16 Ng= 128 planTime=    0.46 runTime=   0.012 destroyTime=  0.0002
+numLocales=16 Ng= 512 planTime=      22 runTime=    0.36 destroyTime= 0.00033
+numLocales=16 Ng=1024 planTime=      72 runTime=     2.9 destroyTime= 0.00031
+numLocales=16 Ng=1536 planTime= 1.7e+02 runTime=      11 destroyTime= 0.00032
+numLocales=16 Ng=2048 planTime= 2.9e+02 runTime=      26 destroyTime= 0.00049
+numLocales=16 Ng=2560 planTime=   6e+02 runTime=      54 destroyTime= 0.00032

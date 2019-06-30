@@ -8,17 +8,13 @@ use ReplicatedVar;
 use Time;
 require "fftw3-mpi.h";
 
-// Allow the user to define the number of threads used by FFTW.
-config const numFFTWThreads=0;
-
-
 // Initialize the FFTW library
 // We have to do this on every locale, since
 // locales correspond to MPI ranks.
 coforall loc in Locales {
   on loc {
 
-    fftw_init_threads();
+    //fftw_init_threads();
     fftw_mpi_init();
 
     const nth = if numFFTWThreads > 0 then numFFTWThreads : c_int
