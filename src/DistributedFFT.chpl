@@ -22,6 +22,8 @@ prototype module DistributedFFT {
 
   var fftw_planner_lock$ : [rcDomain] sync bool;
 
+  enum FFTtype {DFT, R2R};
+
   /* fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany, */
   /*                              fftw_complex *in, const int *inembed, */
   /*                              int istride, int idist, */
@@ -32,10 +34,13 @@ prototype module DistributedFFT {
     var plan : fftw_plan;
 
     // Mimic the advanced interface 
-    proc init(numThreads : integral, args ...?k) {
+    proc init(param ftType : FFTtype, numThreads : integral, args ...?k) {
       fftw_planner_lock$(1).writeEF(true);
       fftw_plan_with_nthreads(numThreads:c_int);
-      plan = fftw_plan_many_dft((...args));
+      select ftType {
+          when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
+          when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
+        }
       fftw_planner_lock$(1).readFE();
     }
 
@@ -96,11 +101,11 @@ prototype module DistributedFFT {
         /*                              fftw_complex *out, const int *onembed, */
         /*                              int ostride, int odist, */
         /*                              int sign, unsigned flags); */
-        var plan1 = new FFTWplan(numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
+        var plan1 = new FFTWplan(FFTtype.DFT,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
                                  nnp, stride, idist,
                                  c_ptrTo(arr[localIndex]), nnp, stride, idist,
                                  FFTW_FORWARD, FFTW_MEASURE);
-        var plan2 = new FFTWplan(numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
+        var plan2 = new FFTWplan(FFTtype.DFT,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
                                  nnp, stride, idist,
                                  c_ptrTo(arr[localIndex]), nnp, stride, idist,
                                  FFTW_BACKWARD, FFTW_MEASURE);
@@ -113,11 +118,11 @@ prototype module DistributedFFT {
         rank = 1 : c_int;
         stride = myDom.dim(3).size : c_int;
         idist = 1 : c_int;
-        var plan3 = new FFTWplan(1, rank, nnp, howmany, c_ptrTo(plane),
+        var plan3 = new FFTWplan(FFTtype.DFT,1, rank, nnp, howmany, c_ptrTo(plane),
                                  nnp, stride, idist,
                                  c_ptrTo(plane), nnp, stride, idist,
                                  FFTW_FORWARD, FFTW_MEASURE);
-        var plan4 = new FFTWplan(1, rank, nnp, howmany, c_ptrTo(plane),
+        var plan4 = new FFTWplan(FFTtype.DFT,1, rank, nnp, howmany, c_ptrTo(plane),
                                  nnp, stride, idist,
                                  c_ptrTo(plane), nnp, stride, idist,
                                  FFTW_BACKWARD, FFTW_MEASURE);
@@ -151,10 +156,10 @@ prototype module DistributedFFT {
         var nnp = c_ptrTo(nn[0]);
         // Assume that the warmup routine has been run with the same
         // array, so all we need is WISDOM
-        var plan_yz = new FFTWplan(numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
-                                 nnp, stride, idist,
-                                 c_ptrTo(arr[localIndex]), nnp, stride, idist,
-                                 sign, FFTW_WISDOM_ONLY);
+        var plan_yz = new FFTWplan(FFTtype.DFT,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
+                                   nnp, stride, idist,
+                                   c_ptrTo(arr[localIndex]), nnp, stride, idist,
+                                   sign, FFTW_WISDOM_ONLY);
         if !plan_yz.isValid then
           halt("Error! Plan generation failed! Did you run the warmup routine?");
 
@@ -179,7 +184,7 @@ prototype module DistributedFFT {
         forall j in yChunk with
           // Task private variables
           (var myplane : [{xRange, 0..0, myDom.dim(3)}] complex,
-           var plan_x = new FFTWplan(1, rank, nnp, howmany, c_ptrTo(myplane),
+           var plan_x = new FFTWplan(FFTtype.DFT,1, rank, nnp, howmany, c_ptrTo(myplane),
                                      nnp, stride, idist,
                                      c_ptrTo(myplane), nnp, stride, idist,
                                      sign, FFTW_MEASURE))
