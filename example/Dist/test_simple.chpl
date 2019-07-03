@@ -1,6 +1,7 @@
 use DistributedFFT;
 use Random;
 use Time;
+use CommDiagnostics;
 
 config const Ng=4;
 
@@ -28,12 +29,21 @@ execute(local_plan);
 timeit.stop();
 writef("Time to locally execute FFT = %r\n",timeit.elapsed());
 
+startCommDiagnostics();
 timeit.clear(); timeit.start();
 doFFT(arr, FFTW_FORWARD);
 timeit.stop();
+stopCommDiagnostics();
 writef("Time to run the FFT = %r\n",timeit.elapsed());
+
 
 arr_save = arr_local;
 const maxerr = max reduce abs(arr - arr_save);
 writef("The difference between the local and full transform is = %er\n",maxerr);
+
+// Write out comm diagnostics
+var comms = getCommDiagnostics();
+for ii in 0.. #numLocales {
+  writeln("Loc ", ii," ", comms[ii]);
+}
 
