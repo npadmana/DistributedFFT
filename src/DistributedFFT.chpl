@@ -76,58 +76,15 @@ prototype module DistributedFFT {
      
      arr is assumed to be a block distributed array.
    */
-  proc warmUpPlanner(arr : [?Dom] ) {
+  proc warmUpPlanner(arr : [?Dom]) {
     if arr.rank != 3 then halt("Code is designed for 3D arrays only");
     if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
 
-    coforall loc in Locales {
-      on loc {
-        // Set up for the yz transforms on each domain.
-        const myDom = arr.localSubdomain();
-        const localIndex = myDom.first;
+    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
+    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
+    doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
+    doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
 
-        // Write down all the parameters explicitly
-        var howmany : c_int = myDom.dim(1).size : c_int;
-        var nn : c_array(c_int, 2);
-        var rank = 2 : c_int;
-        var stride = 1 : c_int;
-        nn[0] = myDom.dim(2).size : c_int;
-        nn[1] = myDom.dim(3).size : c_int;
-        var idist = (nn[0]*nn[1]):c_int;
-        var nnp = c_ptrTo(nn[0]);
-        /* fftw_plan fftw_plan_many_dft(int rank, const int *n, int howmany, */
-        /*                              fftw_complex *in, const int *inembed, */
-        /*                              int istride, int idist, */
-        /*                              fftw_complex *out, const int *onembed, */
-        /*                              int ostride, int odist, */
-        /*                              int sign, unsigned flags); */
-        var plan1 = new FFTWplan(FFTtype.DFT,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
-                                 nnp, stride, idist,
-                                 c_ptrTo(arr[localIndex]), nnp, stride, idist,
-                                 FFTW_FORWARD, FFTW_MEASURE);
-        var plan2 = new FFTWplan(FFTtype.DFT,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
-                                 nnp, stride, idist,
-                                 c_ptrTo(arr[localIndex]), nnp, stride, idist,
-                                 FFTW_BACKWARD, FFTW_MEASURE);
-
-        // Warm up the x transpose versions next
-        const xRange = Dom.dim(1);
-        var plane : [{xRange, myDom.dim(3)}] complex;
-        nn[0] = xRange.size : c_int;
-        howmany = myDom.dim(3).size : c_int;
-        rank = 1 : c_int;
-        stride = myDom.dim(3).size : c_int;
-        idist = 1 : c_int;
-        var plan3 = new FFTWplan(FFTtype.DFT,1, rank, nnp, howmany, c_ptrTo(plane),
-                                 nnp, stride, idist,
-                                 c_ptrTo(plane), nnp, stride, idist,
-                                 FFTW_FORWARD, FFTW_MEASURE);
-        var plan4 = new FFTWplan(FFTtype.DFT,1, rank, nnp, howmany, c_ptrTo(plane),
-                                 nnp, stride, idist,
-                                 c_ptrTo(plane), nnp, stride, idist,
-                                 FFTW_BACKWARD, FFTW_MEASURE);
-      }
-    }
   }
 
 
@@ -136,7 +93,25 @@ prototype module DistributedFFT {
     if arr.rank != 3 then halt("Code is designed for 3D arrays only");
     if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
 
-    var wall = new Barrier(numLocales);
+    doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_WISDOM_ONLY);
+    doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
+
+
+    // End of doFFT
+  }
+
+
+  /* Helper routines. This assumes that the data are block-distributed.
+
+     R2C and C2R transforms are more complicated. Currently not supported.
+
+     args -- are the sign and planner flags.
+
+     Note that if you actually want to do a transform, you should have warmed up
+     the planner, and then pass FFTW_WISDOM_ONLY in (since the array is otherwise
+     destroyed -- unless you use FFTW_ESTIMATE).
+   */
+  proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom], warmUpOnly : bool, args ...?k) {
 
     // Run on all locales
     coforall loc in Locales {
@@ -156,17 +131,34 @@ prototype module DistributedFFT {
         var nnp = c_ptrTo(nn[0]);
         // Assume that the warmup routine has been run with the same
         // array, so all we need is WISDOM
-        var plan_yz = new FFTWplan(FFTtype.DFT,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
+        var plan_yz = new FFTWplan(ftType,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
                                    nnp, stride, idist,
                                    c_ptrTo(arr[localIndex]), nnp, stride, idist,
-                                   sign, FFTW_WISDOM_ONLY);
-        if !plan_yz.isValid then
-          halt("Error! Plan generation failed! Did you run the warmup routine?");
+                                   (...args));
 
-        // Execute the plan
-        plan_yz.execute();
+        if !warmUpOnly {
+          if !plan_yz.isValid then
+            halt("Error! Plan generation failed! Did you run the warmup routine?");
+          // Execute the plan
+          plan_yz.execute();
+        }
 
-        wall.barrier();
+        // on loc ends
+      }
+    }
+  }
+        
+  /* X helper.
+
+     See TODO for question on sign
+  */
+  proc doFFT_X(param ftType: FFTtype, arr : [?Dom], warmUpOnly : bool, args ...?k) {
+
+    coforall loc in Locales {
+      on loc {
+        // Set up for the yz transforms on each domain.
+        const myDom = arr.localSubdomain();
+        const localIndex = myDom.first;
 
         // Split the y-range. Make this dimension agnostic
         const yChunk = chunk(myDom.dim(2), numLocales, here.id);
@@ -174,37 +166,49 @@ prototype module DistributedFFT {
         // Set FFTW parameters
         const xRange = Dom.dim(1);
         const zRange = myDom.dim(3);
-        nn[0] = xRange.size : c_int;
-        howmany = myDom.dim(3).size : c_int;
-        rank = 1 : c_int;
-        stride = myDom.dim(3).size : c_int;
-        idist = 1 : c_int;
+        var nn = xRange.size : c_int;
+        var nnp = c_ptrTo(nn);
+        var howmany = myDom.dim(3).size : c_int;
+        var rank = 1 : c_int;
+        var stride = myDom.dim(3).size : c_int;
+        var idist = 1 : c_int;
 
-        // Pull down each plane, process and send back
-        forall j in yChunk with
-          // Task private variables
-          (var myplane : [{xRange, 0..0, myDom.dim(3)}] complex,
-           var plan_x = new FFTWplan(FFTtype.DFT,1, rank, nnp, howmany, c_ptrTo(myplane),
-                                     nnp, stride, idist,
-                                     c_ptrTo(myplane), nnp, stride, idist,
-                                     sign, FFTW_MEASURE))
-            {
-              // Pull down the data
-              myplane = arr[{xRange,j..j,zRange}];
+        if (warmUpOnly) {
+          var myplane : [{xRange, 0..0, myDom.dim(3)}] complex;
+          var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+                                    nnp, stride, idist,
+                                    c_ptrTo(myplane), nnp, stride, idist,
+                                    (...args));
+        } else {
 
-              // Do the 1D FFTs here
-              plan_x.execute();
 
-              // Push back the pencil here
-              arr[{xRange,j..j,zRange}] = myplane;
-            }
+          // Pull down each plane, process and send back
+          forall j in yChunk with
+            // Task private variables
+            // TODO : Type here is complex. Does this make sense always???
+            (var myplane : [{xRange, 0..0, myDom.dim(3)}] complex,
+             var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+                                       nnp, stride, idist,
+                                       c_ptrTo(myplane), nnp, stride, idist,
+                                       (...args))) 
+              {
+                // Pull down the data
+                myplane = arr[{xRange,j..j,zRange}];
+
+                // Do the 1D FFTs here
+                plan_x.execute();
+
+                // Push back the pencil here
+                arr[{xRange,j..j,zRange}] = myplane;
+              }
+        }
 
         // End of on-loc
       }
     }
-
-    // End of doFFT
   }
 
 
+
+  // End of module
 }

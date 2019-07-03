@@ -21,14 +21,18 @@ doFFT(arr, FFTW_FORWARD);
 timeit.stop();
 const runFtime=timeit.elapsed();
 
+arr[0,0,0] -= Ng**3;
+const maxerr1 = max reduce abs(arr);
+arr[0,0,0] = Ng**3;
+
 timeit.clear(); timeit.start();
 doFFT(arr, FFTW_BACKWARD);
 timeit.stop();
 const runBtime=timeit.elapsed();
 
 arr *= 1.0/Ng**3;
-const maxerr = max reduce abs(arr - 1.0);
+const maxerr2 = max reduce abs(arr - 1.0);
 
 
-writef("numLocales=%2i Ng=%4i diff=%8.2er planTime=%8.2r runTime(F)=%8.2r runTime(B)=%8.2r\n",
-       numLocales,Ng, maxerr, planTime, runFtime, runBtime);
+writef("numLocales=%2i Ng=%4i diff=%8.2er,%8.2er planTime=%8.2r runTime(F)=%8.2r runTime(B)=%8.2r\n",
+       numLocales,Ng, maxerr1, maxerr2, planTime, runFtime, runBtime);
