@@ -19,6 +19,7 @@ prototype module DistributedFFT {
   }
 
   config const numFFTWThreads = here.numPUs();
+  config const debugTranspose = false;
 
   var fftw_planner_lock$ : [rcDomain] sync bool;
 
@@ -82,19 +83,28 @@ prototype module DistributedFFT {
 
     doFFT_YZ(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
     doFFT_YZ(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
-    doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
-    doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
-
+    if (debugTranspose) {
+      doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, true, FFTW_FORWARD, FFTW_MEASURE);
+      doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, true, FFTW_BACKWARD, FFTW_MEASURE);
+    } else {
+      doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
+      doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
+    }
   }
 
 
-  /* FFT */
+  /* FFT.
+   */
   proc doFFT(arr : [?Dom], sign : c_int) {
     if arr.rank != 3 then halt("Code is designed for 3D arrays only");
     if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
 
     doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_WISDOM_ONLY);
-    doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
+    if (debugTranspose) {
+      doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, false, sign, FFTW_MEASURE);
+    } else {
+      doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
+    }
 
 
     // End of doFFT
@@ -174,7 +184,7 @@ prototype module DistributedFFT {
         var idist = 1 : c_int;
 
         if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, myDom.dim(3)}] complex;
+          var myplane : [{xRange, 0..0, zRange}] complex;
           var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
                                     nnp, stride, idist,
                                     c_ptrTo(myplane), nnp, stride, idist,
@@ -186,7 +196,7 @@ prototype module DistributedFFT {
           forall j in yChunk with
             // Task private variables
             // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, myDom.dim(3)}] complex,
+            (var myplane : [{xRange, 0..0, zRange}] complex,
              var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
@@ -208,6 +218,82 @@ prototype module DistributedFFT {
     }
   }
 
+
+  /* X helper with a transpose function
+
+     See TODO for question on sign.
+
+     transposeFunc(in, out, sign : bool)
+  */
+  proc doFFT_X_Transposed(param ftType: FFTtype, transposeFunc, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
+
+    coforall loc in Locales {
+      on loc {
+        // Set up for the yz transforms on each domain.
+        const myDom = arr.localSubdomain();
+        const localIndex = myDom.first;
+
+        // Split the y-range. Make this dimension agnostic
+        const yChunk = chunk(myDom.dim(2), numLocales, here.id);
+
+        // Set FFTW parameters
+        const xRange = Dom.dim(1);
+        const zRange = myDom.dim(3);
+        var nn = xRange.size : c_int;
+        var nnp = c_ptrTo(nn);
+        var howmany = myDom.dim(3).size : c_int;
+        var rank = 1 : c_int;
+        var stride = 1 : c_int;
+        var idist = nn;
+
+        if (warmUpOnly) {
+          var myplane : [{zRange, 0..0, xRange}] complex;
+          var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+                                    nnp, stride, idist,
+                                    c_ptrTo(myplane), nnp, stride, idist,
+                                    (...args));
+        } else {
+
+
+          // Pull down each plane, process and send back
+          forall j in yChunk with
+            // Task private variables
+            // TODO : Type here is complex. Does this make sense always???
+            (var myplane : [{zRange, 0..0, xRange}] complex,
+             var myplaneT : [{xRange, 0..0, zRange}] T,
+             var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+                                       nnp, stride, idist,
+                                       c_ptrTo(myplane), nnp, stride, idist,
+                                       (...args))) 
+              {
+                // Pull down the data
+                myplaneT = arr[{xRange,j..j,zRange}];
+                transposeFunc.fwd(myplaneT, myplane);
+
+                // Do the 1D FFTs here
+                plan_x.execute();
+
+                // Push back the pencil here
+                transposeFunc.rev(myplane, myplaneT);
+                arr[{xRange,j..j,zRange}] = myplaneT;
+              }
+        }
+
+        // End of on-loc
+      }
+    }
+  }
+
+  record Transposer {
+    inline proc fwd(inPlane : [?Dom], outPlane) {
+      for (i,j,k) in Dom do outPlane[k,j,i] = inPlane[i,j,k];
+    }
+
+    inline proc rev(inPlane : [?Dom], outPlane) {
+      for (i,j,k) in Dom do outPlane[k,j,i] = inPlane[i,j,k];
+    }
+
+  }
 
 
   // End of module
