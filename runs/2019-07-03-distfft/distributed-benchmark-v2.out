@@ -1,0 +1,15 @@
+numLocales=16 Ng= 128 diff=0.00e+00,0.00e+00 planTime=     0.5 runTime(F)=   0.049 runTime(B)=   0.024
+numLocales=16 Ng= 512 diff=0.00e+00,0.00e+00 planTime=     1.4 runTime(F)=     0.3 runTime(B)=    0.17
+numLocales=16 Ng=1024 diff=0.00e+00,0.00e+00 planTime=     1.5 runTime(F)=     1.1 runTime(B)=    0.96
+numLocales=16 Ng=1536 diff=0.00e+00,0.00e+00 planTime=     3.1 runTime(F)=     3.5 runTime(B)=     2.9
+numLocales=16 Ng=2048 diff=0.00e+00,0.00e+00 planTime=     7.1 runTime(F)=     8.2 runTime(B)=     6.2
+numLocales=16 Ng=2560 diff=0.00e+00,0.00e+00 planTime=     9.4 runTime(F)=      14 runTime(B)=      11
+----------------------
+Using transposed version
+----------------------
+numLocales=16 Ng= 128 diff=0.00e+00,0.00e+00 planTime=    0.43 runTime(F)=   0.043 runTime(B)=   0.029
+numLocales=16 Ng= 512 diff=0.00e+00,0.00e+00 planTime=     1.1 runTime(F)=    0.25 runTime(B)=    0.16
+numLocales=16 Ng=1024 diff=0.00e+00,0.00e+00 planTime=     1.5 runTime(F)=     1.1 runTime(B)=    0.94
+numLocales=16 Ng=1536 diff=0.00e+00,0.00e+00 planTime=     3.2 runTime(F)=     3.8 runTime(B)=     3.3
+numLocales=16 Ng=2048 diff=0.00e+00,0.00e+00 planTime=       7 runTime(F)=      10 runTime(B)=     9.9
+numLocales=16 Ng=2560 diff=0.00e+00,0.00e+00 planTime=     9.1 runTime(F)=      15 runTime(B)=      14
