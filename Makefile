@@ -29,6 +29,9 @@ target/example/Dist/%: example/Dist/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/Dist
 	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3 -Msrc ${PERF_FLAGS}
 
+target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
+	mkdir -p target/example/NPB-FT
+	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3 -Msrc ${PERF_FLAGS}
 
 .PHONY: examples target
 examples: target ${EXAMPLES}
