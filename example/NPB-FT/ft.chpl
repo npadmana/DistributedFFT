@@ -28,6 +28,10 @@ config const Threshold = 1.0e-12;
 const (Nz, Ny, Nx) = ProblemSizes(NPBClass);
 const Dom = newSlabDom((Nx,Ny,Nz));
 
+writeln("NPB FT Benchmark, Class=",NPBClass);
+writef("Running on numLocales = %i\n",numLocales);
+writef("Problem size = %i x %i x %i \n",Nx,Ny,Nz);
+
 
 // Define arrays
 var V, W  : [Dom] complex;
@@ -83,24 +87,36 @@ writef("MFLOPS : %10.4dr\n",mflops);
 
 
 proc evolve() {
-  const FTnorm = 1.0/(Nx*Ny*Nz):real;
   forall ijk in Dom {
     V[ijk] *= Twiddle[ijk];
     W[ijk] = V[ijk];
   }
-  doFFT(W, FFTW_BACKWARD);
-  W *= FTnorm;
+  doFFT(W, FFTW_BACKWARD); // This is unnormalized
 }
 
+/* A few comments are in order here.
+
+   The NPB specification defines j as running from 0 to 1023,
+   but examining the code shows that it runs from 1 to 1024.
+
+   Interestingly, for the S->C classes, these seem to yield the same value;
+   however, going into the D class breaks things. We conform to the code
+   version, since the checksums are based on that.
+
+   Also, we follow FFTW and keep the backward transform unnormalized.
+   The reference version also does that, and just normalized the
+   checksum.
+*/
 proc checksum() : complex {
+  const FTnorm = 1.0/(Nx*Ny*Nz):real;
   var ck : complex = 0.0 + 0.0i;
-  forall j in 0..1023 with (+ reduce ck) {
+  forall j in 1..1024 with (+ reduce ck) {
     const q = (5*j)%Nx;
     const r = (3*j)%Ny;
     const s = j%Nz;
     ck += W[q,r,s];
   }
-  return ck;
+  return ck*FTnorm;
 }
 
 
@@ -109,7 +125,7 @@ proc initialize_twiddle() {
   const halfN = (Nx/2, Ny/2, Nz/2);
   const fac = 4.0*pi**2 * alpha;
   forall ijk in Dom {
-    var e = 0.0;
+    var e : int = 0;
     for param ii in 1..3 {
       const i1 = ijk(ii);
       const x1 = if (i1 >= halfN(ii)) then i1-N(ii) else i1;
