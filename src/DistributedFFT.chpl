@@ -121,36 +121,67 @@ prototype module DistributedFFT {
      the planner, and then pass FFTW_WISDOM_ONLY in (since the array is otherwise
      destroyed -- unless you use FFTW_ESTIMATE).
    */
-  proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom], warmUpOnly : bool, args ...?k) {
+  proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
 
     // Run on all locales
     coforall loc in Locales {
       on loc {
         // Set up for the yz transforms on each domain.
         const myDom = arr.localSubdomain();
-        const localIndex = myDom.first;
+
+        // Get the x-range to loop over
+        const xRange = myDom.dim(1);
+        const yRange = myDom.dim(2);
+        const zRange = myDom.dim(3);
+
+        /* We have a few options here on how to set this up.
+
+           Since plan creation must be single threaded, and is locked,
+           we don't want to generate a plan for every yz plane out here.
+
+           We could use the array-execute feature of FFTW, but that
+           might run into issues of alignment.
+
+           So, we try a conservative approach first, by just slicing and
+           copying the data into a temporary array, doing the FFT and copying
+           back. This is identical to the approach we use in doFFT_X.
+        */
 
         // Write down all the parameters explicitly
-        var howmany : c_int = myDom.dim(1).size : c_int;
+        var howmany = 1 : c_int;
         var nn : c_array(c_int, 2);
+        nn[0] = yRange.size : c_int;
+        nn[1] = zRange.size : c_int;
+        var nnp = c_ptrTo(nn[0]);
         var rank = 2 : c_int;
         var stride = 1 : c_int;
-        nn[0] = myDom.dim(2).size : c_int;
-        nn[1] = myDom.dim(3).size : c_int;
-        var idist = (nn[0]*nn[1]):c_int;
-        var nnp = c_ptrTo(nn[0]);
-        // Assume that the warmup routine has been run with the same
-        // array, so all we need is WISDOM
-        var plan_yz = new FFTWplan(ftType,numFFTWThreads, rank, nnp, howmany, c_ptrTo(arr[localIndex]),
-                                   nnp, stride, idist,
-                                   c_ptrTo(arr[localIndex]), nnp, stride, idist,
-                                   (...args));
+        var idist = 1 : c_int;
 
-        if !warmUpOnly {
-          if !plan_yz.isValid then
-            halt("Error! Plan generation failed! Did you run the warmup routine?");
-          // Execute the plan
-          plan_yz.execute();
+        if (warmUpOnly) {
+          var myplane : [{0..0, yRange, zRange}] T;
+          var plan_yz = new FFTWplan(ftType, 1, rank, nnp, howmany, c_ptrTo(myplane),
+                                    nnp, stride, idist,
+                                    c_ptrTo(myplane), nnp, stride, idist,
+                                    (...args));
+        } else {
+          // Pull down each plane, process and send back
+          forall i in xRange with
+            // Task private variables
+            (var myplane : [{0..0, yRange, zRange}] T,
+             var plan_yz = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+                                       nnp, stride, idist,
+                                       c_ptrTo(myplane), nnp, stride, idist,
+                                       (...args))) 
+              {
+                // Pull down the data
+                myplane = arr[{i..i, yRange, zRange}];
+
+                // Do the yz FFTs here
+                plan_yz.execute();
+
+                // Push back the pencil here
+                arr[{i..i, yRange, zRange}] = myplane;
+              }
         }
 
         // on loc ends
