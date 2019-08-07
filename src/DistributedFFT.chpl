@@ -156,6 +156,13 @@ prototype module DistributedFFT {
         var rank = 2 : c_int;
         var stride = 1 : c_int;
         var idist = 0 : c_int;
+        var csize : int;
+        select T {
+            when real do csize=8;
+            when complex do csize=16;
+            otherwise halt("Unknown type "+T:string);
+        }
+        csize *= nn[0]*nn[1];
 
 
         if (warmUpOnly) {
@@ -176,13 +183,16 @@ prototype module DistributedFFT {
              var yzDom = {yRange,zRange})
               {
                 // Pull down the data
-                [(j,k) in yzDom] myplane[i,j,k] = arr[i,j,k];
+                //[(j,k) in yzDom] myplane[0,j,k] = arr.localAccess[i,j,k];
+                var elt = c_ptrTo(arr.localAccess[i,yRange.first, zRange.first]);
+                c_memcpy(c_ptrTo(myplane), elt, csize);
 
                 // Do the yz FFTs here
                 plan_yz.execute();
 
                 // Push back the pencil here
-                [(j,k) in yzDom] arr[i,j,k] = myplane[i,j,k];
+                //[(j,k) in yzDom] arr.localAccess[i,j,k] = myplane[0,j,k];
+                c_memcpy(elt, c_ptrTo(myplane), csize);
               }
         }
 
