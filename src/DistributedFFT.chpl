@@ -11,10 +11,10 @@ prototype module DistributedFFT {
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
-  init_FFTW_MT();
+  //init_FFTW_MT();
 
   proc deinit() {
-    cleanup_threads();
+    //cleanup_threads();
     cleanup();
   }
 
@@ -37,7 +37,7 @@ prototype module DistributedFFT {
     // Mimic the advanced interface 
     proc init(param ftType : FFTtype, numThreads : integral, args ...?k) {
       fftw_planner_lock$(1).writeEF(true);
-      fftw_plan_with_nthreads(numThreads:c_int);
+      //fftw_plan_with_nthreads(numThreads:c_int);
       select ftType {
           when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
           when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
@@ -155,7 +155,8 @@ prototype module DistributedFFT {
         var nnp = c_ptrTo(nn[0]);
         var rank = 2 : c_int;
         var stride = 1 : c_int;
-        var idist = 1 : c_int;
+        var idist = 0 : c_int;
+
 
         if (warmUpOnly) {
           var myplane : [{0..0, yRange, zRange}] T;
@@ -171,16 +172,17 @@ prototype module DistributedFFT {
              var plan_yz = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
-                                       (...args))) 
+                                       (...args)),
+             var yzDom = {yRange,zRange})
               {
                 // Pull down the data
-                myplane = arr[{i..i, yRange, zRange}];
+                [(j,k) in yzDom] myplane[i,j,k] = arr[i,j,k];
 
                 // Do the yz FFTs here
                 plan_yz.execute();
 
                 // Push back the pencil here
-                arr[{i..i, yRange, zRange}] = myplane;
+                [(j,k) in yzDom] arr[i,j,k] = myplane[i,j,k];
               }
         }
 
