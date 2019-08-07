@@ -33,6 +33,11 @@ target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/NPB-FT
 	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3 -Msrc ${PERF_FLAGS}
 
+# Use the FFTW OMP version
+target/example/NPB-FT/%_omp: example/NPB-FT/%.chpl src/DistributedFFT.chpl
+	mkdir -p target/example/NPB-FT
+	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} --ldflags=-qopenmp -lfftw3_omp -lfftw3 -Msrc ${PERF_FLAGS}
+
 .PHONY: examples target
 examples: target ${EXAMPLES}
 
