@@ -7,7 +7,9 @@ prototype module DistributedFFT {
   use RangeChunk;
   use FFTW;
   use FFTW.C_FFTW;
+  use FFT_Timers;
   require "npFFTW.h";
+
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -47,7 +49,10 @@ prototype module DistributedFFT {
     }
 
     proc execute() {
+      var tt = new TimeTracker();
+      tt.start();
       FFTW.execute(plan);
+      tt.stop(TimeStages.Execute);
     }
 
     proc isValid : bool {
@@ -96,12 +101,19 @@ prototype module DistributedFFT {
     if arr.rank != 3 then halt("Code is designed for 3D arrays only");
     if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
 
-    doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_WISDOM_ONLY);
+    var tt = new TimeTracker();
+
+    tt.start();
+    doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
+    tt.stop(TimeStages.YZ);
+
+    tt.start();
     if (debugTranspose) {
       doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, false, sign, FFTW_MEASURE);
     } else {
       doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
     }
+    tt.stop(TimeStages.X);
 
 
     // End of doFFT
@@ -114,9 +126,7 @@ prototype module DistributedFFT {
 
      args -- are the sign and planner flags.
 
-     Note that if you actually want to do a transform, you should have warmed up
-     the planner, and then pass FFTW_WISDOM_ONLY in (since the array is otherwise
-     destroyed -- unless you use FFTW_ESTIMATE).
+     We do each plane separately copying it back and forth.
    */
   proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
 
@@ -240,16 +250,21 @@ prototype module DistributedFFT {
              var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
-                                       (...args))) 
+                                       (...args)),
+             var tt = new TimeTracker()) 
               {
                 // Pull down the data
+                tt.start();
                 myplane = arr[{xRange,j..j,zRange}];
+                tt.stop(TimeStages.Comms);
 
                 // Do the 1D FFTs here
                 plan_x.execute();
 
                 // Push back the pencil here
+                tt.start();
                 arr[{xRange,j..j,zRange}] = myplane;
+                tt.stop(TimeStages.Comms);
               }
         }
 
@@ -331,6 +346,69 @@ prototype module DistributedFFT {
 
     inline proc rev(inPlane : [?Dom], outPlane) {
       for (i,j,k) in Dom do outPlane[k,j,i] = inPlane[i,j,k];
+    }
+
+  }
+
+  module FFT_Timers {
+    use Time;
+    // Time the various FFT steps.
+    config const timeTrackFFT=false;
+
+    enum TimeStages {X, YZ, Execute, Comms};
+    var stageDomain = {TimeStages.X..TimeStages.Comms};
+
+    private var _globalTimeArr : [stageDomain] atomic real;
+
+    resetTimers();
+
+    proc deinit() {
+      if timeTrackFFT then printTimers();
+    }
+
+    proc resetTimers() {
+      for stage in _globalTimeArr do stage.write(0.0);
+    }
+
+    proc printTimers() {
+      writeln("--------- Timings ---------------");
+      for stage in TimeStages {
+        writef("Time for %s : %10.2dr\n",stage:string, _globalTimeArr[stage].read());
+      }
+      writeln("---------------------------------");
+    }
+
+
+    record TimeTracker {
+      var tt : Timer();
+      var arr : [stageDomain] real;
+
+      proc init() {
+        this.complete();
+        tt.clear();
+        arr = 0.0;
+      }
+
+      proc deinit() {
+        if timeTrackFFT {
+          for istage in arr.domain {
+            _globalTimeArr[istage].add(arr[istage]);
+          }
+        }
+      }
+
+      proc start() {
+        if timeTrackFFT {
+          tt.clear(); tt.start();
+        }
+      }
+
+      proc stop(stage) {
+        if timeTrackFFT {
+          tt.stop();
+          arr[stage] += tt.elapsed();
+        }
+      }
     }
 
   }
