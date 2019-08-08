@@ -11,10 +11,7 @@ prototype module DistributedFFT {
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
-  //init_FFTW_MT();
-
   proc deinit() {
-    //cleanup_threads();
     cleanup();
   }
 
@@ -35,7 +32,7 @@ prototype module DistributedFFT {
     var plan : fftw_plan;
 
     // Mimic the advanced interface 
-    proc init(param ftType : FFTtype, numThreads : integral, args ...?k) {
+    proc init(param ftType : FFTtype, args ...?k) {
       fftw_planner_lock$(1).writeEF(true);
       //fftw_plan_with_nthreads(numThreads:c_int);
       select ftType {
@@ -167,7 +164,7 @@ prototype module DistributedFFT {
 
         if (warmUpOnly) {
           var myplane : [{0..0, yRange, zRange}] T;
-          var plan_yz = new FFTWplan(ftType, 1, rank, nnp, howmany, c_ptrTo(myplane),
+          var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                     nnp, stride, idist,
                                     c_ptrTo(myplane), nnp, stride, idist,
                                     (...args));
@@ -176,7 +173,7 @@ prototype module DistributedFFT {
           forall i in xRange with
             // Task private variables
             (var myplane : [{0..0, yRange, zRange}] T,
-             var plan_yz = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+             var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
                                        (...args)),
@@ -228,7 +225,7 @@ prototype module DistributedFFT {
 
         if (warmUpOnly) {
           var myplane : [{xRange, 0..0, zRange}] complex;
-          var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+          var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                     nnp, stride, idist,
                                     c_ptrTo(myplane), nnp, stride, idist,
                                     (...args));
@@ -240,7 +237,7 @@ prototype module DistributedFFT {
             // Task private variables
             // TODO : Type here is complex. Does this make sense always???
             (var myplane : [{xRange, 0..0, zRange}] complex,
-             var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+             var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
                                        (...args))) 
@@ -291,7 +288,7 @@ prototype module DistributedFFT {
 
         if (warmUpOnly) {
           var myplane : [{zRange, 0..0, xRange}] complex;
-          var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+          var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                     nnp, stride, idist,
                                     c_ptrTo(myplane), nnp, stride, idist,
                                     (...args));
@@ -304,7 +301,7 @@ prototype module DistributedFFT {
             // TODO : Type here is complex. Does this make sense always???
             (var myplane : [{zRange, 0..0, xRange}] complex,
              var myplaneT : [{xRange, 0..0, zRange}] T,
-             var plan_x = new FFTWplan(ftType,1, rank, nnp, howmany, c_ptrTo(myplane),
+             var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
                                        (...args))) 
