@@ -83,8 +83,10 @@ prototype module DistributedFFT {
     if arr.rank != 3 then halt("Code is designed for 3D arrays only");
     if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
 
-    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
-    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
+    // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
+    // about the alignment.
+    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE | FFTW_UNALIGNED);
+    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE | FFTW_UNALIGNED);
     if (debugTranspose) {
       doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, true, FFTW_FORWARD, FFTW_MEASURE);
       doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, true, FFTW_BACKWARD, FFTW_MEASURE);
@@ -104,7 +106,10 @@ prototype module DistributedFFT {
     var tt = new TimeTracker();
 
     tt.start();
-    doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
+    // Must call with WISDOM_ONLY and UNALIGNED
+    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
+    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
+    doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
     tt.stop(TimeStages.YZ);
 
     tt.start();
@@ -118,7 +123,6 @@ prototype module DistributedFFT {
 
     // End of doFFT
   }
-
 
   /* Helper routines. This assumes that the data are block-distributed.
 
@@ -143,15 +147,9 @@ prototype module DistributedFFT {
 
         /* We have a few options here on how to set this up.
 
-           Since plan creation must be single threaded, and is locked,
-           we don't want to generate a plan for every yz plane out here.
+           We use the array-execute interface here and just FFT each plane separately.
 
-           We could use the array-execute feature of FFTW, but that
-           might run into issues of alignment.
-
-           So, we try a conservative approach first, by just slicing and
-           copying the data into a temporary array, doing the FFT and copying
-           back. This is identical to the approach we use in doFFT_X.
+           Note that the calling code sets the FFTW_UNALIGNED flag to ensure no alignment mismatches.
         */
 
         // Write down all the parameters explicitly
@@ -170,43 +168,29 @@ prototype module DistributedFFT {
             otherwise halt("Unknown type "+T:string);
         }
         csize *= nn[0]*nn[1];
+        var arr0 = c_ptrTo(arr.localAccess[myDom.first]);
+        var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                                   nnp, stride, idist,
+                                   arr0, nnp, stride, idist,
+                                   (...args));
 
-
-        if (warmUpOnly) {
-          var myplane : [{0..0, yRange, zRange}] T;
-          var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                    nnp, stride, idist,
-                                    c_ptrTo(myplane), nnp, stride, idist,
-                                    (...args));
-        } else {
-          // Pull down each plane, process and send back
-          forall i in xRange with
-            // Task private variables
-            (var myplane : [{0..0, yRange, zRange}] T,
-             var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                       nnp, stride, idist,
-                                       c_ptrTo(myplane), nnp, stride, idist,
-                                       (...args)),
-             var yzDom = {yRange,zRange})
-              {
-                // Pull down the data
-                //[(j,k) in yzDom] myplane[0,j,k] = arr.localAccess[i,j,k];
-                var elt = c_ptrTo(arr.localAccess[i,yRange.first, zRange.first]);
-                c_memcpy(c_ptrTo(myplane), elt, csize);
-
-                // Do the yz FFTs here
-                plan_yz.execute();
-
-                // Push back the pencil here
-                //[(j,k) in yzDom] arr.localAccess[i,j,k] = myplane[0,j,k];
-                c_memcpy(elt, c_ptrTo(myplane), csize);
+        if (!plan_yz.isValid) then
+          halt("Error! Plan generation failed! Did you call the warmup routine?");
+        if (!warmUpOnly) {
+          forall i in xRange {
+            var elt = c_ptrTo(arr.localAccess[i,yRange.first, zRange.first]);
+            select ftType {
+                when FFTtype.DFT do fftw_execute_dft(plan_yz.plan, elt, elt);
+                when FFTtype.R2R do fftw_execute_r2r(plan_yz.plan, elt, elt);
               }
+          }
         }
 
         // on loc ends
       }
     }
   }
+
         
   /* X helper.
 
