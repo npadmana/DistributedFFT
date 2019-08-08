@@ -33,6 +33,8 @@ target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/NPB-FT
 	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
 
+ft: target/example/NPB-FT/ft
+
 .PHONY: examples target
 examples: target ${EXAMPLES}
 
