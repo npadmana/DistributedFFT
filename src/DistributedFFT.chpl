@@ -32,6 +32,7 @@ prototype module DistributedFFT {
   /*                              int sign, unsigned flags); */
   record FFTWplan {
     var plan : fftw_plan;
+    var tt : TimeTracker;
 
     // Mimic the advanced interface 
     proc init(param ftType : FFTtype, args ...?k) {
@@ -49,7 +50,6 @@ prototype module DistributedFFT {
     }
 
     proc execute() {
-      var tt = new TimeTracker();
       tt.start();
       FFTW.execute(plan);
       tt.stop(TimeStages.Execute);
@@ -356,8 +356,7 @@ prototype module DistributedFFT {
     config const timeTrackFFT=false;
 
     enum TimeStages {X, YZ, Execute, Comms};
-    var stageDomain = {TimeStages.X..TimeStages.Comms};
-
+    const stageDomain = {TimeStages.X..TimeStages.Comms};
     private var _globalTimeArr : [stageDomain] atomic real;
 
     resetTimers();
@@ -382,12 +381,6 @@ prototype module DistributedFFT {
     record TimeTracker {
       var tt : Timer();
       var arr : [stageDomain] real;
-
-      proc init() {
-        this.complete();
-        tt.clear();
-        arr = 0.0;
-      }
 
       proc deinit() {
         if timeTrackFFT {
