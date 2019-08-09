@@ -197,7 +197,7 @@ prototype module DistributedFFT {
 
      See TODO for question on sign
   */
-  proc doFFT_X(param ftType: FFTtype, arr : [?Dom], warmUpOnly : bool, args ...?k) {
+  proc doFFT_X(param ftType: FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
 
     coforall loc in Locales {
       on loc {
@@ -219,7 +219,7 @@ prototype module DistributedFFT {
         var idist = 1 : c_int;
 
         if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, zRange}] complex;
+          var myplane : [{xRange, 0..0, zRange}] T;
           var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                     nnp, stride, idist,
                                     c_ptrTo(myplane), nnp, stride, idist,
@@ -231,7 +231,7 @@ prototype module DistributedFFT {
           forall j in yChunk with
             // Task private variables
             // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] complex,
+            (var myplane : [{xRange, 0..0, zRange}] T,
              var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
