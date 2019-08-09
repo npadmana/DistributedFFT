@@ -10,6 +10,8 @@ prototype module DistributedFFT {
   use FFT_Timers;
   require "npFFTW.h";
 
+  config const overSubscribe=2;
+
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -225,9 +227,10 @@ prototype module DistributedFFT {
                                     (...args));
         } else {
           // Pull down each plane, process and send back
-          const nTasks1 = here.maxTaskPar/numLocales + 1;
+          const nTasks1 = (here.maxTaskPar/numLocales)*overSubscribe;
           const nTasks = if nTasks1 < yChunk.size then nTasks1 else yChunk.size;
           coforall itask in 0.. #nTasks {
+            use Barriers;
             // Task private variables
             // TODO : Type here is complex. Does this make sense always???
             var myplane : [{xRange, 0..0, zRange}] complex;
@@ -237,10 +240,9 @@ prototype module DistributedFFT {
                                       (...args));
             // Pull down the data
             //tt.start();
-            var count : atomic int;
-            count.write(0);
+            var mybarrier = new aBarrier(numLocales, reusable=true, procAtomics=true, hackIntoCommBarrier=false);
             //myplane = arr[{xRange,j..j,zRange}];
-            coforall jloc in Locales with (ref count, ref plan_x) {
+            coforall jloc in Locales with (ref plan_x) {
               var tt : TimeTracker();
               const tmpDom = arr.localSubdomain(jloc);
               ref srcArr = arr.localSlice(tmpDom);
@@ -251,14 +253,13 @@ prototype module DistributedFFT {
                 //myplane[destDom]= srcArr[srcDom];
                 chpl__bulkTransferArray(myplane, destDom, srcArr, srcDom);
                 tt.stop(TimeStages.Comms);
-                count.add(1);
                 if (jloc!=here) {
-                  count.waitFor(0);
+                  mybarrier.barrier();
                 } else {
-                  count.waitFor(numLocales);
+                  mybarrier.barrier();
                   plan_x.execute();
-                  count.write(0);
                 }
+                mybarrier.barrier();
                 tt.start();
                 //srcArr[srcDom] = myplane[destDom];
                 chpl__bulkTransferArray(srcArr, srcDom, myplane, destDom);
