@@ -224,32 +224,48 @@ prototype module DistributedFFT {
                                     c_ptrTo(myplane), nnp, stride, idist,
                                     (...args));
         } else {
-
-
           // Pull down each plane, process and send back
-          forall j in yChunk with
+          const nTasks1 = here.maxTaskPar/numLocales + 1;
+          const nTasks = if nTasks1 < yChunk.size then nTasks1 else yChunk.size;
+          coforall itask in 0.. #nTasks {
             // Task private variables
             // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] complex,
-             var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                       nnp, stride, idist,
-                                       c_ptrTo(myplane), nnp, stride, idist,
-                                       (...args)),
-             var tt = new TimeTracker()) 
-              {
-                // Pull down the data
+            var myplane : [{xRange, 0..0, zRange}] complex;
+            var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
+                                      nnp, stride, idist,
+                                      c_ptrTo(myplane), nnp, stride, idist,
+                                      (...args));
+            // Pull down the data
+            //tt.start();
+            var count : atomic int;
+            count.write(0);
+            //myplane = arr[{xRange,j..j,zRange}];
+            coforall jloc in Locales with (ref count, ref plan_x) {
+              var tt : TimeTracker();
+              const tmpDom = arr.localSubdomain(jloc);
+              ref srcArr = arr.localSlice(tmpDom);
+              const destDom = {tmpDom.dim(1),0..0,tmpDom.dim(3)};
+              for j1 in chunk(yChunk, nTasks, itask) {
+                const srcDom = {tmpDom.dim(1),j1..j1,tmpDom.dim(3)};
                 tt.start();
-                myplane = arr[{xRange,j..j,zRange}];
+                //myplane[destDom]= srcArr[srcDom];
+                chpl__bulkTransferArray(myplane, destDom, srcArr, srcDom);
                 tt.stop(TimeStages.Comms);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
+                count.add(1);
+                if (jloc!=here) {
+                  count.waitFor(0);
+                } else {
+                  count.waitFor(numLocales);
+                  plan_x.execute();
+                  count.write(0);
+                }
                 tt.start();
-                arr[{xRange,j..j,zRange}] = myplane;
+                //srcArr[srcDom] = myplane[destDom];
+                chpl__bulkTransferArray(srcArr, srcDom, myplane, destDom);
                 tt.stop(TimeStages.Comms);
               }
+            }
+          }
         }
 
         // End of on-loc
