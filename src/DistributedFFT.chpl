@@ -62,8 +62,9 @@ prototype module DistributedFFT {
 
   /* Convenience constructor for grids */
   proc newSlabDom(dom: domain) where isRectangularDom(dom) {
-    if dom.rank < 2 then compilerError("The domain must be at least 2D");
-    if ((dom.dim(1).size)%numLocales !=0) then halt("numLocales must divide the first dimension");
+    // Does this actually work for anything other than 3D? The FFT code does not.
+    if dom.rank !=3 then compilerError("The domain must be 3D");
+    //if ((dom.dim(1).size)%numLocales !=0) then halt("numLocales must divide the first dimension");
     const targetLocales = reshape(Locales, {0.. #numLocales, 0..0, 0..0});
     return dom dmapped Block(boundingBox=dom, targetLocales=targetLocales);
   }
