@@ -17,9 +17,6 @@ prototype module DistributedFFT {
     cleanup();
   }
 
-  config const numFFTWThreads = here.numPUs();
-  config const debugTranspose = false;
-
   var fftw_planner_lock$ : [rcDomain] sync bool;
 
   enum FFTtype {DFT, R2R};
@@ -30,6 +27,12 @@ prototype module DistributedFFT {
   /*                              fftw_complex *out, const int *onembed, */
   /*                              int ostride, int odist, */
   /*                              int sign, unsigned flags); */
+  /* fftw_plan fftw_plan_many_r2r(int rank, const int *n, int howmany, */
+  /*                              double *in, const int *inembed, */
+  /*                              int istride, int idist, */
+  /*                              double *out, const int *onembed, */
+  /*                              int ostride, int odist, */
+  /*                              const fftw_r2r_kind *kind, unsigned flags); */
   record FFTWplan {
     var plan : fftw_plan;
     var tt : TimeTracker;
@@ -37,7 +40,6 @@ prototype module DistributedFFT {
     // Mimic the advanced interface 
     proc init(param ftType : FFTtype, args ...?k) {
       fftw_planner_lock$(1).writeEF(true);
-      //fftw_plan_with_nthreads(numThreads:c_int);
       select ftType {
           when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
           when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
@@ -62,9 +64,7 @@ prototype module DistributedFFT {
 
   /* Convenience constructor for grids */
   proc newSlabDom(dom: domain) where isRectangularDom(dom) {
-    // Does this actually work for anything other than 3D? The FFT code does not.
     if dom.rank !=3 then compilerError("The domain must be 3D");
-    //if ((dom.dim(1).size)%numLocales !=0) then halt("numLocales must divide the first dimension");
     const targetLocales = reshape(Locales, {0.. #numLocales, 0..0, 0..0});
     return dom dmapped Block(boundingBox=dom, targetLocales=targetLocales);
   }
@@ -88,12 +88,9 @@ prototype module DistributedFFT {
     // about the alignment.
     doFFT_YZ(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE | FFTW_UNALIGNED);
     doFFT_YZ(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE | FFTW_UNALIGNED);
-    if (debugTranspose) {
-      doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, true, FFTW_FORWARD, FFTW_MEASURE);
-      doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, true, FFTW_BACKWARD, FFTW_MEASURE);
-    } else {
-      doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
-      doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
+
+    doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
+    doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
     }
   }
 
@@ -114,11 +111,7 @@ prototype module DistributedFFT {
     tt.stop(TimeStages.YZ);
 
     tt.start();
-    if (debugTranspose) {
-      doFFT_X_Transposed(FFTtype.DFT, new Transposer(), arr, false, sign, FFTW_MEASURE);
-    } else {
-      doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
-    }
+    doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
     tt.stop(TimeStages.X);
 
 
@@ -259,81 +252,6 @@ prototype module DistributedFFT {
   }
 
 
-  /* X helper with a transpose function
-
-     See TODO for question on sign.
-
-     transposeFunc(in, out, sign : bool)
-  */
-  proc doFFT_X_Transposed(param ftType: FFTtype, transposeFunc, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
-
-    coforall loc in Locales {
-      on loc {
-        // Set up for the yz transforms on each domain.
-        const myDom = arr.localSubdomain();
-        const localIndex = myDom.first;
-
-        // Split the y-range. Make this dimension agnostic
-        const yChunk = chunk(myDom.dim(2), numLocales, here.id);
-
-        // Set FFTW parameters
-        const xRange = Dom.dim(1);
-        const zRange = myDom.dim(3);
-        var nn = xRange.size : c_int;
-        var nnp = c_ptrTo(nn);
-        var howmany = myDom.dim(3).size : c_int;
-        var rank = 1 : c_int;
-        var stride = 1 : c_int;
-        var idist = nn;
-
-        if (warmUpOnly) {
-          var myplane : [{zRange, 0..0, xRange}] complex;
-          var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                    nnp, stride, idist,
-                                    c_ptrTo(myplane), nnp, stride, idist,
-                                    (...args));
-        } else {
-
-
-          // Pull down each plane, process and send back
-          forall j in yChunk with
-            // Task private variables
-            // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{zRange, 0..0, xRange}] complex,
-             var myplaneT : [{xRange, 0..0, zRange}] T,
-             var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                       nnp, stride, idist,
-                                       c_ptrTo(myplane), nnp, stride, idist,
-                                       (...args))) 
-              {
-                // Pull down the data
-                myplaneT = arr[{xRange,j..j,zRange}];
-                transposeFunc.fwd(myplaneT, myplane);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
-                transposeFunc.rev(myplane, myplaneT);
-                arr[{xRange,j..j,zRange}] = myplaneT;
-              }
-        }
-
-        // End of on-loc
-      }
-    }
-  }
-
-  record Transposer {
-    inline proc fwd(inPlane : [?Dom], outPlane) {
-      for (i,j,k) in Dom do outPlane[k,j,i] = inPlane[i,j,k];
-    }
-
-    inline proc rev(inPlane : [?Dom], outPlane) {
-      for (i,j,k) in Dom do outPlane[k,j,i] = inPlane[i,j,k];
-    }
-
-  }
 
   module FFT_Timers {
     use Time;
