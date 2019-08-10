@@ -35,6 +35,10 @@ target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
 
 ft: target/example/NPB-FT/ft
 
+target/example/R2R/%: example/R2R/%.chpl src/DistributedFFT.chpl
+	mkdir -p target/example/R2R
+	chpl -o $@ $< ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
+
 .PHONY: examples target
 examples: target ${EXAMPLES}
 

@@ -75,14 +75,12 @@ prototype module DistributedFFT {
     return newSlabDom({(...tup)});
   }
 
-
   /* Warm up the FFTW planner.
      
      arr is assumed to be a block distributed array.
    */
-  proc warmUpPlanner(arr : [?Dom]) {
+  proc warmUpPlanner(arr : [?Dom] complex) {
     if arr.rank != 3 then halt("Code is designed for 3D arrays only");
-    if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
 
     // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
     // about the alignment.
@@ -91,9 +89,26 @@ prototype module DistributedFFT {
 
     doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
     doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
-    }
   }
 
+  /* Warm up the FFTW planner.
+     
+     arr is assumed to be a block distributed array.
+
+     Specialize here for R2R transforms.
+   */
+  proc warmUpPlanner(arr : [?Dom] real, r2rType : [] fftw_r2r_kind) {
+    if arr.rank != 3 then halt("Code is designed for 3D arrays only");
+    if r2rType.size != 3 then halt("Need 3 R2R kinds");
+    if r2rType.rank != 1 then halt("Expected a 1D array");
+
+    ref r2r = r2rType.reindex(0..2);
+
+    // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
+    // about the alignment.
+    doFFT_YZ(FFTtype.R2R, arr, true, r2r[1..2], FFTW_MEASURE | FFTW_UNALIGNED);
+    doFFT_X(FFTtype.R2R, arr, true, r2r[0..0], FFTW_MEASURE);
+  }
 
   /* FFT.
    */
@@ -118,6 +133,43 @@ prototype module DistributedFFT {
     // End of doFFT
   }
 
+  /* R2R
+   */
+  proc doR2R(arr : [?Dom] real, r2rType : [] fftw_r2r_kind) {
+    if arr.rank != 3 then halt("Code is designed for 3D arrays only");
+    if r2rType.size != 3 then halt("Need 3 R2R kinds");
+    if r2rType.rank != 1 then halt("Expected a 1D array");
+
+    ref r2r = r2rType.reindex(0..2);
+
+    var tt = new TimeTracker();
+
+    tt.start();
+    // Must call with WISDOM_ONLY and UNALIGNED
+    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
+    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
+    // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
+    // about the alignment.
+    doFFT_YZ(FFTtype.R2R, arr, false, r2r[1..2], FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
+    tt.stop(TimeStages.YZ);
+
+    tt.start();
+    doFFT_X(FFTtype.R2R, arr, false, r2r[0..0], FFTW_MEASURE);
+    tt.stop(TimeStages.X);
+    // End of doR2R
+  }
+
+  private proc _signOrKindType(param ftType : FFTtype) type
+    where ftType==FFTtype.DFT
+    {
+     return c_int;
+    }
+  private proc _signOrKindType(param ftType : FFTtype) type
+    where ftType==FFTtype.R2R
+    {
+     return c_ptr(fftw_r2r_kind);
+    }
+
   /* Helper routines. This assumes that the data are block-distributed.
 
      R2C and C2R transforms are more complicated. Currently not supported.
@@ -126,11 +178,21 @@ prototype module DistributedFFT {
 
      We do each plane separately copying it back and forth.
    */
-  proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
+  proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, signOrKind, flags : c_uint) {
+
 
     // Run on all locales
     coforall loc in Locales {
       on loc {
+        // Pull signOrKind locally since this may be an array
+        // we need to take a pointer to.
+        var mySignOrKind = signOrKind;
+        var arg0 : _signOrKindType(ftType);
+        select ftType {
+            when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+            when FFTtype.DFT do arg0 = mySignOrKind;
+        }
+
         // Set up for the yz transforms on each domain.
         const myDom = arr.localSubdomain();
 
@@ -166,7 +228,7 @@ prototype module DistributedFFT {
         var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, arr0,
                                    nnp, stride, idist,
                                    arr0, nnp, stride, idist,
-                                   (...args));
+                                   arg0, flags);
 
         if (!plan_yz.isValid) then
           halt("Error! Plan generation failed! Did you call the warmup routine?");
@@ -190,10 +252,19 @@ prototype module DistributedFFT {
 
      See TODO for question on sign
   */
-  proc doFFT_X(param ftType: FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, args ...?k) {
+  proc doFFT_X(param ftType: FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, signOrKind, flags : c_uint) {
 
     coforall loc in Locales {
       on loc {
+        // Pull signOrKind locally since this may be an array
+        // we need to take a pointer to.
+        var mySignOrKind = signOrKind;
+        var arg0 : _signOrKindType(ftType);
+        select ftType {
+            when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+            when FFTtype.DFT do arg0 = mySignOrKind;
+        }
+
         // Set up for the yz transforms on each domain.
         const myDom = arr.localSubdomain();
         const localIndex = myDom.first;
@@ -216,7 +287,7 @@ prototype module DistributedFFT {
           var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                     nnp, stride, idist,
                                     c_ptrTo(myplane), nnp, stride, idist,
-                                    (...args));
+                                    arg0, flags);
         } else {
 
 
@@ -228,7 +299,7 @@ prototype module DistributedFFT {
              var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
                                        nnp, stride, idist,
                                        c_ptrTo(myplane), nnp, stride, idist,
-                                       (...args)),
+                                       arg0, flags),
              var tt = new TimeTracker()) 
               {
                 // Pull down the data
