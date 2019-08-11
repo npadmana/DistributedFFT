@@ -133,6 +133,36 @@ prototype module DistributedFFT {
     // End of doFFT
   }
 
+  /* FFT.
+
+     Stores the FFT in dest transposed (xyz -> yxz).
+
+     Note that both src and dest are overwritten.
+   */
+  proc doFFT_Transposed(src: [?SrcDom] complex, dest : [?DestDom] complex, sign : c_int) {
+    if src.rank != 3 then halt("Code is designed for 3D arrays only");
+    if dest.rank != 3 then halt("Code is designed for 3D arrays only");
+    if src.dim(1) != dest.dim(2) then halt("Mismatched x-y ranges");
+    if src.dim(2) != dest.dim(1) then halt("Mismatched y-x ranges");
+    if src.dim(3) != dest.dim(3) then halt("Mismatched z ranges");
+
+    var tt = new TimeTracker();
+
+    tt.start();
+    // Must call with WISDOM_ONLY and UNALIGNED
+    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
+    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
+    doFFT_YZ(FFTtype.DFT, src, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
+    tt.stop(TimeStages.YZ);
+
+    tt.start();
+    doFFT_X_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
+    tt.stop(TimeStages.X);
+
+
+    // End of doFFT
+  }
+
   /* R2R
    */
   proc doR2R(arr : [?Dom] real, r2rType : [] fftw_r2r_kind) {
@@ -159,6 +189,7 @@ prototype module DistributedFFT {
     // End of doR2R
   }
 
+  // I could not combine these, so keep them separate for now.
   private proc _signOrKindType(param ftType : FFTtype) type
     where ftType==FFTtype.DFT
     {
@@ -169,6 +200,43 @@ prototype module DistributedFFT {
     {
      return c_ptr(fftw_r2r_kind);
     }
+
+  // Set up the YZ transform plan
+  proc setupYZPlan(param ftType : FFTtype, yzplane : [?Dom] ?T, signOrKind, flags : c_uint)
+  {
+   // Pull signOrKind locally since this may be an array
+   // we need to take a pointer to.
+   var mySignOrKind = signOrKind;
+   var arg0 : _signOrKindType(ftType);
+   select ftType {
+       when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+       when FFTtype.DFT do arg0 = mySignOrKind;
+     }
+
+   // Set up for the yz transforms on each domain.
+   const myDom = yzplane.localSubdomain();
+
+   // Get the x-range to loop over
+   const yRange = myDom.dim(2);
+   const zRange = myDom.dim(3);
+
+
+   // Write down all the parameters explicitly
+   var howmany = 1 : c_int;
+   var nn : c_array(c_int, 2);
+   nn[0] = yRange.size : c_int;
+   nn[1] = zRange.size : c_int;
+   var nnp = c_ptrTo(nn[0]);
+   var rank = 2 : c_int;
+   var stride = 1 : c_int;
+   var idist = 0 : c_int;
+   var arr0 = c_ptrTo(yzplane.localAccess[myDom.first]);
+   return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                       nnp, stride, idist,
+                       arr0, nnp, stride, idist,
+                       arg0, flags);
+  }
+
 
   /* Helper routines. This assumes that the data are block-distributed.
 
@@ -184,51 +252,13 @@ prototype module DistributedFFT {
     // Run on all locales
     coforall loc in Locales {
       on loc {
-        // Pull signOrKind locally since this may be an array
-        // we need to take a pointer to.
-        var mySignOrKind = signOrKind;
-        var arg0 : _signOrKindType(ftType);
-        select ftType {
-            when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-            when FFTtype.DFT do arg0 = mySignOrKind;
-        }
-
-        // Set up for the yz transforms on each domain.
-        const myDom = arr.localSubdomain();
-
         // Get the x-range to loop over
+        const myDom = arr.localSubdomain();
         const xRange = myDom.dim(1);
         const yRange = myDom.dim(2);
         const zRange = myDom.dim(3);
 
-        /* We have a few options here on how to set this up.
-
-           We use the array-execute interface here and just FFT each plane separately.
-
-           Note that the calling code sets the FFTW_UNALIGNED flag to ensure no alignment mismatches.
-        */
-
-        // Write down all the parameters explicitly
-        var howmany = 1 : c_int;
-        var nn : c_array(c_int, 2);
-        nn[0] = yRange.size : c_int;
-        nn[1] = zRange.size : c_int;
-        var nnp = c_ptrTo(nn[0]);
-        var rank = 2 : c_int;
-        var stride = 1 : c_int;
-        var idist = 0 : c_int;
-        var csize : int;
-        select T {
-            when real do csize=8;
-            when complex do csize=16;
-            otherwise halt("Unknown type "+T:string);
-        }
-        csize *= nn[0]*nn[1];
-        var arr0 = c_ptrTo(arr.localAccess[myDom.first]);
-        var plan_yz = new FFTWplan(ftType, rank, nnp, howmany, arr0,
-                                   nnp, stride, idist,
-                                   arr0, nnp, stride, idist,
-                                   arg0, flags);
+        var plan_yz = setupYZPlan(ftType, arr, signOrKind, flags);
 
         if (!plan_yz.isValid) then
           halt("Error! Plan generation failed! Did you call the warmup routine?");
@@ -247,7 +277,36 @@ prototype module DistributedFFT {
     }
   }
 
-        
+  // Set up the X FFT plan.
+  // Assumes that we get the XZ plane.
+  proc setupXPlan(param ftType : FFTtype, xzplane : [?Dom] ?T, signOrKind, flags : c_uint)
+  {
+   // Pull signOrKind locally since this may be an array
+   // we need to take a pointer to.
+   var mySignOrKind = signOrKind;
+   var arg0 : _signOrKindType(ftType);
+   select ftType {
+       when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+       when FFTtype.DFT do arg0 = mySignOrKind;
+     }
+
+   // Set FFTW parameters
+   const myDom = xzplane.localSubdomain();
+   const xRange = Dom.dim(1);
+   const zRange = myDom.dim(3);
+   var nn = xRange.size : c_int;
+   var nnp = c_ptrTo(nn);
+   var howmany = myDom.dim(3).size : c_int;
+   var rank = 1 : c_int;
+   var stride = myDom.dim(3).size : c_int;
+   var idist = 1 : c_int;
+   var arr0 = c_ptrTo(xzplane.localAccess[myDom.first]);
+   return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                       nnp, stride, idist,
+                       arr0, nnp, stride, idist,
+                       arg0, flags);
+  }
+
   /* X helper.
 
      See TODO for question on sign
@@ -256,38 +315,19 @@ prototype module DistributedFFT {
 
     coforall loc in Locales {
       on loc {
-        // Pull signOrKind locally since this may be an array
-        // we need to take a pointer to.
-        var mySignOrKind = signOrKind;
-        var arg0 : _signOrKindType(ftType);
-        select ftType {
-            when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-            when FFTtype.DFT do arg0 = mySignOrKind;
-        }
 
         // Set up for the yz transforms on each domain.
         const myDom = arr.localSubdomain();
         const localIndex = myDom.first;
+        const xRange = Dom.dim(1);
+        const zRange = myDom.dim(3);
 
         // Split the y-range. Make this dimension agnostic
         const yChunk = chunk(myDom.dim(2), numLocales, here.id);
 
-        // Set FFTW parameters
-        const xRange = Dom.dim(1);
-        const zRange = myDom.dim(3);
-        var nn = xRange.size : c_int;
-        var nnp = c_ptrTo(nn);
-        var howmany = myDom.dim(3).size : c_int;
-        var rank = 1 : c_int;
-        var stride = myDom.dim(3).size : c_int;
-        var idist = 1 : c_int;
-
         if (warmUpOnly) {
           var myplane : [{xRange, 0..0, zRange}] T;
-          var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                    nnp, stride, idist,
-                                    c_ptrTo(myplane), nnp, stride, idist,
-                                    arg0, flags);
+          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
         } else {
 
 
@@ -296,10 +336,7 @@ prototype module DistributedFFT {
             // Task private variables
             // TODO : Type here is complex. Does this make sense always???
             (var myplane : [{xRange, 0..0, zRange}] T,
-             var plan_x = new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(myplane),
-                                       nnp, stride, idist,
-                                       c_ptrTo(myplane), nnp, stride, idist,
-                                       arg0, flags),
+             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
              var tt = new TimeTracker()) 
               {
                 // Pull down the data
@@ -322,6 +359,65 @@ prototype module DistributedFFT {
     }
   }
 
+  /* X helper, transposed.
+
+     FFT the x direction of arr, and store transposed in dest.
+
+     x_y_z -> y_x_z
+  */
+  proc doFFT_X_Transposed(param ftType: FFTtype, arr : [?Dom] ?T,
+                          dest : [?DomDest] T, warmUpOnly : bool, signOrKind, flags : c_uint) {
+
+    coforall loc in Locales {
+      on loc {
+
+        // Set up for the yz transforms on each domain.
+        const myDom = arr.localSubdomain();
+        const localIndex = myDom.first;
+
+        // Transposed dimensions
+        const myDomDest = dest.localSubdomain();
+
+        // Split the y-range. Make this dimension agnostic
+        // We're transposing, so the y-dimension of the output
+        // array is now dimension 1.
+        const yChunk = myDomDest.dim(1); 
+        const xRange = Dom.dim(1);
+        const zRange = myDom.dim(3);
+
+
+        if (warmUpOnly) {
+          var myplane : [{xRange, 0..0, zRange}] T;
+          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
+        } else {
+
+
+          // Pull down each plane, process and send back
+          forall j in yChunk with
+            // Task private variables
+            // TODO : Type here is complex. Does this make sense always???
+            (var myplane : [{xRange, 0..0, zRange}] T,
+             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
+             var tt = new TimeTracker()) 
+              {
+                // Pull down the data
+                tt.start();
+                myplane = arr[{xRange,j..j,zRange}];
+                tt.stop(TimeStages.Comms);
+
+                // Do the 1D FFTs here
+                plan_x.execute();
+
+                // Push back the pencil here
+                c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]),
+                                 c_ptrTo(myplane), myplane.size);
+              }
+        }
+
+        // End of on-loc
+      }
+    }
+  }
 
 
   module FFT_Timers {
