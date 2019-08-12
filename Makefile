@@ -33,7 +33,7 @@ target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/NPB-FT
 	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
 
-ft: target/example/NPB-FT/ft
+ft: target/example/NPB-FT/ft target/example/NPB-FT/ft_transposed
 
 target/example/R2R/%: example/R2R/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/R2R

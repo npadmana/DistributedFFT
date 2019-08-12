@@ -140,11 +140,11 @@ prototype module DistributedFFT {
      Note that both src and dest are overwritten.
    */
   proc doFFT_Transposed(src: [?SrcDom] complex, dest : [?DestDom] complex, sign : c_int) {
-    if src.rank != 3 then halt("Code is designed for 3D arrays only");
-    if dest.rank != 3 then halt("Code is designed for 3D arrays only");
-    if src.dim(1) != dest.dim(2) then halt("Mismatched x-y ranges");
-    if src.dim(2) != dest.dim(1) then halt("Mismatched y-x ranges");
-    if src.dim(3) != dest.dim(3) then halt("Mismatched z ranges");
+    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
+    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
 
     var tt = new TimeTracker();
 
@@ -371,6 +371,7 @@ prototype module DistributedFFT {
         const yChunk = myDomDest.dim(1); 
         const xRange = Dom.dim(1);
         const zRange = myDom.dim(3);
+        const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
 
 
         if (warmUpOnly) {
@@ -397,7 +398,7 @@ prototype module DistributedFFT {
 
                 // Push back the pencil here
                 c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]),
-                                 c_ptrTo(myplane), myplane.size);
+                                 c_ptrTo(myplane), myPlaneSize);
               }
         }
 
