@@ -17,7 +17,8 @@ prototype module DistributedFFT {
     cleanup();
   }
 
-  var fftw_planner_lock$ : [rcDomain] sync bool;
+  pragma "locale private"
+  var fftw_planner_lock$ : chpl_LocalSpinlock;
 
   enum FFTtype {DFT, R2R};
 
@@ -39,16 +40,18 @@ prototype module DistributedFFT {
 
     // Mimic the advanced interface 
     proc init(param ftType : FFTtype, args ...?k) {
-      fftw_planner_lock$(1).writeEF(true);
+      fftw_planner_lock$.lock();
       select ftType {
           when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
           when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
         }
-      fftw_planner_lock$(1).readFE();
+      fftw_planner_lock$.unlock();
     }
 
     proc deinit() {
+      fftw_planner_lock$.lock();
       destroy_plan(plan);
+      fftw_planner_lock$.unlock();
     }
 
     proc execute() {
