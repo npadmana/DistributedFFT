@@ -18,3 +18,10 @@ set output "npb-ft-E-time.pdf"
 plot \
   'data/1.19.0-pre-ugni-qthreads-nbp-ft-E.dat' using 1:2 title "Chapel 1.19 (pre)" with linespoints linestyle 4, \
   'data/reference-nbp-ft-E.dat'                using 1:2 title "Reference (MPI)"   with linespoints linestyle 1, 
+
+set xtics (64,128,256,512)
+set title "NPB-FT (Size F) Time (seconds)"
+set output "npb-ft-F-time.pdf"
+plot \
+  'data/1.19.0-pre-ugni-qthreads-nbp-ft-F.dat' using 1:2 title "Chapel 1.19 (pre)" with linespoints linestyle 4, \
+  'data/reference-nbp-ft-F.dat'                using 1:2 title "Reference (MPI)"   with linespoints linestyle 1, 

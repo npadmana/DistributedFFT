@@ -63,9 +63,10 @@ Size F:
 | nodes | Ref MPI | Chapel  |
 | ----- | ------- | ------- |
 |  32   | OOM     | OOM     |
-|  64   |         | OOM     |
-| 128   |
-| 256   |
+|  64   | 974.02s | OOM     |
+| 128   | 457.08s | 315.17s |
+| 256   | 266.70s | 194.09s |
+| 512   | 133.74s | 138.23s |
 
 
 [1]: https://github.com/npadmana/DistributedFFT/blob/1ffdfd2/example/NPB-FT/ft_transposed.chpl

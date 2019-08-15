@@ -26,27 +26,28 @@ date
 chpl --version
 module list 
 
-## size D
-#node_counts=(1 2 4 8 16 32 64 128 256)
-#for i in {1..1}; do
-#  for nodes in "${node_counts[@]}"; do 
-#    run_perf     $nodes DistributedFFT/target/example/NPB-FT/ft_transposed D
-#    run_ref_perf $nodes NPB3.4-MPI/bin/ft D
-#  done
-#done
+# size D
+node_counts=(1 2 4 8 16 32 64 128 256)
+for i in {1..2}; do
+  for nodes in "${node_counts[@]}"; do 
+    run_perf     $nodes DistributedFFT/target/example/NPB-FT/ft_transposed D
+    run_ref_perf $nodes NPB3.4-MPI/bin/ft D
+  done
+done
 
-### size E
-##node_counts=(8 16 32 64 128 256)
-##for i in {1..1}; do
-##  for nodes in "${node_counts[@]}"; do 
-##    run_perf     $nodes DistributedFFT/target/example/NPB-FT/ft_transposed E
-##    run_ref_perf $nodes NPB3.4-MPI/bin/ft E
-##  done
-##done
+# size E
+node_counts=(8 16 32 64 128 256)
+for i in {1..2}; do
+  for nodes in "${node_counts[@]}"; do 
+    run_perf     $nodes DistributedFFT/target/example/NPB-FT/ft_transposed E
+    run_ref_perf $nodes NPB3.4-MPI/bin/ft E
+  done
+done
 
 # size F
 node_counts=(64 128 256)
-for i in {1..1}; do
+#node_counts=(512)
+for i in {1..2}; do
   for nodes in "${node_counts[@]}"; do 
     run_perf     $nodes DistributedFFT/target/example/NPB-FT/ft_transposed F
     run_ref_perf $nodes NPB3.4-MPI/bin/ft F

@@ -5,12 +5,12 @@
  No input file inputft.data. Using compiled defaults
  Size                : 8192x4096x4096  (class F)
  Iterations          :             25
- Number of processes :           2048
- Processor array     :         1x2048
+ Number of processes :           4096
+ Processor array     :         1x4096
  Layout type         :             1D
  T =   -1     Checksum =    3.795711193634D-09    3.785181105090D-09
 
- Initialization time =     41.2190
+ Initialization time =     20.9869
 
  T =    1     Checksum =    5.119892866928D+02    5.121457822747D+02
  T =    2     Checksum =    5.119560157487D+02    5.121009044434D+02
@@ -44,11 +44,11 @@
  Class           =                        F
  Size            =           8192x4096x4096
  Iterations      =                       25
- Time in seconds =                   974.02
- Total processes =                     2048
- Active procs    =                     2048
- Mop/s total     =                698999.78
- Mop/s/process   =                   341.31
+ Time in seconds =                   457.08
+ Total processes =                     4096
+ Active procs    =                     4096
+ Mop/s total     =               1489528.08
+ Mop/s/process   =                   363.65
  Operation type  =           floating point
  Verification    =               SUCCESSFUL
  Version         =                      3.4
@@ -70,6 +70,5 @@
  Internet: npb@nas.nasa.gov
 
 
-Application 2421964 resources: utime ~2013735s, stime ~68478s, Rss ~3726756, inblocks ~28182, outblocks ~0
-
+Application 2421966 resources: utime ~1913998s, stime ~48408s, Rss ~1900108, inblocks ~57922, outblocks ~0
 
