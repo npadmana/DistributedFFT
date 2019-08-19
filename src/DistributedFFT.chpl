@@ -349,6 +349,36 @@ prototype module DistributedFFT {
     }
   }
 
+  // Set up the X FFT plan for transposed arrays
+  // Assumes that we get the XZ plane.
+  proc setupXTransposePlan(param ftType : FFTtype, xzplane : [?Dom] ?T, signOrKind, flags : c_uint) {
+    // Pull signOrKind locally since this may be an array
+    // we need to take a pointer to.
+    var mySignOrKind = signOrKind;
+    var arg0 : _signOrKindType(ftType);
+    select ftType {
+        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+        when FFTtype.DFT do arg0 = mySignOrKind;
+      }
+
+    // Set FFTW parameters
+    const myDom = xzplane.localSubdomain();
+    const xRange = myDom.dim(2);
+    const zRange = myDom.dim(3);
+    var nn = xRange.size : c_int;
+    var nnp = c_ptrTo(nn);
+    var howmany = myDom.dim(3).size : c_int;
+    var rank = 1 : c_int;
+    var stride = myDom.dim(3).size : c_int;
+    var idist = 1 : c_int;
+    var arr0 = c_ptrTo(xzplane.localAccess[myDom.first]);
+    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                        nnp, stride, idist,
+                        arr0, nnp, stride, idist,
+                        arg0, flags);
+  }
+
+
   /* X helper, transposed.
 
      FFT the x direction of arr, and store transposed in dest.
@@ -356,7 +386,13 @@ prototype module DistributedFFT {
      x_y_z -> y_x_z
   */
   proc doFFT_X_Transposed(param ftType: FFTtype, arr : [?Dom] ?T,
-                          dest : [?DomDest] T, warmUpOnly : bool, signOrKind, flags : c_uint) {
+                          dest : [?DomDest] T, warmUpOnly : bool, signOrKind, in flags : c_uint) {
+
+    // We will use the destination array instead of a temporary to minimize
+    // memory usage. Since we'll execute with the array-execute interface, run with
+    // FFTW_UNALIGNED 
+
+    flags = flags | FFTW_UNALIGNED;
 
     coforall loc in Locales {
       on loc {
@@ -374,36 +410,26 @@ prototype module DistributedFFT {
         const yChunk = myDomDest.dim(1); 
         const xRange = Dom.dim(1);
         const zRange = myDom.dim(3);
-        const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
 
+        // Set up plan
+        var plan_x = setupXTransposePlan(ftType, dest, signOrKind, flags);
 
-        if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, zRange}] T;
-          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
-        } else {
+        // Pull down each plane, process and send back
+        forall j in yChunk with
+          (var tt = new TimeTracker()) 
+            {
+              // Pull down the data
+              tt.start();
+              dest[{j..j,xRange,zRange}] = arr[{xRange,j..j,zRange}];
+              tt.stop(TimeStages.Comms);
 
-
-          // Pull down each plane, process and send back
-          forall j in yChunk with
-            // Task private variables
-            // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] T,
-             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
-             var tt = new TimeTracker()) 
-              {
-                // Pull down the data
-                tt.start();
-                myplane = arr[{xRange,j..j,zRange}];
-                tt.stop(TimeStages.Comms);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
-                c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]),
-                                 c_ptrTo(myplane), myPlaneSize);
-              }
-        }
+              // Do the 1D FFTs here
+              var elt = c_ptrTo(dest.localAccess[j,xRange.first, zRange.first]);
+              select ftType {
+                  when FFTtype.DFT do fftw_execute_dft(plan_x.plan, elt, elt);
+                  when FFTtype.R2R do fftw_execute_r2r(plan_x.plan, elt, elt);
+                }
+            }
 
         // End of on-loc
       }
