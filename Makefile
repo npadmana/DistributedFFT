@@ -31,7 +31,13 @@ target/example/Dist/%: example/Dist/%.chpl src/DistributedFFT.chpl
 
 target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/NPB-FT
-	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3 -Msrc ${PERF_FLAGS}
+	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
+
+ft: target/example/NPB-FT/ft target/example/NPB-FT/ft_transposed
+
+target/example/R2R/%: example/R2R/%.chpl src/DistributedFFT.chpl
+	mkdir -p target/example/R2R
+	chpl -o $@ $< ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
 
 # Use the FFTW OMP version
 target/example/NPB-FT/%_omp: example/NPB-FT/%.chpl src/DistributedFFT.chpl
