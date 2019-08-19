@@ -1,0 +1,27 @@
+#!/usr/bin/env gnuplot
+
+load 'chapel-settings.gpi'
+
+# title and labels
+set xlabel "Locales (x 36 cores / locale)"
+set xtics (16,32,64,128,256)
+set ylabel "Time (sec)"
+
+set title "NPB-FT (Size D) Time (seconds)"
+set output "npb-ft-D-time.pdf"
+plot \
+  'data/1.19.0-pre-ugni-qthreads-nbp-ft-D.dat' using 1:2 title "Chapel 1.19 (pre)" with linespoints linestyle 4, \
+  'data/reference-nbp-ft-D.dat'                using 1:2 title "Reference (MPI)"   with linespoints linestyle 1, 
+
+set title "NPB-FT (Size E) Time (seconds)"
+set output "npb-ft-E-time.pdf"
+plot \
+  'data/1.19.0-pre-ugni-qthreads-nbp-ft-E.dat' using 1:2 title "Chapel 1.19 (pre)" with linespoints linestyle 4, \
+  'data/reference-nbp-ft-E.dat'                using 1:2 title "Reference (MPI)"   with linespoints linestyle 1, 
+
+set xtics (128,256,512)
+set title "NPB-FT (Size F) Time (seconds)"
+set output "npb-ft-F-time.pdf"
+plot \
+  'data/1.19.0-pre-ugni-qthreads-nbp-ft-F.dat' using 1:2 title "Chapel 1.19 (pre)" with linespoints linestyle 4, \
+  'data/reference-nbp-ft-F.dat'                using 1:2 title "Reference (MPI)"   with linespoints linestyle 1, 
