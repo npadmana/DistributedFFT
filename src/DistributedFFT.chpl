@@ -413,6 +413,7 @@ prototype module DistributedFFT {
 
         // Set up plan
         var plan_x = setupXTransposePlan(ftType, dest, signOrKind, flags);
+        ref darr = dest.localSlice(dest.localSubdomain());
 
         // Pull down each plane, process and send back
         forall j in yChunk with
@@ -420,11 +421,12 @@ prototype module DistributedFFT {
             {
               // Pull down the data
               tt.start();
-              dest[{j..j,xRange,zRange}] = arr[{xRange,j..j,zRange}];
+              ref dplane = darr[{j..j,xRange,zRange}];
+              dplane = arr[{xRange,j..j,zRange}];
               tt.stop(TimeStages.Comms);
 
               // Do the 1D FFTs here
-              var elt = c_ptrTo(dest.localAccess[j,xRange.first, zRange.first]);
+              var elt = c_ptrTo(dplane);
               select ftType {
                   when FFTtype.DFT do fftw_execute_dft(plan_x.plan, elt, elt);
                   when FFTtype.R2R do fftw_execute_r2r(plan_x.plan, elt, elt);
