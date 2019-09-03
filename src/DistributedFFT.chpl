@@ -392,36 +392,35 @@ prototype module DistributedFFT {
         const yChunk = chunk(myDom.dim(2), numLocales, here.id);
 
         if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, zRange}] T;
-          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
+          var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         } else {
+          // We assume numberOfPlanes tasks
+          coforall iplane in 0.. #numberOfPlanes {
+            var myplane : [{xRange, 0..0, zRange}] T;
+            var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+            var tt = new TimeTracker();
 
+            var myChunk = chunk(yChunk, numberOfPlanes, iplane);
+            const x0 = xRange.first;
+            for j in myChunk {
+              tt.start();
+              myplane = arr[{xRange,j..j,zRange}];
+              tt.stop(TimeStages.Comms);
 
-          // Pull down each plane, process and send back
-          forall j in yChunk with
-            // Task private variables
-            // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] T,
-             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
-             var tt = new TimeTracker()) 
-              {
-                // Pull down the data
-                tt.start();
-                myplane = arr[{xRange,j..j,zRange}];
-                tt.stop(TimeStages.Comms);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
-                tt.start();
-                arr[{xRange,j..j,zRange}] = myplane;
-                tt.stop(TimeStages.Comms);
+              forall iz in zRange with (ref plan_x) {
+                var elt = c_ptrTo(myplane[x0, 0, iz]);
+                plan_x.execute(elt, elt);
               }
-        }
 
-        // End of on-loc
+              // Push back the pencil here
+              tt.start();
+              arr[{xRange,j..j,zRange}] = myplane;
+              tt.stop(TimeStages.Comms);
+            }
+          }
+        }
       }
+      // End of on-loc
     }
   }
 
@@ -440,50 +439,47 @@ prototype module DistributedFFT {
         // Set up for the yz transforms on each domain.
         const myDom = arr.localSubdomain();
         const localIndex = myDom.first;
-
-        // Transposed dimensions
-        const myDomDest = dest.localSubdomain();
-
-        // Split the y-range. Make this dimension agnostic
-        // We're transposing, so the y-dimension of the output
-        // array is now dimension 1.
-        const yChunk = myDomDest.dim(1); 
         const xRange = Dom.dim(1);
         const zRange = myDom.dim(3);
-        const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
 
+        // Split the y-range. Make this dimension agnostic
+        const yChunk = chunk(myDom.dim(2), numLocales, here.id);
 
         if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, zRange}] T;
-          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
+          var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         } else {
+          // We assume numberOfPlanes tasks
+          coforall iplane in 0.. #numberOfPlanes {
+            var myplane : [{xRange, 0..0, zRange}] T;
+            var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+            var tt = new TimeTracker();
 
+            var myChunk = chunk(yChunk, numberOfPlanes, iplane);
+            const x0 = xRange.first;
+            for j in myChunk {
+              tt.start();
+              myplane = arr[{xRange,j..j,zRange}];
+              tt.stop(TimeStages.Comms);
 
-          // Pull down each plane, process and send back
-          forall j in yChunk with
-            // Task private variables
-            // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] T,
-             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
-             var tt = new TimeTracker()) 
-              {
-                // Pull down the data
-                tt.start();
-                myplane = arr[{xRange,j..j,zRange}];
-                tt.stop(TimeStages.Comms);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
-                c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]),
-                                 c_ptrTo(myplane), myPlaneSize);
+              forall iz in zRange with (ref plan_x) {
+                var elt = c_ptrTo(myplane[x0, 0, iz]);
+                plan_x.execute(elt, elt);
               }
-        }
 
-        // End of on-loc
+              // Push back the pencil here
+              tt.start();
+              /* This is the memcpy version saved here for reference */
+              /* c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]), */
+              /*          c_ptrTo(myplane), myPlaneSize); */
+              dest[{j..j,xRange,zRange}] = myplane;
+              tt.stop(TimeStages.Comms);
+            }
+          }
+        }
       }
+      // End of on-loc
     }
+
   }
 
   // I could not combine these, so keep them separate for now.
