@@ -10,6 +10,7 @@ prototype module DistributedFFT {
   use FFT_Timers;
   require "npFFTW.h";
 
+  config const numberOfPlanes=2;
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -35,11 +36,14 @@ prototype module DistributedFFT {
   /*                              int ostride, int odist, */
   /*                              const fftw_r2r_kind *kind, unsigned flags); */
   record FFTWplan {
+    param ftType : FFTtype;
     var plan : fftw_plan;
     var tt : TimeTracker;
 
     // Mimic the advanced interface 
-    proc init(param ftType : FFTtype, args ...?k) {
+    proc init(param ftType1 : FFTtype, args ...?k) {
+      ftType = ftType1;
+      this.complete();
       fftw_planner_lock$.lock();
       select ftType {
           when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
@@ -59,6 +63,16 @@ prototype module DistributedFFT {
       FFTW.execute(plan);
       tt.stop(TimeStages.Execute);
     }
+
+    proc execute(arr1, arr2) {
+      tt.start();
+      select ftType {
+          when FFTtype.DFT do fftw_execute_dft(plan, arr1, arr2);
+          when FFTtype.R2R do fftw_execute_r2r(plan, arr1, arr2);
+        }
+      tt.stop(TimeStages.Execute);
+    }
+
 
     proc isValid : bool {
       return isNullPlan(plan)==0;
@@ -228,6 +242,64 @@ prototype module DistributedFFT {
                         arg0, flags);
   }
 
+  // Set up 1D in-place plans
+  proc setup1DPlan(type arrType, param ftType : FFTtype, nx : int, strideIn : int, signOrKind, in flags : c_uint) {
+    // Pull signOrKind locally since this may be an array
+    // we need to take a pointer to.
+    var mySignOrKind = signOrKind;
+    var arg0 : _signOrKindType(ftType);
+    select ftType {
+        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+        when FFTtype.DFT do arg0 = mySignOrKind;
+      }
+
+    // Define a dummy array
+    var arr : [0.. #(nx*strideIn)] arrType;
+
+    // Write down all the parameters explicitly
+    var howmany = 1 : c_int;
+    var nn : c_array(c_int, 1);
+    nn[0] = nx : c_int;
+    var nnp = c_ptrTo(nn[0]);
+    var rank = 1 : c_int;
+    var stride = strideIn  : c_int;
+    var idist = 0 : c_int;
+    var arr0 = c_ptrTo(arr);
+    flags = flags | FFTW_UNALIGNED;
+    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                        nnp, stride, idist,
+                        arr0, nnp, stride, idist,
+                        arg0, flags);
+  }
+
+  // Set up 1D out-of-place plans
+  proc setup1DPlan(type arrType, param ftType : FFTtype, nx : int, strideIn : int, strideOut : int, signOrKind, in flags : c_uint) {
+    // Pull signOrKind locally since this may be an array
+    // we need to take a pointer to.
+    var mySignOrKind = signOrKind;
+    var arg0 : _signOrKindType(ftType);
+    select ftType {
+        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+        when FFTtype.DFT do arg0 = mySignOrKind;
+      }
+
+    // Define a dummy array
+    var arrIn : [0.. #(nx*strideIn)] arrType;
+    var arrOut : [0.. #(nx*strideOut)] arrType;
+
+    // Write down all the parameters explicitly
+    var howmany = 1 : c_int;
+    var nn : c_array(c_int, 1);
+    nn[0] = nx : c_int;
+    var nnp = c_ptrTo(nn[0]);
+    var rank = 1 : c_int;
+    var idist = 0 : c_int;
+    flags = flags | FFTW_UNALIGNED;
+    return new FFTWplan(ftType, rank, nnp, howmany, c_ptrTo(arrIn),
+                        nnp, strideIn : c_int, idist,
+                        c_ptrTo(arrOut), nnp, strideOut : c_int, idist,
+                        arg0, flags);
+  }
 
   /* Helper routines. This assumes that the data are block-distributed.
 
@@ -249,17 +321,21 @@ prototype module DistributedFFT {
         const yRange = myDom.dim(2);
         const zRange = myDom.dim(3);
 
-        var plan_yz = setupYZPlan(ftType, arr, signOrKind, flags);
+        var plan_z = setup1DPlan(T, ftType, zRange.size, 1, signOrKind, flags);
+        var plan_y = setup1DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
 
-        if (!plan_yz.isValid) then
-          halt("Error! Plan generation failed! Did you call the warmup routine?");
         if (!warmUpOnly) {
-          forall i in xRange {
-            var elt = c_ptrTo(arr.localAccess[i,yRange.first, zRange.first]);
-            select ftType {
-                when FFTtype.DFT do fftw_execute_dft(plan_yz.plan, elt, elt);
-                when FFTtype.R2R do fftw_execute_r2r(plan_yz.plan, elt, elt);
-              }
+          // Do the z transforms
+          const z0 = zRange.first;
+          forall (ix, iy) in {xRange, yRange} with (ref plan_z) {
+            var elt = c_ptrTo(arr.localAccess[ix, iy, z0]);
+            plan_z.execute(elt, elt);
+          }
+          // Do the y transforms
+          const y0 = yRange.first;
+          forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
+            var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
+            plan_y.execute(elt, elt);
           }
         }
 
