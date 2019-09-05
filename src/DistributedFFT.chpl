@@ -10,7 +10,7 @@ prototype module DistributedFFT {
   use FFT_Timers;
   require "npFFTW.h";
 
-  config const numberOfPlanes=2;
+  config const numberOfPlanes=1;
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -390,17 +390,18 @@ prototype module DistributedFFT {
 
         // Split the y-range. Make this dimension agnostic
         const yChunk = chunk(myDom.dim(2), numLocales, here.id);
+        const numberOfActualPlanes = if yChunk.size > numberOfPlanes then numberOfPlanes else yChunk.size;
 
         if (warmUpOnly) {
           var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         } else {
-          // We assume numberOfPlanes tasks
-          coforall iplane in 0.. #numberOfPlanes {
+          // We assume numberOfActualPlanes tasks
+          coforall iplane in 0.. #numberOfActualPlanes {
             var myplane : [{xRange, 0..0, zRange}] T;
             var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
             var tt = new TimeTracker();
 
-            var myChunk = chunk(yChunk, numberOfPlanes, iplane);
+            var myChunk = chunk(yChunk, numberOfActualPlanes, iplane);
             const x0 = xRange.first;
             for j in myChunk {
               tt.start();
@@ -444,17 +445,18 @@ prototype module DistributedFFT {
 
         // Split the y-range. Make this dimension agnostic
         const yChunk = chunk(myDom.dim(2), numLocales, here.id);
+        const numberOfActualPlanes = if yChunk.size > numberOfPlanes then numberOfPlanes else yChunk.size;
 
         if (warmUpOnly) {
           var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         } else {
-          // We assume numberOfPlanes tasks
-          coforall iplane in 0.. #numberOfPlanes {
+          // We assume numberOfActualPlanes tasks
+          coforall iplane in 0.. #numberOfActualPlanes {
             var myplane : [{xRange, 0..0, zRange}] T;
             var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
             var tt = new TimeTracker();
 
-            var myChunk = chunk(yChunk, numberOfPlanes, iplane);
+            var myChunk = chunk(yChunk, numberOfActualPlanes, iplane);
             const x0 = xRange.first;
             for j in myChunk {
               tt.start();
