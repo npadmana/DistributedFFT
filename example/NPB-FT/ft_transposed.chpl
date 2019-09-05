@@ -90,8 +90,9 @@ writef("MFLOPS : %10.4dr\n",mflops);
 
 proc evolve() {
   forall ijk in DomT {
-    V.localAccess[ijk] *= Twiddle.localAccess[ijk];
-    Wt.localAccess[ijk] = V.localAccess[ijk];
+    const elt = V.localAccess[ijk]*Twiddle.localAccess[ijk];
+    V.localAccess[ijk] = elt;
+    Wt.localAccess[ijk] = elt;
   }
   doFFT_Transposed(Wt, W, FFTW_BACKWARD); // This is unnormalized
 }
