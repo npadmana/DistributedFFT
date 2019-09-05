@@ -442,6 +442,7 @@ prototype module DistributedFFT {
         const localIndex = myDom.first;
         const xRange = Dom.dim(1);
         const zRange = myDom.dim(3);
+        const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
 
         // Split the y-range. Make this dimension agnostic
         const yChunk = chunk(myDom.dim(2), numLocales, here.id);
@@ -471,9 +472,9 @@ prototype module DistributedFFT {
               // Push back the pencil here
               tt.start();
               /* This is the memcpy version saved here for reference */
-              /* c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]), */
-              /*          c_ptrTo(myplane), myPlaneSize); */
-              dest[{j..j,xRange,zRange}] = myplane;
+              c_memcpy(c_ptrTo(dest.localAccess[j, x0, zRange.first]),
+                       c_ptrTo(myplane), myPlaneSize);
+              /* dest[{j..j,xRange,zRange}] = myplane; */
               tt.stop(TimeStages.Comms);
             }
           }
