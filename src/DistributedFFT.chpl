@@ -443,7 +443,9 @@ prototype module DistributedFFT {
         const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
 
         // Split the y-range. Make this dimension agnostic
-        const yChunk = chunk(myDom.dim(2), numLocales, here.id);
+        // Transposed dimensions
+        const myDomDest = dest.localSubdomain();
+        const yChunk = myDomDest.dim(1);
         const numberOfActualPlanes = if yChunk.size > numberOfPlanes then numberOfPlanes else yChunk.size;
 
         if (warmUpOnly) {
