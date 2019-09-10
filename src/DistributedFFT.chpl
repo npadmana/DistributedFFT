@@ -65,12 +65,10 @@ prototype module DistributedFFT {
     }
 
     proc execute(arr1, arr2) {
-      tt.start();
       select ftType {
           when FFTtype.DFT do fftw_execute_dft(plan, arr1, arr2);
           when FFTtype.R2R do fftw_execute_r2r(plan, arr1, arr2);
         }
-      tt.stop(TimeStages.Execute);
     }
 
 
@@ -327,15 +325,25 @@ prototype module DistributedFFT {
         if (!warmUpOnly) {
           // Do the z transforms
           const z0 = zRange.first;
-          forall (ix, iy) in {xRange, yRange} with (ref plan_z) {
+          forall (ix, iy) in {xRange, yRange} with
+           (ref plan_z,
+            var tt = new TimeTracker())
+          {
             var elt = c_ptrTo(arr.localAccess[ix, iy, z0]);
+            tt.start();
             plan_z.execute(elt, elt);
+            tt.stop(TimeStages.Execute);
           }
           // Do the y transforms
           const y0 = yRange.first;
-          forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
+          forall (ix, iz) in {xRange, zRange} with
+           (ref plan_y,
+            var tt = new TimeTracker())
+          {
+            tt.start();
             var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
             plan_y.execute(elt, elt);
+            tt.stop(TimeStages.Execute);
           }
         }
 
@@ -408,9 +416,14 @@ prototype module DistributedFFT {
               myplane = arr[{xRange,j..j,zRange}];
               tt.stop(TimeStages.Comms);
 
-              forall iz in zRange with (ref plan_x) {
+              forall iz in zRange with
+                (ref plan_x,
+                 var tt1 = new TimeTracker())
+              {
+                tt1.start();
                 var elt = c_ptrTo(myplane[x0, 0, iz]);
                 plan_x.execute(elt, elt);
+                tt1.stop(TimeStages.Execute);
               }
 
               // Push back the pencil here
