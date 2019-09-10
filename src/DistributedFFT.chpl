@@ -464,18 +464,21 @@ prototype module DistributedFFT {
               myplane = arr[{xRange,j..j,zRange}];
               tt.stop(TimeStages.Comms);
 
+              tt.start();
               forall iz in zRange with (ref plan_x) {
                 var elt = c_ptrTo(myplane[x0, 0, iz]);
                 plan_x.execute(elt, elt);
               }
+              tt.stop(TimeStages.Execute);
 
               // Push back the pencil here
               tt.start();
               /* This is the memcpy version saved here for reference */
-              c_memcpy(c_ptrTo(dest.localAccess[j, x0, zRange.first]),
-                       c_ptrTo(myplane), myPlaneSize);
+              forall ix in xRange do 
+                c_memcpy(c_ptrTo(dest.localAccess[j, ix, zRange.first]),
+                         c_ptrTo(myplane[ix,0,zRange.first]), zRange.size*c_sizeof(T):int);
               /* dest[{j..j,xRange,zRange}] = myplane; */
-              tt.stop(TimeStages.Comms);
+              tt.stop(TimeStages.Memcpy);
             }
           }
         }
@@ -501,7 +504,7 @@ prototype module DistributedFFT {
     // Time the various FFT steps.
     config const timeTrackFFT=false;
 
-    enum TimeStages {X, YZ, Execute, Comms};
+    enum TimeStages {X, YZ, Execute, Memcpy, Comms};
     const stageDomain = {TimeStages.X..TimeStages.Comms};
     private var _globalTimeArr : [stageDomain] atomic real;
 
