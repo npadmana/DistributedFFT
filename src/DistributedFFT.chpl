@@ -325,25 +325,15 @@ prototype module DistributedFFT {
         if (!warmUpOnly) {
           // Do the z transforms
           const z0 = zRange.first;
-          forall (ix, iy) in {xRange, yRange} with
-           (ref plan_z,
-            var tt = new TimeTracker())
-          {
+          forall (ix, iy) in {xRange, yRange} with (ref plan_z) {
             var elt = c_ptrTo(arr.localAccess[ix, iy, z0]);
-            tt.start();
             plan_z.execute(elt, elt);
-            tt.stop(TimeStages.Execute);
           }
           // Do the y transforms
           const y0 = yRange.first;
-          forall (ix, iz) in {xRange, zRange} with
-           (ref plan_y,
-            var tt = new TimeTracker())
-          {
-            tt.start();
+          forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
             var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
             plan_y.execute(elt, elt);
-            tt.stop(TimeStages.Execute);
           }
         }
 
@@ -416,14 +406,9 @@ prototype module DistributedFFT {
               myplane = arr[{xRange,j..j,zRange}];
               tt.stop(TimeStages.Comms);
 
-              forall iz in zRange with
-                (ref plan_x,
-                 var tt1 = new TimeTracker())
-              {
-                tt1.start();
+              forall iz in zRange with (ref plan_x) {
                 var elt = c_ptrTo(myplane[x0, 0, iz]);
                 plan_x.execute(elt, elt);
-                tt1.stop(TimeStages.Execute);
               }
 
               // Push back the pencil here
