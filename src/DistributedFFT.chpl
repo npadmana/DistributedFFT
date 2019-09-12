@@ -464,6 +464,7 @@ prototype module DistributedFFT {
 
             var myChunk = chunk(yChunk, numberOfActualPlanes, iplane);
             const x0 = xRange.first;
+            const z0 = zRange.first;
             for j in myChunk {
               tt.start();
               myplane = arr[{xRange,j..j,zRange}];
@@ -480,8 +481,8 @@ prototype module DistributedFFT {
               tt.start();
               /* This is the memcpy version saved here for reference */
               forall ix in xRange do 
-                c_memcpy(c_ptrTo(dest.localAccess[j, ix, zRange.first]),
-                         c_ptrTo(myplane[ix,0,zRange.first]), zRange.size*c_sizeof(T):int);
+                c_memcpy(c_ptrTo(dest.localAccess[j, ix, z0]),
+                         c_ptrTo(myplane[ix,0,z0]), myLineSize);
               /* dest[{j..j,xRange,zRange}] = myplane; */
               tt.stop(TimeStages.Memcpy);
             }
