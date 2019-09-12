@@ -322,6 +322,8 @@ prototype module DistributedFFT {
         var plan_z = setup1DPlan(T, ftType, zRange.size, 1, signOrKind, flags);
         var plan_y = setup1DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
 
+        var tt = new TimeTracker();
+        tt.start();
         if (!warmUpOnly) {
           // Do the z transforms
           const z0 = zRange.first;
@@ -336,6 +338,7 @@ prototype module DistributedFFT {
             plan_y.execute(elt, elt);
           }
         }
+        tt.stop(TimeStages.Execute);
 
         // on loc ends
       }
@@ -406,10 +409,12 @@ prototype module DistributedFFT {
               myplane = arr[{xRange,j..j,zRange}];
               tt.stop(TimeStages.Comms);
 
+              tt.start();
               forall iz in zRange with (ref plan_x) {
                 var elt = c_ptrTo(myplane[x0, 0, iz]);
                 plan_x.execute(elt, elt);
               }
+              tt.stop(TimeStages.Execute);
 
               // Push back the pencil here
               tt.start();
@@ -440,7 +445,7 @@ prototype module DistributedFFT {
         const localIndex = myDom.first;
         const xRange = Dom.dim(1);
         const zRange = myDom.dim(3);
-        const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
+        const myLineSize = zRange.size*c_sizeof(T):int;
 
         // Split the y-range. Make this dimension agnostic
         // Transposed dimensions
