@@ -467,7 +467,15 @@ prototype module DistributedFFT {
             const z0 = zRange.first;
             for j in myChunk {
               tt.start();
-              myplane = arr[{xRange,j..j,zRange}];
+              //forall ix in xRange do myplane[{ix..ix,0..0,zRange}] = arr[{ix..ix,j..j,zRange}];
+              const offset = (xRange.size/numLocales)*here.id;
+              forall ix in 0.. #xRange.size {
+                const ix1 = (ix + offset)%xRange.size + x0;
+                ref dstRef = myplane[ix1,0,z0];
+                ref srcRef = arr[ix1,j,z0];
+                __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myLineSize);
+              }
+
               tt.stop(TimeStages.Comms);
 
               tt.start();
