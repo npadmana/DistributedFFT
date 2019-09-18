@@ -451,50 +451,35 @@ prototype module DistributedFFT {
         // Transposed dimensions
         const myDomDest = dest.localSubdomain();
         const yChunk = myDomDest.dim(1);
-        const numberOfActualPlanes = if yChunk.size > numberOfPlanes then numberOfPlanes else yChunk.size;
+        const myBlockSize = myLineSize*yChunk.size;
 
         if (warmUpOnly) {
           var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         } else {
-          // We assume numberOfActualPlanes tasks
-          coforall iplane in 0.. #numberOfActualPlanes {
-            var myplane : [{xRange, 0..0, zRange}] T;
-            var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
-            var tt = new TimeTracker();
+          const x0 = xRange.first;
+          const z0 = zRange.first;
 
-            var myChunk = chunk(yChunk, numberOfActualPlanes, iplane);
-            const x0 = xRange.first;
-            const z0 = zRange.first;
-            for j in myChunk {
-              tt.start();
-              //forall ix in xRange do myplane[{ix..ix,0..0,zRange}] = arr[{ix..ix,j..j,zRange}];
-              const offset = (xRange.size/numLocales)*here.id;
-              forall ix in 0.. #xRange.size {
-                const ix1 = (ix + offset)%xRange.size + x0;
-                ref dstRef = myplane[ix1,0,z0];
-                ref srcRef = arr[ix1,j,z0];
-                __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myLineSize);
-              }
-
-              tt.stop(TimeStages.Comms);
-
-              tt.start();
-              forall iz in zRange with (ref plan_x) {
-                var elt = c_ptrTo(myplane[x0, 0, iz]);
-                plan_x.execute(elt, elt);
-              }
-              tt.stop(TimeStages.Execute);
-
-              // Push back the pencil here
-              tt.start();
-              /* This is the memcpy version saved here for reference */
-              forall ix in xRange do 
-                c_memcpy(c_ptrTo(dest.localAccess[j, ix, z0]),
-                         c_ptrTo(myplane[ix,0,z0]), myLineSize);
-              /* dest[{j..j,xRange,zRange}] = myplane; */
-              tt.stop(TimeStages.Memcpy);
-            }
+          // Copy the data
+          var tt = new TimeTracker();
+          tt.start();
+          const offset = (xRange.size/numLocales)*here.id;
+          forall ix in 0.. #xRange.size with (var tmparr : [{yChunk, zRange}] T) {
+            const ix1 = (ix + offset)%xRange.size + x0;
+            ref dstRef = tmparr[yChunk.first, z0];
+            ref srcRef = arr[ix1,yChunk.first,z0];
+            __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myBlockSize);
+            for iy in yChunk do c_memcpy(c_ptrTo(dest.localAccess[iy, ix1, z0]), c_ptrTo(tmparr[iy,z0]), myLineSize);
           }
+          tt.stop(TimeStages.Comms);
+
+          tt.start();
+          var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+          forall (iy,iz) in {yChunk, zRange} with (ref plan_x) {
+            var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
+            plan_x.execute(elt, elt);
+          }
+          tt.stop(TimeStages.Execute);
+
         }
       }
       // End of on-loc
