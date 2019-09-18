@@ -451,7 +451,6 @@ prototype module DistributedFFT {
         // Transposed dimensions
         const myDomDest = dest.localSubdomain();
         const yChunk = myDomDest.dim(1);
-        const myBlockSize = myLineSize*yChunk.size;
 
         if (warmUpOnly) {
           var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
@@ -459,26 +458,26 @@ prototype module DistributedFFT {
           const x0 = xRange.first;
           const z0 = zRange.first;
 
-          // Copy the data
-          var tt = new TimeTracker();
-          tt.start();
-          const offset = (xRange.size/numLocales)*here.id;
-          forall ix in 0.. #xRange.size with (var tmparr : [{yChunk, zRange}] T) {
-            const ix1 = (ix + offset)%xRange.size + x0;
-            ref dstRef = tmparr[yChunk.first, z0];
-            ref srcRef = arr[ix1,yChunk.first,z0];
-            __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myBlockSize);
-            for iy in yChunk do c_memcpy(c_ptrTo(dest.localAccess[iy, ix1, z0]), c_ptrTo(tmparr[iy,z0]), myLineSize);
-          }
-          tt.stop(TimeStages.Comms);
+          forall iy in yChunk with (var tt = new TimeTracker()) {
+            // Copy the data
+            tt.start();
+            const offset = (xRange.size/numLocales)*here.id;
+            forall ix in 0.. #xRange.size {
+              const ix1 = (ix + offset)%xRange.size + x0;
+              ref dstRef = dest.localAccess[iy, ix1, z0];
+              ref srcRef = arr[ix1,iy,z0];
+              __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myLineSize);
+            }
+            tt.stop(TimeStages.Comms);
 
-          tt.start();
-          var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
-          forall (iy,iz) in {yChunk, zRange} with (ref plan_x) {
-            var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
-            plan_x.execute(elt, elt);
+            tt.start();
+            var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+            forall iz in zRange with (ref plan_x) {
+              var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
+              plan_x.execute(elt, elt);
+            }
+            tt.stop(TimeStages.Execute);
           }
-          tt.stop(TimeStages.Execute);
 
         }
       }
