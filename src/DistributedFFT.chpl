@@ -458,7 +458,10 @@ prototype module DistributedFFT {
           const x0 = xRange.first;
           const z0 = zRange.first;
 
-          forall iy in yChunk with (var tt = new TimeTracker()) {
+          forall iy in yChunk with (
+                                    var tt = new TimeTracker(),
+                                    var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags)
+                                    ) {
             // Copy the data
             tt.start();
             const offset = (xRange.size/numLocales)*here.id;
@@ -471,7 +474,6 @@ prototype module DistributedFFT {
             tt.stop(TimeStages.Comms);
 
             tt.start();
-            var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
             forall iz in zRange with (ref plan_x) {
               var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
               plan_x.execute(elt, elt);
