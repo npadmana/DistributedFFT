@@ -452,16 +452,13 @@ prototype module DistributedFFT {
         const myDomDest = dest.localSubdomain();
         const yChunk = myDomDest.dim(1);
 
-        if (warmUpOnly) {
-          var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
-        } else {
+        var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+        if (!warmUpOnly) {
           const x0 = xRange.first;
           const z0 = zRange.first;
 
-          forall iy in yChunk with (
-                                    var tt = new TimeTracker(),
-                                    var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags)
-                                    ) {
+          var tt = new TimeTracker();
+          for iy in yChunk {
             // Copy the data
             tt.start();
             const offset = (xRange.size/numLocales)*here.id;
