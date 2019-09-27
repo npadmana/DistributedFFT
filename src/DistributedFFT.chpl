@@ -456,16 +456,16 @@ prototype module DistributedFFT {
         if (warmUpOnly) {
           var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         } else {
-          // We assume numberOfActualPlanes tasks
-          coforall iplane in 0.. #numberOfActualPlanes {
+          var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+          const numOuterTasks = if yChunk.size >= here.maxTaskPar then here.maxTaskPar
+                                                                  else 1;
+          coforall tid in 0..#numOuterTasks with (ref plan_x) {
             var myplane : [{xRange, 0..0, zRange}] T;
-            var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
             var tt = new TimeTracker();
 
-            var myChunk = chunk(yChunk, numberOfActualPlanes, iplane);
             const x0 = xRange.first;
             const z0 = zRange.first;
-            for j in myChunk {
+            for j in chunk(yChunk, numOuterTasks, tid)  {
               tt.start();
               //forall ix in xRange do myplane[{ix..ix,0..0,zRange}] = arr[{ix..ix,j..j,zRange}];
               const offset = (xRange.size/numLocales)*here.id;
