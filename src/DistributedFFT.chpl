@@ -457,26 +457,30 @@ prototype module DistributedFFT {
           const x0 = xRange.first;
           const z0 = zRange.first;
 
-          forall iy in yChunk with (ref plan_x, var tt = new TimeTracker()) {
-            // Copy the data
-            tt.start();
-            const offset = (xRange.size/numLocales)*here.id;
-            forall ix in 0.. #xRange.size {
-              const ix1 = (ix + offset)%xRange.size + x0;
-              ref dstRef = dest.localAccess[iy, ix1, z0];
-              ref srcRef = arr[ix1,iy,z0];
-              __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myLineSize);
-            }
-            tt.stop(TimeStages.Comms);
+          const numOuterTasks = if yChunk.size >= here.maxTaskPar then here.maxTaskPar
+                                                                  else 1;
+          coforall tid in 0..#numOuterTasks with (ref plan_x) {
+            var tt = new TimeTracker();
+            for iy in chunk(yChunk, numOuterTasks, tid)  {
+              // Copy the data
+              tt.start();
+              const offset = (xRange.size/numLocales)*here.id;
+              forall ix in 0.. #xRange.size {
+                const ix1 = (ix + offset)%xRange.size + x0;
+                ref dstRef = dest.localAccess[iy, ix1, z0];
+                ref srcRef = arr[ix1,iy,z0];
+                __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myLineSize);
+              }
+              tt.stop(TimeStages.Comms);
 
-            tt.start();
-            forall iz in zRange with (ref plan_x) {
-              var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
-              plan_x.execute(elt, elt);
+              tt.start();
+              forall iz in zRange with (ref plan_x) {
+                var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
+                plan_x.execute(elt, elt);
+              }
+              tt.stop(TimeStages.Execute);
             }
-            tt.stop(TimeStages.Execute);
           }
-
         }
       }
       // End of on-loc
