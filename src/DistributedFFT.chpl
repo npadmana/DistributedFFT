@@ -457,7 +457,8 @@ prototype module DistributedFFT {
           const x0 = xRange.first;
           const z0 = zRange.first;
 
-          forall iy in yChunk with (ref plan_x, var tt = new TimeTracker()) {
+          var tt = new TimeTracker();
+          for iy in yChunk {
             // Copy the data
             tt.start();
             const offset = (xRange.size/numLocales)*here.id;
