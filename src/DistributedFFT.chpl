@@ -457,8 +457,12 @@ prototype module DistributedFFT {
           const x0 = xRange.first;
           const z0 = zRange.first;
 
+          const numOuterTasks = if yChunk.size >= here.maxTaskPar then here.maxTaskPar
+                                                                  else 1;
+          coforall tid in 0..#numOuterTasks with (ref plan_x) {
+
           var tt = new TimeTracker();
-          for iy in yChunk {
+          for iy in chunk(yChunk, numOuterTasks, tid)  {
             // Copy the data
             tt.start();
             const offset = (xRange.size/numLocales)*here.id;
@@ -477,7 +481,7 @@ prototype module DistributedFFT {
             }
             tt.stop(TimeStages.Execute);
           }
-
+          }
         }
       }
       // End of on-loc
