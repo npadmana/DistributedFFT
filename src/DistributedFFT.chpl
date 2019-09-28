@@ -169,10 +169,12 @@ prototype module DistributedFFT {
     // UNALIGNED -- since we do each plane separately, make no alignment assumtions
     doFFT_YZ(FFTtype.DFT, src, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
     tt.stop(TimeStages.YZ);
+    writef("yz=%dr  ",tt.tt.elapsed());
 
     tt.start();
     doFFT_X_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
     tt.stop(TimeStages.X);
+    writef("x=%dr  ",tt.tt.elapsed());
 
 
     // End of doFFT
