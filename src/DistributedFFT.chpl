@@ -167,12 +167,12 @@ prototype module DistributedFFT {
     // Must call with WISDOM_ONLY and UNALIGNED
     // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
     // UNALIGNED -- since we do each plane separately, make no alignment assumtions
-    doFFT_YZ(FFTtype.DFT, src, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
+    doFFT_YZ_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
     tt.stop(TimeStages.YZ);
     writef("yz=%dr  ",tt.tt.elapsed());
 
     tt.start();
-    doFFT_X_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
+    doFFT_X_Transposed(FFTtype.DFT, dest, false, sign, FFTW_MEASURE);
     tt.stop(TimeStages.X);
     writef("x=%dr  ",tt.tt.elapsed());
 
@@ -347,6 +347,50 @@ prototype module DistributedFFT {
     }
   }
 
+  proc doFFT_YZ_Transposed(param ftType : FFTtype, arr : [?Dom] ?T, dest : [?DomDest] T, warmUpOnly : bool, signOrKind, flags : c_uint) {
+
+
+    // Run on all locales
+    coforall loc in Locales {
+      on loc {
+        // Get the x-range to loop over
+        const myDom = arr.localSubdomain();
+        const xRange = myDom.dim(1);
+        const yRange = myDom.dim(2);
+        const zRange = myDom.dim(3);
+        const myLineSize = zRange.size*c_sizeof(T):int;
+
+        var plan_z = setup1DPlan(T, ftType, zRange.size, 1, signOrKind, flags);
+        var plan_y = setup1DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
+
+        var tt = new TimeTracker();
+        tt.start();
+        if (!warmUpOnly) {
+          // Do the y transforms
+          const y0 = yRange.first;
+          forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
+            var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
+            plan_y.execute(elt, elt);
+          }
+          // Do the z transforms
+          const z0 = zRange.first;
+          const offset = (yRange.size/numLocales)*here.id;
+          forall (ix, iy) in {xRange, 0.. #yRange.size}.these(tasksPerLocale=here.maxTaskPar*2) with (ref plan_z) {
+            const iy1 = (iy + offset)%yRange.size + y0;
+            var elt = c_ptrTo(arr.localAccess[ix, iy1, z0]);
+            plan_z.execute(elt, elt);
+            ref srcRef = arr.localAccess[ix, iy1, z0];
+            ref dstRef = dest[iy1,ix,z0];
+            __primitive("chpl_comm_put", srcRef, dstRef.locale.id, dstRef, myLineSize);
+          }
+        }
+        tt.stop(TimeStages.Execute);
+
+        // on loc ends
+      }
+    }
+  }
+
   // Set up the X FFT plan.
   // Assumes that we get the XZ plane.
   proc setupXPlan(param ftType : FFTtype, xzplane : [?Dom] ?T, signOrKind, flags : c_uint) {
@@ -436,58 +480,30 @@ prototype module DistributedFFT {
 
      x_y_z -> y_x_z
   */
-  proc doFFT_X_Transposed(param ftType: FFTtype, arr : [?Dom] ?T,
-                          dest : [?DomDest] T, warmUpOnly : bool, signOrKind, flags : c_uint) {
+  proc doFFT_X_Transposed(param ftType: FFTtype, 
+                          dest : [?DomDest] ?T, warmUpOnly : bool, signOrKind, flags : c_uint) {
 
     coforall loc in Locales {
       on loc {
 
-        // Set up for the yz transforms on each domain.
-        const myDom = arr.localSubdomain();
-        const localIndex = myDom.first;
-        const xRange = Dom.dim(1);
-        const zRange = myDom.dim(3);
-        const myLineSize = zRange.size*c_sizeof(T):int;
-
         // Split the y-range. Make this dimension agnostic
         // Transposed dimensions
         const myDomDest = dest.localSubdomain();
-        const yChunk = myDomDest.dim(1);
+        const yRange = myDomDest.dim(1);
+        const xRange = myDomDest.dim(2);
+        const zRange = myDomDest.dim(3);
 
         var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
         if (!warmUpOnly) {
           const x0 = xRange.first;
-          const z0 = zRange.first;
 
-          const numOuterTasks = if yChunk.size >= here.maxTaskPar then here.maxTaskPar
-                                                                  else 1;
-          coforall tid in 0..#numOuterTasks with (ref plan_x) {
-            var tt = new TimeTracker();
-            for iy in chunk(yChunk, numOuterTasks, tid)  {
-              // Copy the data
-              tt.start();
-              const offset = (xRange.size/numLocales)*here.id;
-              forall ix in 0.. #xRange.size {
-                const ix1 = (ix + offset)%xRange.size + x0;
-                ref dstRef = dest.localAccess[iy, ix1, z0];
-                ref srcRef = arr[ix1,iy,z0];
-                __primitive("chpl_comm_get", dstRef, srcRef.locale.id, srcRef, myLineSize);
-              }
-              tt.stop(TimeStages.Comms);
-
-              tt.start();
-              forall iz in zRange with (ref plan_x) {
-                var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
-                plan_x.execute(elt, elt);
-              }
-              tt.stop(TimeStages.Execute);
-            }
+          forall (iy, iz) in {yRange, zRange} {
+            var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
+            plan_x.execute(elt, elt);
           }
         }
       }
-      // End of on-loc
     }
-
   }
 
   // I could not combine these, so keep them separate for now.
