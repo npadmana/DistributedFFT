@@ -11,6 +11,7 @@ prototype module DistributedFFT {
   require "npFFTW.h";
 
   config const numberOfPlanes=1;
+  config const doPlaneYZ=true;
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -301,6 +302,37 @@ prototype module DistributedFFT {
                         arg0, flags);
   }
 
+  // Set up 2D in-place plan
+  proc setup2DPlan(type arrType, param ftType : FFTtype, nx : int, ny : int, signOrKind, in flags : c_uint) {
+    // Pull signOrKind locally since this may be an array
+    // we need to take a pointer to.
+    var mySignOrKind = signOrKind;
+    var arg0 : _signOrKindType(ftType);
+    select ftType {
+        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+        when FFTtype.DFT do arg0 = mySignOrKind;
+      }
+
+    // Define a dummy array
+    var arr : [0.. #nx, 0.. #ny] arrType;
+
+    // Write down all the parameters explicitly
+    var howmany = 1 : c_int;
+    var nn : c_array(c_int, 2);
+    nn[0] = nx : c_int;
+    nn[1] = ny : c_int;
+    var nnp = c_ptrTo(nn[0]);
+    var rank = 2 : c_int;
+    var stride = 1  : c_int;
+    var idist = 0 : c_int;
+    var arr0 = c_ptrTo(arr);
+    flags = flags | FFTW_UNALIGNED;
+    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                        nnp, stride, idist,
+                        arr0, nnp, stride, idist,
+                        arg0, flags);
+  }
+
   /* Helper routines. This assumes that the data are block-distributed.
 
      R2C and C2R transforms are more complicated. Currently not supported.
@@ -321,23 +353,40 @@ prototype module DistributedFFT {
         const yRange = myDom.dim(2);
         const zRange = myDom.dim(3);
 
-        var plan_z = setup1DPlan(T, ftType, zRange.size, 1, signOrKind, flags);
-        var plan_y = setup1DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
-
         var tt = new TimeTracker();
         tt.start();
-        if (!warmUpOnly) {
-          // Do the z transforms
-          const z0 = zRange.first;
-          forall (ix, iy) in {xRange, yRange} with (ref plan_z) {
-            var elt = c_ptrTo(arr.localAccess[ix, iy, z0]);
-            plan_z.execute(elt, elt);
+        // If we have more YZ planes on this locale compared to available
+        // tasks, then just process a plane at a time. Otherwise, do this
+        // line by line.
+        if (doPlaneYZ) {
+          // Process a plane at a time
+          var plan_yz = setup2DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
+          if (!warmUpOnly) {
+            const y0 = yRange.first;
+            const z0 = zRange.first;
+            forall ix in xRange with (ref plan_yz) {
+              var elt = c_ptrTo(arr.localAccess[ix, y0, z0]);
+              plan_yz.execute(elt, elt);
+            }
           }
-          // Do the y transforms
-          const y0 = yRange.first;
-          forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
-            var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
-            plan_y.execute(elt, elt);
+        } else {
+          // Process lines at a time
+          var plan_z = setup1DPlan(T, ftType, zRange.size, 1, signOrKind, flags);
+          var plan_y = setup1DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
+
+          if (!warmUpOnly) {
+            // Do the z transforms
+            const z0 = zRange.first;
+            forall (ix, iy) in {xRange, yRange} with (ref plan_z) {
+              var elt = c_ptrTo(arr.localAccess[ix, iy, z0]);
+              plan_z.execute(elt, elt);
+            }
+            // Do the y transforms
+            const y0 = yRange.first;
+            forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
+              var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
+              plan_y.execute(elt, elt);
+            }
           }
         }
         tt.stop(TimeStages.Execute);
