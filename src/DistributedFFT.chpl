@@ -11,6 +11,7 @@ prototype module DistributedFFT {
   require "npFFTW.h";
 
   config const numberOfPlanes=1;
+  config const overSubscribe=true;
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -167,7 +168,7 @@ prototype module DistributedFFT {
     // Must call with WISDOM_ONLY and UNALIGNED
     // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
     // UNALIGNED -- since we do each plane separately, make no alignment assumtions
-    doFFT_YZ_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
+    doFFT_YZ_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
     tt.stop(TimeStages.YZ);
     writef("yz=%dr  ",tt.tt.elapsed());
 
@@ -272,6 +273,37 @@ prototype module DistributedFFT {
                         arg0, flags);
   }
 
+  // Set up many 1D in place plans
+  proc setupPlanColumns(type arrType, param ftType : FFTtype, dom : domain(2), numTransforms : int, signOrKind, in flags : c_uint) {
+    // Pull signOrKind locally since this may be an array
+    // we need to take a pointer to.
+    var mySignOrKind = signOrKind;
+    var arg0 : _signOrKindType(ftType);
+    select ftType {
+        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+        when FFTtype.DFT do arg0 = mySignOrKind;
+      }
+
+    // Define a dummy array
+    var arr : [dom] arrType;
+
+    // Write down all the parameters explicitly
+    var howmany = numTransforms : c_int;
+    var nn : c_array(c_int, 1);
+    nn[0] = dom.dim(1).size : c_int;
+    var nnp = c_ptrTo(nn[0]);
+    var rank = 1 : c_int;
+    var stride = dom.dim(2).size  : c_int;
+    var idist = 1 : c_int;
+    var arr0 = c_ptrTo(arr);
+    flags = flags | FFTW_UNALIGNED;
+    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+                        nnp, stride, idist,
+                        arr0, nnp, stride, idist,
+                        arg0, flags);
+  }
+
+
   // Set up 1D out-of-place plans
   proc setup1DPlan(type arrType, param ftType : FFTtype, nx : int, strideIn : int, strideOut : int, signOrKind, in flags : c_uint) {
     // Pull signOrKind locally since this may be an array
@@ -360,22 +392,35 @@ prototype module DistributedFFT {
         const zRange = myDom.dim(3);
         const myLineSize = zRange.size*c_sizeof(T):int;
 
+        const numTasks = min(here.maxTaskPar, zRange.size);
+        const numTransforms = zRange.size/numTasks;
+        var plan_y = setupPlanColumns(T, ftType, {yRange, zRange}, numTransforms, signOrKind, flags);
+        var plan_y1 = setupPlanColumns(T, ftType, {yRange, zRange}, numTransforms+1, signOrKind, flags);
         var plan_z = setup1DPlan(T, ftType, zRange.size, 1, signOrKind, flags);
-        var plan_y = setup1DPlan(T, ftType, yRange.size, zRange.size, signOrKind, flags);
 
         var tt = new TimeTracker();
         tt.start();
         if (!warmUpOnly) {
           // Do the y transforms
           const y0 = yRange.first;
-          forall (ix, iz) in {xRange, zRange} with (ref plan_y) {
-            var elt = c_ptrTo(arr.localAccess[ix, y0, iz]);
-            plan_y.execute(elt, elt);
+
+          coforall itask in 0..#numTasks with (ref plan_y, ref plan_y1) {
+            const myzRange = chunk(zRange, numTasks, itask);
+            for ix in xRange {
+              var elt = c_ptrTo(arr.localAccess[ix, y0, myzRange.first]);
+              select myzRange.size {
+                  when numTransforms do plan_y.execute(elt,elt);
+                  when numTransforms+1 do plan_y1.execute(elt,elt);
+                  otherwise halt("Bad myzRange size");
+                }
+            }
           }
+
           // Do the z transforms
           const z0 = zRange.first;
           const offset = (yRange.size/numLocales)*here.id;
-          forall (ix, iy) in {xRange, 0.. #yRange.size}.these(tasksPerLocale=here.maxTaskPar*2) with (ref plan_z) {
+          const numTasksZ=if overSubscribe then 2*here.maxTaskPar else here.maxTaskPar;
+          forall (ix, iy) in {xRange, 0.. #yRange.size}.these(tasksPerLocale=numTasksZ) with (ref plan_z) {
             const iy1 = (iy + offset)%yRange.size + y0;
             var elt = c_ptrTo(arr.localAccess[ix, iy1, z0]);
             plan_z.execute(elt, elt);
@@ -493,13 +538,24 @@ prototype module DistributedFFT {
         const xRange = myDomDest.dim(2);
         const zRange = myDomDest.dim(3);
 
-        var plan_x = setup1DPlan(T, ftType, xRange.size, zRange.size, signOrKind, flags);
+        const numTasks = min(here.maxTaskPar, zRange.size);
+        const numTransforms = zRange.size/numTasks;
+        var plan_x = setupPlanColumns(T, ftType, {xRange, zRange}, numTransforms, signOrKind, flags);
+        var plan_x1 = setupPlanColumns(T, ftType, {xRange, zRange}, numTransforms+1, signOrKind, flags);
+
         if (!warmUpOnly) {
           const x0 = xRange.first;
 
-          forall (iy, iz) in {yRange, zRange} {
-            var elt = c_ptrTo(dest.localAccess[iy,x0,iz]);
-            plan_x.execute(elt, elt);
+          coforall itask in 0..#numTasks with (ref plan_x, ref plan_x1) {
+            const myzRange = chunk(zRange, numTasks, itask);
+            for iy in yRange {
+              var elt = c_ptrTo(dest.localAccess[iy, x0, myzRange.first]);
+              select myzRange.size {
+                  when numTransforms do plan_x.execute(elt,elt);
+                  when numTransforms+1 do plan_x1.execute(elt,elt);
+                  otherwise halt("Bad myzRange size");
+                }
+            }
           }
         }
       }
