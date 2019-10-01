@@ -64,10 +64,27 @@ prototype module DistributedFFT {
       tt.stop(TimeStages.Execute);
     }
 
-    proc execute(arr1, arr2) {
+    proc execute(arr1 : c_ptr(?T), arr2 : c_ptr(T)) {
       select ftType {
           when FFTtype.DFT do fftw_execute_dft(plan, arr1, arr2);
           when FFTtype.R2R do fftw_execute_r2r(plan, arr1, arr2);
+        }
+    }
+
+    inline proc execute(ref arr1 : ?T, ref arr2 : T) where (!isAnyCPtr(T)) {
+      var elt1 = c_ptrTo(arr1);
+      var elt2 = c_ptrTo(arr2);
+      select ftType {
+          when FFTtype.DFT do fftw_execute_dft(plan, elt1, elt2);
+          when FFTtype.R2R do fftw_execute_r2r(plan, elt1, elt2);
+        }
+    }
+
+    inline proc execute(ref arr1 : ?T) where (!isAnyCPtr(T)) {
+      var elt1 = c_ptrTo(arr1);
+      select ftType {
+          when FFTtype.DFT do fftw_execute_dft(plan, elt1, elt1);
+          when FFTtype.R2R do fftw_execute_r2r(plan, elt1, elt1);
         }
     }
 
@@ -227,8 +244,7 @@ prototype module DistributedFFT {
           // y-transform
           const y0 = ySrc.first;
           forall iz in zSrc with (ref plan_y) {
-            var elt = c_ptrTo(myplane[0,y0,iz]);
-            plan_y.execute(elt, elt);
+            plan_y.execute(myplane[0,y0,iz]);
           }
 
           // z-transform
@@ -237,8 +253,7 @@ prototype module DistributedFFT {
           const offset = (ySrc.size/numLocales)*here.id;
           forall iy in 0.. #ySrc.size with (ref plan_z) {
             const iy1 = (iy + offset)%ySrc.size + y0;
-            var elt = c_ptrTo(myplane[0,iy1,z0]);
-            plan_z.execute(elt, elt);
+            plan_z.execute(myplane[0,iy1,z0]);
             // This is the transpose step
             dest[{iy1..iy1,ix..ix,zSrc}] = myplane[{0..0, iy1..iy1,zSrc}];
           }
@@ -250,8 +265,86 @@ prototype module DistributedFFT {
         // x-transform
         const x0 = xDest.first;
         forall (iy,iz) in {yDest, zSrc} with (ref plan_x) {
-          var elt = c_ptrTo(dest.localAccess[iy, x0, iz]);
-          plan_x.execute(elt, elt);
+          plan_x.execute(dest.localAccess[iy, x0, iz]);
+        }
+
+        // End of on-loc
+      }
+    }
+
+
+    // End of doFFT
+  }
+
+  /* FFT.
+
+     Stores the FFT in dest transposed (xyz -> yxz).
+   */
+  proc doFFT_Transposed_Performant(param ftType : FFTtype,
+                                   src: [?SrcDom] ?T,
+                                   dest : [?DestDom] T,
+                                   signOrKind) {
+    // Sanity checks
+    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
+    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
+
+
+    var YZBarrier = new Barrier(numLocales);
+
+    coforall loc in Locales {
+      on loc {
+        const mySrcDom = src.localSubdomain();
+        const xSrc = mySrcDom.dim(1);
+        const ySrc = mySrcDom.dim(2);
+        const zSrc = mySrcDom.dim(3);
+        const myLineSize = zSrc.size*c_sizeof(T):int;
+        const myDestDom = dest.localSubdomain();
+        const yDest = myDestDom.dim(1);
+        const xDest = myDestDom.dim(2);
+
+        // Set up FFTW plans
+        var plan_x = setup1DPlan(T, ftType, xDest.size, zSrc.size, signOrKind, FFTW_MEASURE);
+        var plan_y = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
+        var plan_z = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
+
+        // Use this as a temporary work array to
+        // avoid rewriting the src array
+        var myplane : [{0..0, ySrc, zSrc}] T;
+
+        for ix in xSrc {
+          // Copy data over. This is a completely
+          // local operation, so use localAccess.
+          // Or a series of memcpys for performance.
+          [(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
+
+          // y-transform
+          const y0 = ySrc.first;
+          forall iz in zSrc with (ref plan_y) {
+            plan_y.execute(myplane[0,y0,iz]);
+          }
+
+          // z-transform
+          const z0 = zSrc.first;
+          // Offset to reduce collisions
+          const offset = (ySrc.size/numLocales)*here.id;
+          forall iy in 0.. #ySrc.size with (ref plan_z) {
+            const iy1 = (iy + offset)%ySrc.size + y0;
+            plan_z.execute(myplane[0,iy1,z0]);
+            // This is the transpose step
+            dest[{iy1..iy1,ix..ix,zSrc}] = myplane[{0..0, iy1..iy1,zSrc}];
+          }
+        }
+
+        // Wait until all communication is complete
+        YZBarrier.barrier();
+
+        // x-transform
+        const x0 = xDest.first;
+        forall (iy,iz) in {yDest, zSrc} with (ref plan_x) {
+          plan_x.execute(dest.localAccess[iy, x0, iz]);
         }
 
         // End of on-loc
