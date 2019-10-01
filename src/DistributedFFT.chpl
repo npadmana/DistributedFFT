@@ -2,7 +2,7 @@
 prototype module DistributedFFT {
 
   use BlockDist;
-  use Barriers;
+  use AllLocalesBarriers;
   use ReplicatedVar;
   use RangeChunk;
   use FFTW;
@@ -226,8 +226,6 @@ prototype module DistributedFFT {
     if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
 
 
-    var YZBarrier = new Barrier(numLocales);
-
     coforall loc in Locales {
       on loc {
         const mySrcDom = src.localSubdomain();
@@ -273,7 +271,7 @@ prototype module DistributedFFT {
         }
 
         // Wait until all communication is complete
-        YZBarrier.barrier();
+        allLocalesBarrier.barrier();
 
         // x-transform
         const x0 = xDest.first;
@@ -304,8 +302,6 @@ prototype module DistributedFFT {
     if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
     if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
 
-
-    var YZBarrier = new Barrier(numLocales);
 
     coforall loc in Locales {
       on loc {
@@ -367,7 +363,7 @@ prototype module DistributedFFT {
         }
 
         // Wait until all communication is complete
-        YZBarrier.barrier();
+        allLocalesBarrier.barrier();
 
         // x-transform
         const x0 = xDest.first;
