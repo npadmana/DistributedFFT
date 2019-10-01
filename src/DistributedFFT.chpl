@@ -305,9 +305,14 @@ prototype module DistributedFFT {
         const yDest = myDestDom.dim(1);
         const xDest = myDestDom.dim(2);
 
+        const numTasks = min(here.maxTaskPar, zSrc.size);
+        const numTransforms = zSrc.size/numTasks;
+
         // Set up FFTW plans
-        var plan_x = setup1DPlan(T, ftType, xDest.size, zSrc.size, signOrKind, FFTW_MEASURE);
-        var plan_y = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
+        var plan_y = setupPlanColumns(T, ftType, {ySrc, zSrc}, numTransforms, signOrKind, FFTW_MEASURE);
+        var plan_y1 = setupPlanColumns(T, ftType, {ySrc, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
+        var plan_x = setupPlanColumns(T, ftType, {xDest, zSrc}, numTransforms, signOrKind, FFTW_MEASURE);
+        var plan_x1 = setupPlanColumns(T, ftType, {xDest, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
         var plan_z = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
         // Use this as a temporary work array to
@@ -315,26 +320,35 @@ prototype module DistributedFFT {
         var myplane : [{0..0, ySrc, zSrc}] T;
 
         for ix in xSrc {
+          const z0 = zSrc.first;
           // Copy data over. This is a completely
           // local operation, so use localAccess.
           // Or a series of memcpys for performance.
-          [(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
+          //[(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
+          forall iy in ySrc {
+            c_memcpy(c_ptrTo(myplane[0,iy,z0]),
+                     c_ptrTo(src.localAccess[ix,iy,z0]),
+                     myLineSize);
+          }
 
           // y-transform
           const y0 = ySrc.first;
-          forall iz in zSrc with (ref plan_y) {
-            plan_y.execute(myplane[0,y0,iz]);
+          forall myzRange in batchedRange(zSrc) with (ref plan_y, ref plan_y1) {
+            select myzRange.size {
+                when numTransforms do plan_y.execute(myplane[0,y0,myzRange.first]);
+                when numTransforms+1 do plan_y1.execute(myplane[0,y0,myzRange.first]);
+                otherwise halt("Bad myzRange size");
+              }
           }
 
           // z-transform
-          const z0 = zSrc.first;
           // Offset to reduce collisions
           const offset = (ySrc.size/numLocales)*here.id;
           forall iy in 0.. #ySrc.size with (ref plan_z) {
             const iy1 = (iy + offset)%ySrc.size + y0;
             plan_z.execute(myplane[0,iy1,z0]);
             // This is the transpose step
-            dest[{iy1..iy1,ix..ix,zSrc}] = myplane[{0..0, iy1..iy1,zSrc}];
+            remotePut(dest[iy1,ix,z0], myplane[0,iy1,z0], myLineSize);
           }
         }
 
@@ -343,8 +357,15 @@ prototype module DistributedFFT {
 
         // x-transform
         const x0 = xDest.first;
-        forall (iy,iz) in {yDest, zSrc} with (ref plan_x) {
-          plan_x.execute(dest.localAccess[iy, x0, iz]);
+        forall myzRange in batchedRange(zSrc) with (ref plan_x, ref plan_x1) {
+          for iy in yDest {
+            ref elt = dest.localAccess[iy, x0, myzRange.first];
+            select myzRange.size {
+                when numTransforms do plan_x.execute(elt);
+                when numTransforms+1 do plan_x1.execute(elt);
+                otherwise halt("Bad myzRange size");
+              }
+          }
         }
 
         // End of on-loc
@@ -354,6 +375,25 @@ prototype module DistributedFFT {
 
     // End of doFFT
   }
+
+  inline proc remotePut(ref dstRef, ref srcRef, numBytes : int) {
+    __primitive("chpl_comm_put", srcRef, dstRef.locale.id, dstRef, numBytes);
+  }
+
+  iter batchedRange(r : range) {
+    halt("Serial iterator not implemented");
+  }
+
+  iter batchedRange(param tag : iterKind, r : range)
+    where (tag==iterKind.standalone)
+  {
+    const numTasks = min(here.maxTaskPar, r.size);
+    coforall itask in 0.. #numTasks {
+      const myr = chunk(r, numTasks, itask);
+      yield myr;
+    }
+  }
+
 
   /* R2R
    */
