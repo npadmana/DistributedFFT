@@ -17,8 +17,6 @@ use Time;
 enum NPB {S,W,A,B,C,D,E,F};
 config const NPBClass : NPB = NPB.S;
 
-config const useElegant=true;
-
 // Constants
 const alpha = 1.0e-6;
 config const Threshold = 1.0e-12;
@@ -42,14 +40,6 @@ var V, Wt: [DomT] complex;
 var Twiddle : [DomT] real;
 
 var timeit : Timer;
-
-// Warm up the FFTW planners.
-// We don't time this
-//timeit.clear(); timeit.start();
-//warmUpPlanner(V);
-//warmUpPlanner(W);
-//timeit.stop();
-//writef("Time to setup FFT plans   : %10.4dr \n",timeit.elapsed());
 
 // Touch the arrays once
 timeit.clear(); timeit.start();
@@ -97,11 +87,7 @@ proc evolve() {
     V.localAccess[ijk] = elt;
     Wt.localAccess[ijk] = elt;
   }
-  if (useElegant) {
-    doFFT_Transposed_Elegant(FFTtype.DFT, Wt, W, FFTW_BACKWARD); // This is unnormalized
-  } else {
-    doFFT_Transposed(Wt, W, FFTW_BACKWARD); // This is unnormalized
-  }
+  doFFT_Transposed(FFTtype.DFT, Wt, W, FFTW_BACKWARD); // This is unnormalized
 
 }
 
@@ -151,12 +137,7 @@ proc initialize_twiddle() {
 proc initialize_U() {
   use Random;
   fillRandom(W, 314159265, RNG.NPB);
-  if (useElegant) {
-    doFFT_Transposed_Elegant(FFTtype.DFT, W, V, FFTW_FORWARD);
-  } else {
-    doFFT_Transposed(W, V, FFTW_FORWARD);
-  }
-
+  doFFT_Transposed(FFTtype.DFT, W, V, FFTW_FORWARD);
 }
 
 proc verify(x : complex, y : complex) : bool {

@@ -11,6 +11,7 @@ prototype module DistributedFFT {
   require "npFFTW.h";
 
   config const numberOfPlanes=1;
+  config const useElegant=false;
 
   extern proc isNullPlan(plan : fftw_plan) : c_int;
 
@@ -165,37 +166,49 @@ prototype module DistributedFFT {
     // End of doFFT
   }
 
-  /* FFT.
+  //////* FFT.
 
-     Stores the FFT in dest transposed (xyz -> yxz).
+  /////   Stores the FFT in dest transposed (xyz -> yxz).
 
-     Note that both src and dest are overwritten.
-   */
-  proc doFFT_Transposed(src: [?SrcDom] complex, dest : [?DestDom] complex, sign : c_int) {
-    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
-    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
-    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
+  /////   Note that both src and dest are overwritten.
+  ///// */
+  /////proc doFFT_Transposed(src: [?SrcDom] complex, dest : [?DestDom] complex, sign : c_int) {
+  /////  if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
+  /////  if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
+  /////  if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
+  /////  if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
+  /////  if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
 
-    var tt = new TimeTracker();
+  /////  var tt = new TimeTracker();
 
-    tt.start();
-    // Must call with WISDOM_ONLY and UNALIGNED
-    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
-    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
-    doFFT_YZ_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
-    tt.stop(TimeStages.YZ);
-    writef("yz=%dr  ",tt.tt.elapsed());
+  /////  tt.start();
+  /////  // Must call with WISDOM_ONLY and UNALIGNED
+  /////  // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
+  /////  // UNALIGNED -- since we do each plane separately, make no alignment assumtions
+  /////  doFFT_YZ_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
+  /////  tt.stop(TimeStages.YZ);
+  /////  writef("yz=%dr  ",tt.tt.elapsed());
 
-    tt.start();
-    doFFT_X_Transposed(FFTtype.DFT, dest, false, sign, FFTW_MEASURE);
-    tt.stop(TimeStages.X);
-    writef("x=%dr  ",tt.tt.elapsed());
+  /////  tt.start();
+  /////  doFFT_X_Transposed(FFTtype.DFT, dest, false, sign, FFTW_MEASURE);
+  /////  tt.stop(TimeStages.X);
+  /////  writef("x=%dr  ",tt.tt.elapsed());
 
 
-    // End of doFFT
+  /////  // End of doFFT
+  /////}
+
+  proc doFFT_Transposed(param ftType : FFTtype,
+                        src: [?SrcDom] ?T,
+                        dest : [?DestDom] T,
+                        signOrKind) {
+    if (useElegant) {
+      doFFT_Transposed_Elegant(ftType, src, dest, signOrKind);
+    } else {
+      doFFT_Transposed_Performant(ftType, src, dest, signOrKind);
+    }
   }
+
 
   /* FFT.
 
@@ -318,19 +331,14 @@ prototype module DistributedFFT {
         // Use this as a temporary work array to
         // avoid rewriting the src array
         var myplane : [{0..0, ySrc, zSrc}] T;
+        const z0 = zSrc.first;
+        forall iy in ySrc {
+          c_memcpy(c_ptrTo(myplane[0,iy,z0]),
+                   c_ptrTo(src.localAccess[xSrc.first,iy,z0]),
+                   myLineSize);
+        }
 
         for ix in xSrc {
-          const z0 = zSrc.first;
-          // Copy data over. This is a completely
-          // local operation, so use localAccess.
-          // Or a series of memcpys for performance.
-          //[(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
-          forall iy in ySrc {
-            c_memcpy(c_ptrTo(myplane[0,iy,z0]),
-                     c_ptrTo(src.localAccess[ix,iy,z0]),
-                     myLineSize);
-          }
-
           // y-transform
           const y0 = ySrc.first;
           forall myzRange in batchedRange(zSrc) with (ref plan_y, ref plan_y1) {
@@ -349,6 +357,12 @@ prototype module DistributedFFT {
             plan_z.execute(myplane[0,iy1,z0]);
             // This is the transpose step
             remotePut(dest[iy1,ix,z0], myplane[0,iy1,z0], myLineSize);
+            // If not last slice, copy over
+            if (ix != xSrc.last) {
+              c_memcpy(c_ptrTo(myplane[0,iy1,z0]),
+                       c_ptrTo(src.localAccess[ix+1,iy1,z0]),
+                       myLineSize);
+            }
           }
         }
 
