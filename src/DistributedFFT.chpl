@@ -2,6 +2,7 @@
 prototype module DistributedFFT {
 
   use BlockDist;
+  use ChapelLocks;
   use AllLocalesBarriers;
   use ReplicatedVar;
   use RangeChunk;
@@ -35,6 +36,8 @@ prototype module DistributedFFT {
   /*                              double *out, const int *onembed, */
   /*                              int ostride, int odist, */
   /*                              const fftw_r2r_kind *kind, unsigned flags); */
+  // https://github.com/chapel-lang/chapel/issues/13319
+  pragma "default intent is ref"
   record FFTWplan {
     param ftType : FFTtype;
     var plan : fftw_plan;
@@ -121,79 +124,60 @@ prototype module DistributedFFT {
 
   /* FFT.
 
-     Stores the FFT in dest transposed (xyz -> yxz).
+     Stores the FFT in Dst transposed (xyz -> yxz).
    */
   proc doFFT_Transposed_Elegant(param ftType : FFTtype,
-                                src: [?SrcDom] ?T,
-                                dest : [?DestDom] T,
+                                Src: [?SrcDom] ?T,
+                                Dst : [?DstDom] T,
                                 signOrKind) {
     // Sanity checks
-    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
-    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
-    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
+    if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
+    coforall loc in Locales do on loc {
+      const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
+      const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
-    coforall loc in Locales {
-      on loc {
-        const mySrcDom = src.localSubdomain();
-        const xSrc = mySrcDom.dim(1);
-        const ySrc = mySrcDom.dim(2);
-        const zSrc = mySrcDom.dim(3);
-        const myLineSize = zSrc.size*c_sizeof(T):int;
-        const myDestDom = dest.localSubdomain();
-        const yDest = myDestDom.dim(1);
-        const xDest = myDestDom.dim(2);
+      var xPlan = setup1DPlan(T, ftType, xDst.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var yPlan = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1,         signOrKind, FFTW_MEASURE);
 
-        // Set up FFTW plans
-        var plan_x = setup1DPlan(T, ftType, xDest.size, zSrc.size, signOrKind, FFTW_MEASURE);
-        var plan_y = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
-        var plan_z = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
+      var myplane : [{0..0, ySrc, zSrc}] T;
 
-        // Use this as a temporary work array to
-        // avoid rewriting the src array
-        var myplane : [{0..0, ySrc, zSrc}] T;
+      for ix in xSrc {
+        myplane = Src[{ix..ix, ySrc, zSrc}]; // Ideal
+        // [iy in ySrc] myplane[{0..0, iy..iy, zSrc}] = Src[{ix..ix, iy..iy, zSrc}]; // Better perf
 
-        for ix in xSrc {
-          // Copy data over. This is a completely
-          // local operation, so use localAccess.
-          // Or a series of memcpys for performance.
-          [(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
-
-          // y-transform
-          const y0 = ySrc.first;
-          forall iz in zSrc with (ref plan_y) {
-            plan_y.execute(myplane[0,y0,iz]);
-          }
-
-          // z-transform
-          const z0 = zSrc.first;
-          // Offset to reduce collisions
-          const offset = (ySrc.size/numLocales)*here.id;
-          forall iy in 0.. #ySrc.size with (ref plan_z) {
-            const iy1 = (iy + offset)%ySrc.size + y0;
-            plan_z.execute(myplane[0,iy1,z0]);
-            // This is the transpose step
-            dest[{iy1..iy1,ix..ix,zSrc}] = myplane[{0..0, iy1..iy1,zSrc}];
-          }
+        // y-transform
+        forall iz in zSrc {
+          yPlan.execute(myplane[0, ySrc.first, iz]);
         }
 
-        // Wait until all communication is complete
-        allLocalesBarrier.barrier();
-
-        // x-transform
-        const x0 = xDest.first;
-        forall (iy,iz) in {yDest, zSrc} with (ref plan_x) {
-          plan_x.execute(dest.localAccess[iy, x0, iz]);
+        // z-transform, offset to reduce comm collisions
+        forall iy in offset(ySrc) {
+          zPlan.execute(myplane[0, iy, zSrc.first]);
+          Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
+          //remotePut(Dst[iy, ix ,zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
         }
+      }
 
-        // End of on-loc
+      // Wait until all communication is complete
+      allLocalesBarrier.barrier();
+
+      // x-transform
+      forall (iy,iz) in {yDst, zSrc} {
+        xPlan.execute(Dst[iy, xDst.first, iz]);
       }
     }
+  }
 
-
-    // End of doFFT
+  iter offset(r: range) { halt("Serial offset not implemented"); }
+  iter offset(param tag: iterKind, r: range) where (tag==iterKind.standalone) {
+    forall i in r + (r.size/numLocales * here.id) do {
+      yield i % r.size + r.first;
+    }
   }
 
   /* FFT.
