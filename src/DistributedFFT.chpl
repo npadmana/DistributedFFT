@@ -211,9 +211,7 @@ prototype module DistributedFFT {
       var myplane : [{0..0, ySrc, zSrc}] T;
 
       forall iy in ySrc {
-        c_memcpy(c_ptrTo(myplane[0, iy, zSrc.first]),
-                 c_ptrTo(Src.localAccess[xSrc.first, iy, zSrc.first]),
-                 myLineSize);
+        copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
       }
 
       for ix in xSrc {
@@ -228,12 +226,10 @@ prototype module DistributedFFT {
         forall iy in offset(ySrc) {
           zPlan.execute(myplane[0, iy, zSrc.first]);
           // This is the transpose step
-          remotePut(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
+          copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
           // If not last slice, copy over
           if (ix != xSrc.last) {
-            c_memcpy(c_ptrTo(myplane[0, iy, zSrc.first]),
-                     c_ptrTo(Src.localAccess[ix+1, iy, zSrc.first]),
-                     myLineSize);
+            copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
           }
         }
       }
@@ -259,8 +255,14 @@ prototype module DistributedFFT {
     }
   }
 
-  inline proc remotePut(ref dstRef, ref srcRef, numBytes : int) {
-    __primitive("chpl_comm_put", srcRef, dstRef.locale.id, dstRef, numBytes);
+  proc copy(ref dst, const ref src, numBytes: int) {
+    if dst.locale.id == here.id {
+      __primitive("chpl_comm_get", dst, src.locale.id, src, numBytes.safeCast(size_t));
+    } else if src.locale.id == here.id {
+      __primitive("chpl_comm_put", src, dst.locale.id, dst, numBytes.safeCast(size_t));
+    } else {
+      halt("Remote src and remote dst not yet supported");
+    }
   }
 
   iter batchedRange(r : range, numTasks) {
