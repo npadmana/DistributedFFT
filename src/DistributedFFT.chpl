@@ -197,14 +197,14 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
       const myLineSize = zSrc.size*numBytes(T);
 
+      // Setup FFTW plans, x/y are batched so we need a different batch size
+      // for when zSrc doesn't evenly split into numTasks
       const numTasks = min(here.maxTaskPar, zSrc.size);
-      const numTransforms = zSrc.size/numTasks;
-
-      // Set up FFTW plans
-      var yPlan = setupPlanColumns(T, ftType, {ySrc, zSrc}, numTransforms, signOrKind, FFTW_MEASURE);
-      var yPlan1 = setupPlanColumns(T, ftType, {ySrc, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
-      var xPlan = setupPlanColumns(T, ftType, {xDst, zSrc}, numTransforms, signOrKind, FFTW_MEASURE);
-      var xPlan1 = setupPlanColumns(T, ftType, {xDst, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
+      const (batchSizeSm, batchSizeLg) = (zSrc.size/numTasks, zSrc.size/numTasks+1);
+      var yPlanSm = setupPlanColumns(T, ftType, {ySrc, zSrc}, batchSizeSm, signOrKind, FFTW_MEASURE);
+      var yPlanLg = setupPlanColumns(T, ftType, {ySrc, zSrc}, batchSizeLg, signOrKind, FFTW_MEASURE);
+      var xPlanSm = setupPlanColumns(T, ftType, {xDst, zSrc}, batchSizeSm, signOrKind, FFTW_MEASURE);
+      var xPlanLg = setupPlanColumns(T, ftType, {xDst, zSrc}, batchSizeLg,  signOrKind, FFTW_MEASURE);
       var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
@@ -218,12 +218,10 @@ prototype module DistributedFFT {
 
       for ix in xSrc {
         // Y-transform
-        forall myzRange in batchedRange(zSrc) {
-          select myzRange.size {
-            when numTransforms do yPlan.execute(myplane[0, ySrc.first, myzRange.first]);
-            when numTransforms+1 do yPlan1.execute(myplane[0, ySrc.first, myzRange.first]);
-            otherwise halt("Bad myzRange size");
-          }
+        forall myzRange in batchedRange(zSrc, numTasks) {
+          ref elt = myplane[0, ySrc.first, myzRange.first];
+          if myzRange.size == batchSizeSm then yPlanSm.execute(elt);
+                                          else yPlanLg.execute(elt);
         }
 
         // Z-transform, offset to reduce comm congestion/collision
@@ -244,14 +242,11 @@ prototype module DistributedFFT {
       allLocalesBarrier.barrier();
 
       // X-transform
-      forall myzRange in batchedRange(zSrc) {
+      forall myzRange in batchedRange(zSrc, numTasks) {
         for iy in yDst {
-          ref elt = Dst.localAccess[iy, xDst.first, myzRange.first];
-          select myzRange.size {
-            when numTransforms do xPlan.execute(elt);
-            when numTransforms+1 do xPlan1.execute(elt);
-            otherwise halt("Bad myzRange size");
-          }
+          ref elt = Dst[iy, xDst.first, myzRange.first];
+          if myzRange.size == batchSizeSm then xPlanSm.execute(elt);
+                                          else xPlanLg.execute(elt);
         }
       }
     }
@@ -268,17 +263,15 @@ prototype module DistributedFFT {
     __primitive("chpl_comm_put", srcRef, dstRef.locale.id, dstRef, numBytes);
   }
 
-  iter batchedRange(r : range) {
+  iter batchedRange(r : range, numTasks) {
     halt("Serial iterator not implemented");
   }
 
-  iter batchedRange(param tag : iterKind, r : range)
+  iter batchedRange(param tag : iterKind, r : range, numTasks)
     where (tag==iterKind.standalone)
   {
-    const numTasks = min(here.maxTaskPar, r.size);
-    coforall itask in 0.. #numTasks {
-      const myr = chunk(r, numTasks, itask);
-      yield myr;
+    coforall chunk in chunks(r, numTasks) {
+      yield chunk;
     }
   }
 
