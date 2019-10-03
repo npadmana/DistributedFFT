@@ -38,7 +38,6 @@ prototype module DistributedFFT {
   record FFTWplan {
     param ftType : FFTtype;
     var plan : fftw_plan;
-    var tt : TimeTracker;
 
     // Mimic the advanced interface 
     proc init(param ftType1 : FFTtype, args ...?k) {
@@ -59,9 +58,7 @@ prototype module DistributedFFT {
     }
 
     proc execute() {
-      tt.start();
       FFTW.execute(plan);
-      tt.stop(TimeStages.Execute);
     }
 
     proc execute(arr1 : c_ptr(?T), arr2 : c_ptr(T)) {
@@ -155,6 +152,9 @@ prototype module DistributedFFT {
         // avoid rewriting the src array
         var myplane : [{0..0, ySrc, zSrc}] T;
 
+        // Start tracking time
+        var tt = new TimeTracker();
+
         for ix in xSrc {
           // Copy data over. This is a completely
           // local operation, so use localAccess.
@@ -162,12 +162,15 @@ prototype module DistributedFFT {
           [(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
 
           // y-transform
+          tt.start();
           const y0 = ySrc.first;
           forall iz in zSrc with (ref plan_y) {
             plan_y.execute(myplane[0,y0,iz]);
           }
+          tt.stop(TimeStages.Y);
 
           // z-transform
+          tt.start();
           const z0 = zSrc.first;
           // Offset to reduce collisions
           const offset = (ySrc.size/numLocales)*here.id;
@@ -177,16 +180,19 @@ prototype module DistributedFFT {
             // This is the transpose step
             dest[{iy1..iy1,ix..ix,zSrc}] = myplane[{0..0, iy1..iy1,zSrc}];
           }
+          tt.stop(TimeStages.Z);
         }
 
         // Wait until all communication is complete
         allLocalesBarrier.barrier();
 
         // x-transform
+        tt.start();
         const x0 = xDest.first;
         forall (iy,iz) in {yDest, zSrc} with (ref plan_x) {
           plan_x.execute(dest.localAccess[iy, x0, iz]);
         }
+        tt.stop(TimeStages.X);
 
         // End of on-loc
       }
@@ -243,8 +249,12 @@ prototype module DistributedFFT {
                    myLineSize);
         }
 
+        // Time tracking
+        var tt = new TimeTracker();
+
         for ix in xSrc {
           // y-transform
+          tt.start();
           const y0 = ySrc.first;
           forall myzRange in batchedRange(zSrc) with (ref plan_y, ref plan_y1) {
             select myzRange.size {
@@ -253,9 +263,11 @@ prototype module DistributedFFT {
                 otherwise halt("Bad myzRange size");
               }
           }
+          tt.stop(TimeStages.Y);
 
           // z-transform
           // Offset to reduce collisions
+          tt.start();
           const offset = (ySrc.size/numLocales)*here.id;
           forall iy in 0.. #ySrc.size with (ref plan_z) {
             const iy1 = (iy + offset)%ySrc.size + y0;
@@ -269,12 +281,14 @@ prototype module DistributedFFT {
                        myLineSize);
             }
           }
+          tt.stop(TimeStages.Z);
         }
 
         // Wait until all communication is complete
         allLocalesBarrier.barrier();
 
         // x-transform
+        tt.start();
         const x0 = xDest.first;
         forall myzRange in batchedRange(zSrc) with (ref plan_x, ref plan_x1) {
           for iy in yDest {
@@ -286,6 +300,7 @@ prototype module DistributedFFT {
               }
           }
         }
+        tt.stop(TimeStages.X);
 
         // End of on-loc
       }
@@ -392,8 +407,8 @@ prototype module DistributedFFT {
     // Time the various FFT steps.
     config const timeTrackFFT=false;
 
-    enum TimeStages {X, YZ, Execute, Memcpy, Comms};
-    const stageDomain = {TimeStages.X..TimeStages.Comms};
+    enum TimeStages {X, Y, Z};
+    const stageDomain = {TimeStages.X..TimeStages.Z};
     private var _globalTimeArr : [stageDomain] atomic real;
 
     resetTimers();
