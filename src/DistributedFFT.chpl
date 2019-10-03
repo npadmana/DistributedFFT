@@ -140,45 +140,43 @@ prototype module DistributedFFT {
       const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
+      // Set up FFTW plans
       var xPlan = setup1DPlan(T, ftType, xDst.size, zSrc.size, signOrKind, FFTW_MEASURE);
       var yPlan = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
-      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1,         signOrKind, FFTW_MEASURE);
+      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
+      // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
 
       for ix in xSrc {
+        // Copy source to temp array
         myplane = Src[{ix..ix, ySrc, zSrc}]; // Ideal
         // [iy in ySrc] myplane[{0..0, iy..iy, zSrc}] = Src[{ix..ix, iy..iy, zSrc}]; // Better perf
 
-        // y-transform
+        // Y-transform
         forall iz in zSrc {
           yPlan.execute(myplane[0, ySrc.first, iz]);
         }
 
-        // z-transform, offset to reduce comm collisions
+        // Z-transform, offset to reduce comm congestion/collision
         forall iy in offset(ySrc) {
           zPlan.execute(myplane[0, iy, zSrc.first]);
+          // Transpose data into Dst
           Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
-          //remotePut(Dst[iy, ix ,zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
+          //remotePut(Dst[iy, ix , zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
         }
       }
 
       // Wait until all communication is complete
       allLocalesBarrier.barrier();
 
-      // x-transform
-      forall (iy,iz) in {yDst, zSrc} {
+      // X-transform
+      forall (iy, iz) in {yDst, zSrc} {
         xPlan.execute(Dst[iy, xDst.first, iz]);
       }
     }
   }
 
-  iter offset(r: range) { halt("Serial offset not implemented"); }
-  iter offset(param tag: iterKind, r: range) where (tag==iterKind.standalone) {
-    forall i in r + (r.size/numLocales * here.id) do {
-      yield i % r.size + r.first;
-    }
-  }
 
   /* FFT.
 
@@ -188,6 +186,7 @@ prototype module DistributedFFT {
                                    Src: [?SrcDom] ?T,
                                    Dst : [?DstDom] T,
                                    signOrKind) {
+    // Sanity checks
     if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
     if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
     if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
@@ -208,34 +207,34 @@ prototype module DistributedFFT {
       var xPlan1 = setupPlanColumns(T, ftType, {xDst, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
       var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
-      // Use temporary work array to avoid rewriting the Src array
+      // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
 
       forall iy in ySrc {
-        c_memcpy(c_ptrTo(myplane[0,iy,zSrc.first]),
-                 c_ptrTo(Src.localAccess[xSrc.first,iy,zSrc.first]),
+        c_memcpy(c_ptrTo(myplane[0, iy, zSrc.first]),
+                 c_ptrTo(Src.localAccess[xSrc.first, iy, zSrc.first]),
                  myLineSize);
       }
 
       for ix in xSrc {
-        // y-transform
+        // Y-transform
         forall myzRange in batchedRange(zSrc) {
           select myzRange.size {
-              when numTransforms do yPlan.execute(myplane[0,ySrc.first,myzRange.first]);
-              when numTransforms+1 do yPlan1.execute(myplane[0,ySrc.first,myzRange.first]);
-              otherwise halt("Bad myzRange size");
-            }
+            when numTransforms do yPlan.execute(myplane[0, ySrc.first, myzRange.first]);
+            when numTransforms+1 do yPlan1.execute(myplane[0, ySrc.first, myzRange.first]);
+            otherwise halt("Bad myzRange size");
+          }
         }
 
-        // z-transform, offset to reduce comm congestion/collision
+        // Z-transform, offset to reduce comm congestion/collision
         forall iy in offset(ySrc) {
-          zPlan.execute(myplane[0,iy,zSrc.first]);
+          zPlan.execute(myplane[0, iy, zSrc.first]);
           // This is the transpose step
-          remotePut(Dst[iy,ix,zSrc.first], myplane[0,iy,zSrc.first], myLineSize);
+          remotePut(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
           // If not last slice, copy over
           if (ix != xSrc.last) {
-            c_memcpy(c_ptrTo(myplane[0,iy,zSrc.first]),
-                     c_ptrTo(Src.localAccess[ix+1,iy,zSrc.first]),
+            c_memcpy(c_ptrTo(myplane[0, iy, zSrc.first]),
+                     c_ptrTo(Src.localAccess[ix+1, iy, zSrc.first]),
                      myLineSize);
           }
         }
@@ -244,21 +243,25 @@ prototype module DistributedFFT {
       // Wait until all communication is complete
       allLocalesBarrier.barrier();
 
-      // x-transform
+      // X-transform
       forall myzRange in batchedRange(zSrc) {
         for iy in yDst {
           ref elt = Dst.localAccess[iy, xDst.first, myzRange.first];
           select myzRange.size {
-              when numTransforms do xPlan.execute(elt);
-              when numTransforms+1 do xPlan1.execute(elt);
-              otherwise halt("Bad myzRange size");
-            }
+            when numTransforms do xPlan.execute(elt);
+            when numTransforms+1 do xPlan1.execute(elt);
+            otherwise halt("Bad myzRange size");
+          }
         }
       }
     }
+  }
 
-
-    // End of doFFT
+  iter offset(r: range) { halt("Serial offset not implemented"); }
+  iter offset(param tag: iterKind, r: range) where (tag==iterKind.standalone) {
+    forall i in r + (r.size/numLocales * here.id) do {
+      yield i % r.size + r.first;
+    }
   }
 
   inline proc remotePut(ref dstRef, ref srcRef, numBytes : int) {
