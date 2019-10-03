@@ -3,7 +3,6 @@ EXAMPLE_SRC=$(shell find example -name *.chpl)
 EXAMPLES=target/example/MPI/fftw-mpi-benchmark \
 	target/example/Comm/plane_v2 \
 	target/example/FFTW/fftw-plan-timings \
-	target/example/Dist/time_warmup \
 	target/example/Dist/test_simple \
 	target/example/Dist/time_simple \
 
