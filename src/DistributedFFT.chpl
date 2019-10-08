@@ -179,14 +179,9 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
       const myLineSize = zSrc.size*numBytes(T);
 
-      // Setup FFTW plans, x/y are batched so we need a different batch size
-      // for when zSrc doesn't evenly split into numTasks
-      const numTasks = min(here.maxTaskPar, zSrc.size);
-      const (batchSizeSm, batchSizeLg) = (zSrc.size/numTasks, zSrc.size/numTasks+1);
-      var yPlanSm = setupPlanColumns(T, ftType, {ySrc, zSrc}, batchSizeSm, signOrKind, FFTW_MEASURE);
-      var yPlanLg = setupPlanColumns(T, ftType, {ySrc, zSrc}, batchSizeLg, signOrKind, FFTW_MEASURE);
-      var xPlanSm = setupPlanColumns(T, ftType, {xDst, zSrc}, batchSizeSm, signOrKind, FFTW_MEASURE);
-      var xPlanLg = setupPlanColumns(T, ftType, {xDst, zSrc}, batchSizeLg,  signOrKind, FFTW_MEASURE);
+      // Setup FFTW plans
+      var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
@@ -198,10 +193,8 @@ prototype module DistributedFFT {
 
       for ix in xSrc {
         // Y-transform
-        forall myzRange in batchedRange(zSrc, numTasks) {
-          ref elt = myplane[0, ySrc.first, myzRange.first];
-          if myzRange.size == batchSizeSm then yPlanSm.execute(elt);
-                                          else yPlanLg.execute(elt);
+        forall (plan, myzRange) in yPlan.batch() {
+          plan.execute(myplane[0, ySrc.first, myzRange.first]);
         }
 
         // Z-transform, offset to reduce comm congestion/collision
@@ -220,11 +213,9 @@ prototype module DistributedFFT {
       allLocalesBarrier.barrier();
 
       // X-transform
-      forall myzRange in batchedRange(zSrc, numTasks) {
+      forall (plan, myzRange) in xPlan.batch() {
         for iy in yDst {
-          ref elt = Dst[iy, xDst.first, myzRange.first];
-          if myzRange.size == batchSizeSm then xPlanSm.execute(elt);
-                                          else xPlanLg.execute(elt);
+          plan.execute(Dst[iy, xDst.first, myzRange.first]);
         }
       }
     }
@@ -247,16 +238,39 @@ prototype module DistributedFFT {
     }
   }
 
-  iter batchedRange(r : range, numTasks) {
-    halt("Serial iterator not implemented");
+
+  pragma "default intent is ref"
+  record BatchedFFTWplan {
+    param ftType : FFTtype;
+    const parRange: range;
+    const numTasks: int;
+    const batchSizeSm, batchSizeLg: int;
+    var planSm, planLg: FFTWplan(ftType);
+
+    proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+      this.ftType = ftType;
+      this.parRange = dom.dim(parDim);
+      this.numTasks = min(here.maxTaskPar, parRange.size);
+      this.batchSizeSm = parRange.size/numTasks;
+      this.batchSizeLg = parRange.size/numTasks+1;
+      this.planSm = setupPlanColumns(arrType, ftType, dom, batchSizeSm, signOrKind, flags);
+      this.planLg = setupPlanColumns(arrType, ftType, dom, batchSizeLg, signOrKind, flags);
+    }
+
+    iter batch() {
+      halt("Serial iterator not implemented");
+    }
+
+    iter batch(param tag : iterKind) where (tag==iterKind.standalone) {
+      coforall chunk in chunks(parRange, numTasks) {
+        if chunk.size == batchSizeSm then yield (planSm, chunk);
+        if chunk.size == batchSizeLg then yield (planLg, chunk);
+      }
+    }
   }
 
-  iter batchedRange(param tag : iterKind, r : range, numTasks)
-    where (tag==iterKind.standalone)
-  {
-    coforall chunk in chunks(r, numTasks) {
-      yield chunk;
-    }
+  proc setupBatchPlanColumns(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+    return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags);
   }
 
 
@@ -267,9 +281,9 @@ prototype module DistributedFFT {
     var mySignOrKind = signOrKind;
     var arg0 : _signOrKindType(ftType);
     select ftType {
-        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-        when FFTtype.DFT do arg0 = mySignOrKind;
-      }
+      when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+      when FFTtype.DFT do arg0 = mySignOrKind;
+    }
 
     // Define a dummy array
     var arr : [0.. #(nx*strideIn)] arrType;
@@ -297,9 +311,9 @@ prototype module DistributedFFT {
     var mySignOrKind = signOrKind;
     var arg0 : _signOrKindType(ftType);
     select ftType {
-        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-        when FFTtype.DFT do arg0 = mySignOrKind;
-      }
+      when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+      when FFTtype.DFT do arg0 = mySignOrKind;
+    }
 
     // Define a dummy array
     var arr : [dom] arrType;
