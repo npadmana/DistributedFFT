@@ -7,6 +7,6 @@
 
 #include "fftw3.h"
 
-int isNullPlan(fftw_plan plan) {
+static int isNullPlan(fftw_plan plan) {
   return (plan==NULL);
 }
