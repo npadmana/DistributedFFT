@@ -2,6 +2,7 @@
 prototype module DistributedFFT {
 
   use BlockDist;
+  use ChapelLocks;
   use AllLocalesBarriers;
   use ReplicatedVar;
   use RangeChunk;
@@ -35,6 +36,8 @@ prototype module DistributedFFT {
   /*                              double *out, const int *onembed, */
   /*                              int ostride, int odist, */
   /*                              const fftw_r2r_kind *kind, unsigned flags); */
+  // https://github.com/chapel-lang/chapel/issues/13319
+  pragma "default intent is ref"
   record FFTWplan {
     param ftType : FFTtype;
     var plan : fftw_plan;
@@ -121,195 +124,156 @@ prototype module DistributedFFT {
 
   /* FFT.
 
-     Stores the FFT in dest transposed (xyz -> yxz).
+     Stores the FFT in Dst transposed (xyz -> yxz).
    */
   proc doFFT_Transposed_Elegant(param ftType : FFTtype,
-                                src: [?SrcDom] ?T,
-                                dest : [?DestDom] T,
+                                Src: [?SrcDom] ?T,
+                                Dst : [?DstDom] T,
                                 signOrKind) {
     // Sanity checks
-    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
-    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
-    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
+    if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
+    coforall loc in Locales do on loc {
+      const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
+      const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
-    coforall loc in Locales {
-      on loc {
-        const mySrcDom = src.localSubdomain();
-        const xSrc = mySrcDom.dim(1);
-        const ySrc = mySrcDom.dim(2);
-        const zSrc = mySrcDom.dim(3);
-        const myLineSize = zSrc.size*c_sizeof(T):int;
-        const myDestDom = dest.localSubdomain();
-        const yDest = myDestDom.dim(1);
-        const xDest = myDestDom.dim(2);
+      // Set up FFTW plans
+      var xPlan = setup1DPlan(T, ftType, xDst.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var yPlan = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
-        // Set up FFTW plans
-        var plan_x = setup1DPlan(T, ftType, xDest.size, zSrc.size, signOrKind, FFTW_MEASURE);
-        var plan_y = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
-        var plan_z = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
+      // Use temp work array to avoid overwriting the Src array
+      var myplane : [{0..0, ySrc, zSrc}] T;
 
-        // Use this as a temporary work array to
-        // avoid rewriting the src array
-        var myplane : [{0..0, ySrc, zSrc}] T;
+      for ix in xSrc {
+        // Copy source to temp array
+        myplane = Src[{ix..ix, ySrc, zSrc}]; // Ideal
+        // [iy in ySrc] myplane[{0..0, iy..iy, zSrc}] = Src[{ix..ix, iy..iy, zSrc}]; // Better perf
 
-        for ix in xSrc {
-          // Copy data over. This is a completely
-          // local operation, so use localAccess.
-          // Or a series of memcpys for performance.
-          [(tmp, iy,iz) in myplane.domain] myplane[0, iy,iz] = src.localAccess[ix,iy,iz];
-
-          // y-transform
-          const y0 = ySrc.first;
-          forall iz in zSrc with (ref plan_y) {
-            plan_y.execute(myplane[0,y0,iz]);
-          }
-
-          // z-transform
-          const z0 = zSrc.first;
-          // Offset to reduce collisions
-          const offset = (ySrc.size/numLocales)*here.id;
-          forall iy in 0.. #ySrc.size with (ref plan_z) {
-            const iy1 = (iy + offset)%ySrc.size + y0;
-            plan_z.execute(myplane[0,iy1,z0]);
-            // This is the transpose step
-            dest[{iy1..iy1,ix..ix,zSrc}] = myplane[{0..0, iy1..iy1,zSrc}];
-          }
+        // Y-transform
+        forall iz in zSrc {
+          yPlan.execute(myplane[0, ySrc.first, iz]);
         }
 
-        // Wait until all communication is complete
-        allLocalesBarrier.barrier();
-
-        // x-transform
-        const x0 = xDest.first;
-        forall (iy,iz) in {yDest, zSrc} with (ref plan_x) {
-          plan_x.execute(dest.localAccess[iy, x0, iz]);
+        // Z-transform, offset to reduce comm congestion/collision
+        forall iy in offset(ySrc) {
+          zPlan.execute(myplane[0, iy, zSrc.first]);
+          // Transpose data into Dst
+          Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
+          //remotePut(Dst[iy, ix , zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
         }
+      }
 
-        // End of on-loc
+      // Wait until all communication is complete
+      allLocalesBarrier.barrier();
+
+      // X-transform
+      forall (iy, iz) in {yDst, zSrc} {
+        xPlan.execute(Dst[iy, xDst.first, iz]);
       }
     }
-
-
-    // End of doFFT
   }
+
 
   /* FFT.
 
-     Stores the FFT in dest transposed (xyz -> yxz).
+     Stores the FFT in Dst transposed (xyz -> yxz).
    */
   proc doFFT_Transposed_Performant(param ftType : FFTtype,
-                                   src: [?SrcDom] ?T,
-                                   dest : [?DestDom] T,
+                                   Src: [?SrcDom] ?T,
+                                   Dst : [?DstDom] T,
                                    signOrKind) {
     // Sanity checks
-    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
-    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
-    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
+    if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
+    coforall loc in Locales do on loc {
+      const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
+      const (yDst, xDst, _) = DstDom.localSubdomain().dims();
+      const myLineSize = zSrc.size*numBytes(T);
 
-    coforall loc in Locales {
-      on loc {
-        const mySrcDom = src.localSubdomain();
-        const xSrc = mySrcDom.dim(1);
-        const ySrc = mySrcDom.dim(2);
-        const zSrc = mySrcDom.dim(3);
-        const myLineSize = zSrc.size*c_sizeof(T):int;
-        const myDestDom = dest.localSubdomain();
-        const yDest = myDestDom.dim(1);
-        const xDest = myDestDom.dim(2);
+      // Setup FFTW plans, x/y are batched so we need a different batch size
+      // for when zSrc doesn't evenly split into numTasks
+      const numTasks = min(here.maxTaskPar, zSrc.size);
+      const (batchSizeSm, batchSizeLg) = (zSrc.size/numTasks, zSrc.size/numTasks+1);
+      var yPlanSm = setupPlanColumns(T, ftType, {ySrc, zSrc}, batchSizeSm, signOrKind, FFTW_MEASURE);
+      var yPlanLg = setupPlanColumns(T, ftType, {ySrc, zSrc}, batchSizeLg, signOrKind, FFTW_MEASURE);
+      var xPlanSm = setupPlanColumns(T, ftType, {xDst, zSrc}, batchSizeSm, signOrKind, FFTW_MEASURE);
+      var xPlanLg = setupPlanColumns(T, ftType, {xDst, zSrc}, batchSizeLg,  signOrKind, FFTW_MEASURE);
+      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
-        const numTasks = min(here.maxTaskPar, zSrc.size);
-        const numTransforms = zSrc.size/numTasks;
+      // Use temp work array to avoid overwriting the Src array
+      var myplane : [{0..0, ySrc, zSrc}] T;
 
-        // Set up FFTW plans
-        var plan_y = setupPlanColumns(T, ftType, {ySrc, zSrc}, numTransforms, signOrKind, FFTW_MEASURE);
-        var plan_y1 = setupPlanColumns(T, ftType, {ySrc, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
-        var plan_x = setupPlanColumns(T, ftType, {xDest, zSrc}, numTransforms, signOrKind, FFTW_MEASURE);
-        var plan_x1 = setupPlanColumns(T, ftType, {xDest, zSrc}, numTransforms+1, signOrKind, FFTW_MEASURE);
-        var plan_z = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
+      forall iy in ySrc {
+        copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
+      }
 
-        // Use this as a temporary work array to
-        // avoid rewriting the src array
-        var myplane : [{0..0, ySrc, zSrc}] T;
-        const z0 = zSrc.first;
-        forall iy in ySrc {
-          c_memcpy(c_ptrTo(myplane[0,iy,z0]),
-                   c_ptrTo(src.localAccess[xSrc.first,iy,z0]),
-                   myLineSize);
+      for ix in xSrc {
+        // Y-transform
+        forall myzRange in batchedRange(zSrc, numTasks) {
+          ref elt = myplane[0, ySrc.first, myzRange.first];
+          if myzRange.size == batchSizeSm then yPlanSm.execute(elt);
+                                          else yPlanLg.execute(elt);
         }
 
-        for ix in xSrc {
-          // y-transform
-          const y0 = ySrc.first;
-          forall myzRange in batchedRange(zSrc) with (ref plan_y, ref plan_y1) {
-            select myzRange.size {
-                when numTransforms do plan_y.execute(myplane[0,y0,myzRange.first]);
-                when numTransforms+1 do plan_y1.execute(myplane[0,y0,myzRange.first]);
-                otherwise halt("Bad myzRange size");
-              }
-          }
-
-          // z-transform
-          // Offset to reduce collisions
-          const offset = (ySrc.size/numLocales)*here.id;
-          forall iy in 0.. #ySrc.size with (ref plan_z) {
-            const iy1 = (iy + offset)%ySrc.size + y0;
-            plan_z.execute(myplane[0,iy1,z0]);
-            // This is the transpose step
-            remotePut(dest[iy1,ix,z0], myplane[0,iy1,z0], myLineSize);
-            // If not last slice, copy over
-            if (ix != xSrc.last) {
-              c_memcpy(c_ptrTo(myplane[0,iy1,z0]),
-                       c_ptrTo(src.localAccess[ix+1,iy1,z0]),
-                       myLineSize);
-            }
+        // Z-transform, offset to reduce comm congestion/collision
+        forall iy in offset(ySrc) {
+          zPlan.execute(myplane[0, iy, zSrc.first]);
+          // This is the transpose step
+          copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
+          // If not last slice, copy over
+          if (ix != xSrc.last) {
+            copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
           }
         }
+      }
 
-        // Wait until all communication is complete
-        allLocalesBarrier.barrier();
+      // Wait until all communication is complete
+      allLocalesBarrier.barrier();
 
-        // x-transform
-        const x0 = xDest.first;
-        forall myzRange in batchedRange(zSrc) with (ref plan_x, ref plan_x1) {
-          for iy in yDest {
-            ref elt = dest.localAccess[iy, x0, myzRange.first];
-            select myzRange.size {
-                when numTransforms do plan_x.execute(elt);
-                when numTransforms+1 do plan_x1.execute(elt);
-                otherwise halt("Bad myzRange size");
-              }
-          }
+      // X-transform
+      forall myzRange in batchedRange(zSrc, numTasks) {
+        for iy in yDst {
+          ref elt = Dst[iy, xDst.first, myzRange.first];
+          if myzRange.size == batchSizeSm then xPlanSm.execute(elt);
+                                          else xPlanLg.execute(elt);
         }
-
-        // End of on-loc
       }
     }
-
-
-    // End of doFFT
   }
 
-  inline proc remotePut(ref dstRef, ref srcRef, numBytes : int) {
-    __primitive("chpl_comm_put", srcRef, dstRef.locale.id, dstRef, numBytes);
+  iter offset(r: range) { halt("Serial offset not implemented"); }
+  iter offset(param tag: iterKind, r: range) where (tag==iterKind.standalone) {
+    forall i in r + (r.size/numLocales * here.id) do {
+      yield i % r.size + r.first;
+    }
   }
 
-  iter batchedRange(r : range) {
+  proc copy(ref dst, const ref src, numBytes: int) {
+    if dst.locale.id == here.id {
+      __primitive("chpl_comm_get", dst, src.locale.id, src, numBytes.safeCast(size_t));
+    } else if src.locale.id == here.id {
+      __primitive("chpl_comm_put", src, dst.locale.id, dst, numBytes.safeCast(size_t));
+    } else {
+      halt("Remote src and remote dst not yet supported");
+    }
+  }
+
+  iter batchedRange(r : range, numTasks) {
     halt("Serial iterator not implemented");
   }
 
-  iter batchedRange(param tag : iterKind, r : range)
+  iter batchedRange(param tag : iterKind, r : range, numTasks)
     where (tag==iterKind.standalone)
   {
-    const numTasks = min(here.maxTaskPar, r.size);
-    coforall itask in 0.. #numTasks {
-      const myr = chunk(r, numTasks, itask);
-      yield myr;
+    coforall chunk in chunks(r, numTasks) {
+      yield chunk;
     }
   }
 
