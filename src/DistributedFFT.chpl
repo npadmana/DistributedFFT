@@ -119,6 +119,8 @@ prototype module DistributedFFT {
     if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
     coforall loc in Locales do on loc {
+      var timeTrack = new TimeTracker();
+
       const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
@@ -136,26 +138,32 @@ prototype module DistributedFFT {
         // [iy in ySrc] myplane[{0..0, iy..iy, zSrc}] = Src[{ix..ix, iy..iy, zSrc}]; // Better perf
 
         // Y-transform
+        timeTrack.start();
         forall iz in zSrc {
           yPlan.execute(myplane[0, ySrc.first, iz]);
         }
+        timeTrack.stop(TimeStages.Y);
 
         // Z-transform, offset to reduce comm congestion/collision
+        timeTrack.start();
         forall iy in offset(ySrc) {
           zPlan.execute(myplane[0, iy, zSrc.first]);
           // Transpose data into Dst
           Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
           //remotePut(Dst[iy, ix , zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
         }
+        timeTrack.stop(TimeStages.Z);
       }
 
       // Wait until all communication is complete
       allLocalesBarrier.barrier();
 
       // X-transform
+      timeTrack.start();
       forall (iy, iz) in {yDst, zSrc} {
         xPlan.execute(Dst[iy, xDst.first, iz]);
       }
+      timeTrack.stop(TimeStages.X);
     }
   }
 
@@ -175,6 +183,8 @@ prototype module DistributedFFT {
     if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
     coforall loc in Locales do on loc {
+      var timeTrack = new TimeTracker();
+
       const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
       const myLineSize = zSrc.size*numBytes(T);
@@ -193,11 +203,14 @@ prototype module DistributedFFT {
 
       for ix in xSrc {
         // Y-transform
+        timeTrack.start();
         forall (plan, myzRange) in yPlan.batch() {
           plan.execute(myplane[0, ySrc.first, myzRange.first]);
         }
+        timeTrack.stop(TimeStages.Y);
 
         // Z-transform, offset to reduce comm congestion/collision
+        timeTrack.start();
         forall iy in offset(ySrc) {
           zPlan.execute(myplane[0, iy, zSrc.first]);
           // This is the transpose step
@@ -207,17 +220,20 @@ prototype module DistributedFFT {
             copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
           }
         }
+        timeTrack.stop(TimeStages.Z);
       }
 
       // Wait until all communication is complete
       allLocalesBarrier.barrier();
 
       // X-transform
+      timeTrack.start();
       forall (plan, myzRange) in xPlan.batch() {
         for iy in yDst {
           plan.execute(Dst[iy, xDst.first, myzRange.first]);
         }
       }
+      timeTrack.stop(TimeStages.X);
     }
   }
 
@@ -359,8 +375,8 @@ prototype module DistributedFFT {
     // Time the various FFT steps.
     config const timeTrackFFT=false;
 
-    enum TimeStages {X, YZ, Execute, Memcpy, Comms};
-    const stageDomain = {TimeStages.X..TimeStages.Comms};
+    enum TimeStages {X, Y, Z};
+    const stageDomain = {TimeStages.X..TimeStages.Z};
     private var _globalTimeArr : [stageDomain] atomic real;
 
     resetTimers();
