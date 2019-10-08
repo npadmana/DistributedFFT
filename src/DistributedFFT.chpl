@@ -13,8 +13,6 @@ prototype module DistributedFFT {
 
   config const useElegant=false;
 
-  extern proc isNullPlan(plan : fftw_plan) : c_int;
-
   proc deinit() {
     cleanup();
   }
@@ -93,6 +91,7 @@ prototype module DistributedFFT {
 
 
     proc isValid : bool {
+      extern proc isNullPlan(plan : fftw_plan) : c_int;
       return isNullPlan(plan)==0;
     }
   }
