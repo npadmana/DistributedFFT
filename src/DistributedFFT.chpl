@@ -35,17 +35,16 @@ prototype module DistributedFFT {
   record FFTWplan {
     param ftType : FFTtype;
     var plan : fftw_plan;
-    var tt : TimeTracker;
 
     // Mimic the advanced interface 
-    proc init(param ftType1 : FFTtype, args ...?k) {
-      ftType = ftType1;
+    proc init(param ftType : FFTtype, args ...?k) {
+      this.ftType = ftType;
       this.complete();
       plannerLock.lock();
       select ftType {
-          when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
-          when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
-        }
+        when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
+        when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
+      }
       plannerLock.unlock();
     }
 
@@ -56,35 +55,23 @@ prototype module DistributedFFT {
     }
 
     proc execute() {
-      tt.start();
       FFTW.execute(plan);
-      tt.stop(TimeStages.Execute);
     }
 
     proc execute(arr1 : c_ptr(?T), arr2 : c_ptr(T)) {
       select ftType {
-          when FFTtype.DFT do fftw_execute_dft(plan, arr1, arr2);
-          when FFTtype.R2R do fftw_execute_r2r(plan, arr1, arr2);
-        }
+        when FFTtype.DFT do fftw_execute_dft(plan, arr1, arr2);
+        when FFTtype.R2R do fftw_execute_r2r(plan, arr1, arr2);
+      }
     }
 
     inline proc execute(ref arr1 : ?T, ref arr2 : T) where (!isAnyCPtr(T)) {
-      var elt1 = c_ptrTo(arr1);
-      var elt2 = c_ptrTo(arr2);
-      select ftType {
-          when FFTtype.DFT do fftw_execute_dft(plan, elt1, elt2);
-          when FFTtype.R2R do fftw_execute_r2r(plan, elt1, elt2);
-        }
+      execute(c_ptrTo(arr1), c_ptrTo(arr2));
     }
 
     inline proc execute(ref arr1 : ?T) where (!isAnyCPtr(T)) {
-      var elt1 = c_ptrTo(arr1);
-      select ftType {
-          when FFTtype.DFT do fftw_execute_dft(plan, elt1, elt1);
-          when FFTtype.R2R do fftw_execute_r2r(plan, elt1, elt1);
-        }
+      execute(arr1, arr1);
     }
-
 
     proc isValid : bool {
       extern proc isNullPlan(plan : fftw_plan) : c_int;
