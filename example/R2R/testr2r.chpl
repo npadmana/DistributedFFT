@@ -2,18 +2,29 @@ use DistributedFFT;
 
 const BaseDom={0..2,0..2,0..2};
 const Dom = newSlabDom(BaseDom);
-var A : [Dom] real;
+var A,At : [Dom] real;
 var r2r = [FFTW_REDFT00, FFTW_REDFT00, FFTW_REDFT00];
-
-warmUpPlanner(A, r2r);
 
 forall (i,j,k) in Dom {
   A[i,j,k] = ((i%2) + 3*(j%2) + (k%2)):real;
 }
 
-doR2R(A, r2r);
+doFFT_Transposed(FFTtype.R2R,A, At,r2r);
 
-writeln(A);
+writeln(At);
+
+/*
+
+  This is the non-transposed version, which we store here
+  for reference
+
+  The only non-zero elements are
+  (0,0,0) -> 160.0
+  (0,0,2) -> -32.0
+
+  // These two elements get swapped by a transpose.
+  (0,2,0) -> -96.0
+  (2,0,0) -> -32.0
 
 var expected= reshape([160.0, 0.0, -32.0,
                0.0, 0.0, 0.0,
@@ -26,6 +37,20 @@ var expected= reshape([160.0, 0.0, -32.0,
                -32.0, 0.0, 0.0,
                0.0, 0.0, 0.0,
                0.0, 0.0, 0.0],BaseDom);
-A -= expected;
-var diff = max reduce abs(A);
+*/
+
+// This is the transposed version
+var expected= reshape([160.0, 0.0, -32.0,
+               0.0, 0.0, 0.0,
+               -32.0, 0.0, 0.0,
+
+               0.0, 0.0, 0.0,
+               0.0, 0.0, 0.0,
+               0.0, 0.0, 0.0,
+
+               -96.0, 0.0, 0.0,
+               0.0, 0.0, 0.0,
+               0.0, 0.0, 0.0],BaseDom);
+At -= expected;
+var diff = max reduce abs(At);
 if (diff > 1.0e-14) then writeln("Test FAILED");

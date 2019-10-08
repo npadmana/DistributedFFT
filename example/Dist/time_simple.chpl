@@ -5,28 +5,29 @@ use Time;
 config const Ng=64;
 
 const Dom = newSlabDom((Ng,Ng,Ng));
-var arr : [Dom] complex;
+var arr, arrT : [Dom] complex;
 
 var timeit : Timer;
 
 timeit.clear(); timeit.start();
-warmUpPlanner(arr);
+doFFT_Transposed(FFTtype.DFT, arr, arrT, FFTW_FORWARD);
+doFFT_Transposed(FFTtype.DFT, arrT, arr, FFTW_BACKWARD);
 timeit.stop();
 const planTime=timeit.elapsed();
 
 arr = 1.0;
 
 timeit.clear(); timeit.start();
-doFFT(arr, FFTW_FORWARD);
+doFFT_Transposed(FFTtype.DFT, arr, arrT, FFTW_FORWARD);
 timeit.stop();
 const runFtime=timeit.elapsed();
 
-arr[0,0,0] -= Ng**3;
-const maxerr1 = max reduce abs(arr);
-arr[0,0,0] = Ng**3;
+arrT[0,0,0] -= Ng**3;
+const maxerr1 = max reduce abs(arrT);
+arrT[0,0,0] = Ng**3;
 
 timeit.clear(); timeit.start();
-doFFT(arr, FFTW_BACKWARD);
+doFFT_Transposed(FFTtype.DFT, arrT, arr, FFTW_BACKWARD);
 timeit.stop();
 const runBtime=timeit.elapsed();
 
