@@ -2,12 +2,11 @@
 prototype module DistributedFFT {
 
   use BlockDist;
-  use ChapelLocks;
   use AllLocalesBarriers;
-  use ReplicatedVar;
   use RangeChunk;
   use FFTW;
   use FFTW.C_FFTW;
+  use FFT_Locks;
   use FFT_Timers;
   require "npFFTW.h";
 
@@ -16,9 +15,6 @@ prototype module DistributedFFT {
   proc deinit() {
     cleanup();
   }
-
-  pragma "locale private"
-  var fftw_planner_lock$ : chpl_LocalSpinlock;
 
   enum FFTtype {DFT, R2R};
 
@@ -45,18 +41,18 @@ prototype module DistributedFFT {
     proc init(param ftType1 : FFTtype, args ...?k) {
       ftType = ftType1;
       this.complete();
-      fftw_planner_lock$.lock();
+      plannerLock.lock();
       select ftType {
           when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
           when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
         }
-      fftw_planner_lock$.unlock();
+      plannerLock.unlock();
     }
 
     proc deinit() {
-      fftw_planner_lock$.lock();
+      plannerLock.lock();
       destroy_plan(plan);
-      fftw_planner_lock$.unlock();
+      plannerLock.unlock();
     }
 
     proc execute() {
@@ -349,6 +345,13 @@ prototype module DistributedFFT {
     return c_ptr(fftw_r2r_kind);
   }
 
+  module FFT_Locks {
+    // https://github.com/chapel-lang/chapel/issues/9881
+    // https://github.com/chapel-lang/chapel/issues/12300
+    private use ChapelLocks;
+    pragma "locale private"
+    var plannerLock : chpl_LocalSpinlock;
+  }
 
   module FFT_Timers {
     use Time;
