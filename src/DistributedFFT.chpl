@@ -92,91 +92,14 @@ prototype module DistributedFFT {
     return newSlabDom({(...tup)});
   }
 
+  /* FFT.
+
+     Stores the FFT in Dst transposed (xyz -> yxz).
+   */
   proc doFFT_Transposed(param ftType : FFTtype,
-                        src: [?SrcDom] ?T,
-                        dest : [?DestDom] T,
+                        Src: [?SrcDom] ?T,
+                        Dst : [?DstDom] T,
                         signOrKind) {
-    if (useElegant) {
-      doFFT_Transposed_Elegant(ftType, src, dest, signOrKind);
-    } else {
-      doFFT_Transposed_Performant(ftType, src, dest, signOrKind);
-    }
-  }
-
-
-  /* FFT.
-
-     Stores the FFT in Dst transposed (xyz -> yxz).
-   */
-  proc doFFT_Transposed_Elegant(param ftType : FFTtype,
-                                Src: [?SrcDom] ?T,
-                                Dst : [?DstDom] T,
-                                signOrKind) {
-    // Sanity checks
-    if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
-    if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
-    if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
-    if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
-
-    coforall loc in Locales do on loc {
-      var timeTrack = new TimeTracker();
-
-      const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
-      const (yDst, xDst, _) = DstDom.localSubdomain().dims();
-
-      // Set up FFTW plans
-      var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
-      var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
-      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
-
-      // Use temp work array to avoid overwriting the Src array
-      var myplane : [{0..0, ySrc, zSrc}] T = Src[{xSrc.first..xSrc.first, ySrc, zSrc}];
-
-      for ix in xSrc {
-        // Y-transform
-        timeTrack.start();
-        forall (plan, myzRange) in yPlan.batch() {
-          plan.execute(myplane[0, ySrc.first, myzRange.first]);
-        }
-        timeTrack.stop(TimeStages.Y);
-
-        // Z-transform, offset to reduce comm congestion/collision
-        timeTrack.start();
-        forall iy in offset(ySrc) {
-          zPlan.execute(myplane[0, iy, zSrc.first]);
-          // Transpose data into Dst
-          Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
-          //remotePut(Dst[iy, ix , zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
-          if (ix != xSrc.last) {
-            myplane[{0..0, iy..iy, zSrc}] = Src[{ix+1..ix+1, iy..iy, zSrc}];
-          }
-        }
-        timeTrack.stop(TimeStages.Z);
-      }
-
-      // Wait until all communication is complete
-      allLocalesBarrier.barrier();
-
-      // X-transform
-      timeTrack.start();
-      forall (plan, myzRange) in xPlan.batch() {
-        for iy in yDst {
-          plan.execute(Dst[iy, xDst.first, myzRange.first]);
-        }
-      }
-      timeTrack.stop(TimeStages.X);
-    }
-  }
-
-
-  /* FFT.
-
-     Stores the FFT in Dst transposed (xyz -> yxz).
-   */
-  proc doFFT_Transposed_Performant(param ftType : FFTtype,
-                                   Src: [?SrcDom] ?T,
-                                   Dst : [?DstDom] T,
-                                   signOrKind) {
     // Sanity checks
     if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
     if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
@@ -198,8 +121,12 @@ prototype module DistributedFFT {
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
 
-      forall iy in ySrc {
-        copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
+      if useElegant {
+        myplane = Src[{xSrc.first..xSrc.first, ySrc, zSrc}];
+      } else {
+        forall iy in ySrc {
+          copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
+        }
       }
 
       for ix in xSrc {
@@ -214,11 +141,17 @@ prototype module DistributedFFT {
         timeTrack.start();
         forall iy in offset(ySrc) {
           zPlan.execute(myplane[0, iy, zSrc.first]);
-          // This is the transpose step
-          copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
-          // If not last slice, copy over
-          if (ix != xSrc.last) {
-            copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
+          // Transpose data into Dst, and copy the next Src slice into myplane
+          if useElegant {
+            Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}];
+            if (ix != xSrc.last) {
+              myplane[{0..0, iy..iy, zSrc}] = Src[{ix+1..ix+1, iy..iy, zSrc}];
+            }
+          } else {
+            copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
+            if (ix != xSrc.last) {
+              copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
+            }
           }
         }
         timeTrack.stop(TimeStages.Z);
