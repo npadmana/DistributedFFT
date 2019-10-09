@@ -130,13 +130,9 @@ prototype module DistributedFFT {
       var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
-      var myplane : [{0..0, ySrc, zSrc}] T;
+      var myplane : [{0..0, ySrc, zSrc}] T = Src[{xSrc.first..xSrc.first, ySrc, zSrc}];
 
       for ix in xSrc {
-        // Copy source to temp array
-        myplane = Src[{ix..ix, ySrc, zSrc}]; // Ideal
-        // [iy in ySrc] myplane[{0..0, iy..iy, zSrc}] = Src[{ix..ix, iy..iy, zSrc}]; // Better perf
-
         // Y-transform
         timeTrack.start();
         forall (plan, myzRange) in yPlan.batch() {
@@ -151,6 +147,9 @@ prototype module DistributedFFT {
           // Transpose data into Dst
           Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
           //remotePut(Dst[iy, ix , zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
+          if (ix != xSrc.last) {
+            myplane[{0..0, iy..iy, zSrc}] = Src[{ix+1..ix+1, iy..iy, zSrc}];
+          }
         }
         timeTrack.stop(TimeStages.Z);
       }
