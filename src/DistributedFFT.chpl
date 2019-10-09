@@ -125,8 +125,8 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
       // Set up FFTW plans
-      var xPlan = setup1DPlan(T, ftType, xDst.size, zSrc.size, signOrKind, FFTW_MEASURE);
-      var yPlan = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
@@ -139,8 +139,8 @@ prototype module DistributedFFT {
 
         // Y-transform
         timeTrack.start();
-        forall iz in zSrc {
-          yPlan.execute(myplane[0, ySrc.first, iz]);
+        forall (plan, myzRange) in yPlan.batch() {
+          plan.execute(myplane[0, ySrc.first, myzRange.first]);
         }
         timeTrack.stop(TimeStages.Y);
 
@@ -160,8 +160,10 @@ prototype module DistributedFFT {
 
       // X-transform
       timeTrack.start();
-      forall (iy, iz) in {yDst, zSrc} {
-        xPlan.execute(Dst[iy, xDst.first, iz]);
+      forall (plan, myzRange) in xPlan.batch() {
+        for iy in yDst {
+          plan.execute(Dst[iy, xDst.first, myzRange.first]);
+        }
       }
       timeTrack.stop(TimeStages.X);
     }
@@ -189,7 +191,7 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
       const myLineSize = zSrc.size*numBytes(T);
 
-      // Setup FFTW plans
+      // Set up FFTW plans
       var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
