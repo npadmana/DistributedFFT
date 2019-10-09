@@ -2,23 +2,19 @@
 prototype module DistributedFFT {
 
   use BlockDist;
-  use Barriers;
-  use ReplicatedVar;
+  use AllLocalesBarriers;
   use RangeChunk;
   use FFTW;
   use FFTW.C_FFTW;
+  use FFT_Locks;
   use FFT_Timers;
   require "npFFTW.h";
 
-
-  extern proc isNullPlan(plan : fftw_plan) : c_int;
+  config const useElegant=false;
 
   proc deinit() {
     cleanup();
   }
-
-  pragma "locale private"
-  var fftw_planner_lock$ : chpl_LocalSpinlock;
 
   enum FFTtype {DFT, R2R};
 
@@ -34,33 +30,51 @@ prototype module DistributedFFT {
   /*                              double *out, const int *onembed, */
   /*                              int ostride, int odist, */
   /*                              const fftw_r2r_kind *kind, unsigned flags); */
+  // https://github.com/chapel-lang/chapel/issues/13319
+  pragma "default intent is ref"
   record FFTWplan {
+    param ftType : FFTtype;
     var plan : fftw_plan;
-    var tt : TimeTracker;
 
     // Mimic the advanced interface 
     proc init(param ftType : FFTtype, args ...?k) {
-      fftw_planner_lock$.lock();
+      this.ftType = ftType;
+      this.complete();
+      plannerLock.lock();
       select ftType {
-          when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
-          when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
-        }
-      fftw_planner_lock$.unlock();
+        when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
+        when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
+      }
+      plannerLock.unlock();
     }
 
     proc deinit() {
-      fftw_planner_lock$.lock();
+      plannerLock.lock();
       destroy_plan(plan);
-      fftw_planner_lock$.unlock();
+      plannerLock.unlock();
     }
 
     proc execute() {
-      tt.start();
       FFTW.execute(plan);
-      tt.stop(TimeStages.Execute);
+    }
+
+    proc execute(arr1 : c_ptr(?T), arr2 : c_ptr(T)) {
+      select ftType {
+        when FFTtype.DFT do fftw_execute_dft(plan, arr1, arr2);
+        when FFTtype.R2R do fftw_execute_r2r(plan, arr1, arr2);
+      }
+    }
+
+    inline proc execute(ref arr1 : ?T, ref arr2 : T) where (!isAnyCPtr(T)) {
+      execute(c_ptrTo(arr1), c_ptrTo(arr2));
+    }
+
+    inline proc execute(ref arr1 : ?T) where (!isAnyCPtr(T)) {
+      execute(arr1, arr1);
     }
 
     proc isValid : bool {
+      extern proc isNullPlan(plan : fftw_plan) : c_int;
       return isNullPlan(plan)==0;
     }
   }
@@ -78,337 +92,265 @@ prototype module DistributedFFT {
     return newSlabDom({(...tup)});
   }
 
-  /* Warm up the FFTW planner.
-     
-     arr is assumed to be a block distributed array.
-   */
-  proc warmUpPlanner(arr : [?Dom] complex) {
-    if arr.rank != 3 then halt("Code is designed for 3D arrays only");
-
-    // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
-    // about the alignment.
-    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE | FFTW_UNALIGNED);
-    doFFT_YZ(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE | FFTW_UNALIGNED);
-
-    doFFT_X(FFTtype.DFT, arr, true, FFTW_FORWARD, FFTW_MEASURE);
-    doFFT_X(FFTtype.DFT, arr, true, FFTW_BACKWARD, FFTW_MEASURE);
+  proc doFFT_Transposed(param ftType : FFTtype,
+                        src: [?SrcDom] ?T,
+                        dest : [?DestDom] T,
+                        signOrKind) {
+    if (useElegant) {
+      doFFT_Transposed_Elegant(ftType, src, dest, signOrKind);
+    } else {
+      doFFT_Transposed_Performant(ftType, src, dest, signOrKind);
+    }
   }
 
-  /* Warm up the FFTW planner.
-     
-     arr is assumed to be a block distributed array.
-
-     Specialize here for R2R transforms.
-   */
-  proc warmUpPlanner(arr : [?Dom] real, r2rType : [] fftw_r2r_kind) {
-    if arr.rank != 3 then halt("Code is designed for 3D arrays only");
-    if r2rType.size != 3 then halt("Need 3 R2R kinds");
-    if r2rType.rank != 1 then halt("Expected a 1D array");
-
-    ref r2r = r2rType.reindex(0..2);
-
-    // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
-    // about the alignment.
-    doFFT_YZ(FFTtype.R2R, arr, true, r2r[1..2], FFTW_MEASURE | FFTW_UNALIGNED);
-    doFFT_X(FFTtype.R2R, arr, true, r2r[0..0], FFTW_MEASURE);
-  }
-
-  /* FFT.
-   */
-  proc doFFT(arr : [?Dom], sign : c_int) {
-    if arr.rank != 3 then halt("Code is designed for 3D arrays only");
-    if !isComplexType(arr.eltType) then halt("Code is designed for complex arrays only");
-
-    var tt = new TimeTracker();
-
-    tt.start();
-    // Must call with WISDOM_ONLY and UNALIGNED
-    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
-    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
-    doFFT_YZ(FFTtype.DFT, arr, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
-    tt.stop(TimeStages.YZ);
-
-    tt.start();
-    doFFT_X(FFTtype.DFT, arr, false, sign, FFTW_MEASURE);
-    tt.stop(TimeStages.X);
-
-
-    // End of doFFT
-  }
 
   /* FFT.
 
-     Stores the FFT in dest transposed (xyz -> yxz).
-
-     Note that both src and dest are overwritten.
+     Stores the FFT in Dst transposed (xyz -> yxz).
    */
-  proc doFFT_Transposed(src: [?SrcDom] complex, dest : [?DestDom] complex, sign : c_int) {
-    if SrcDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if DestDom.rank != 3 then halt("Code is designed for 3D arrays only");
-    if SrcDom.dim(1) != DestDom.dim(2) then halt("Mismatched x-y ranges");
-    if SrcDom.dim(2) != DestDom.dim(1) then halt("Mismatched y-x ranges");
-    if SrcDom.dim(3) != DestDom.dim(3) then halt("Mismatched z ranges");
+  proc doFFT_Transposed_Elegant(param ftType : FFTtype,
+                                Src: [?SrcDom] ?T,
+                                Dst : [?DstDom] T,
+                                signOrKind) {
+    // Sanity checks
+    if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
-    var tt = new TimeTracker();
+    coforall loc in Locales do on loc {
+      var timeTrack = new TimeTracker();
 
-    tt.start();
-    // Must call with WISDOM_ONLY and UNALIGNED
-    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
-    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
-    doFFT_YZ(FFTtype.DFT, src, false, sign, FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
-    tt.stop(TimeStages.YZ);
+      const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
+      const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
-    tt.start();
-    doFFT_X_Transposed(FFTtype.DFT, src, dest, false, sign, FFTW_MEASURE);
-    tt.stop(TimeStages.X);
+      // Set up FFTW plans
+      var xPlan = setup1DPlan(T, ftType, xDst.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var yPlan = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
+      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
+      // Use temp work array to avoid overwriting the Src array
+      var myplane : [{0..0, ySrc, zSrc}] T;
 
-    // End of doFFT
+      for ix in xSrc {
+        // Copy source to temp array
+        myplane = Src[{ix..ix, ySrc, zSrc}]; // Ideal
+        // [iy in ySrc] myplane[{0..0, iy..iy, zSrc}] = Src[{ix..ix, iy..iy, zSrc}]; // Better perf
+
+        // Y-transform
+        timeTrack.start();
+        forall iz in zSrc {
+          yPlan.execute(myplane[0, ySrc.first, iz]);
+        }
+        timeTrack.stop(TimeStages.Y);
+
+        // Z-transform, offset to reduce comm congestion/collision
+        timeTrack.start();
+        forall iy in offset(ySrc) {
+          zPlan.execute(myplane[0, iy, zSrc.first]);
+          // Transpose data into Dst
+          Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}]; // Ideal
+          //remotePut(Dst[iy, ix , zSrc.first], myplane[0, iy, zSrc.first], zSrc.size*numBytes(T));  // Better perf
+        }
+        timeTrack.stop(TimeStages.Z);
+      }
+
+      // Wait until all communication is complete
+      allLocalesBarrier.barrier();
+
+      // X-transform
+      timeTrack.start();
+      forall (iy, iz) in {yDst, zSrc} {
+        xPlan.execute(Dst[iy, xDst.first, iz]);
+      }
+      timeTrack.stop(TimeStages.X);
+    }
   }
 
-  /* R2R
+
+  /* FFT.
+
+     Stores the FFT in Dst transposed (xyz -> yxz).
    */
-  proc doR2R(arr : [?Dom] real, r2rType : [] fftw_r2r_kind) {
-    if arr.rank != 3 then halt("Code is designed for 3D arrays only");
-    if r2rType.size != 3 then halt("Need 3 R2R kinds");
-    if r2rType.rank != 1 then halt("Expected a 1D array");
+  proc doFFT_Transposed_Performant(param ftType : FFTtype,
+                                   Src: [?SrcDom] ?T,
+                                   Dst : [?DstDom] T,
+                                   signOrKind) {
+    // Sanity checks
+    if SrcDom.rank != 3 || DstDom.rank != 3 then compilerError("Code is designed for 3D arrays only");
+    if SrcDom.dim(1) != DstDom.dim(2) then halt("Mismatched x-y ranges");
+    if SrcDom.dim(2) != DstDom.dim(1) then halt("Mismatched y-x ranges");
+    if SrcDom.dim(3) != DstDom.dim(3) then halt("Mismatched z ranges");
 
-    ref r2r = r2rType.reindex(0..2);
+    coforall loc in Locales do on loc {
+      var timeTrack = new TimeTracker();
 
-    var tt = new TimeTracker();
+      const (xSrc, ySrc, zSrc) = SrcDom.localSubdomain().dims();
+      const (yDst, xDst, _) = DstDom.localSubdomain().dims();
+      const myLineSize = zSrc.size*numBytes(T);
 
-    tt.start();
-    // Must call with WISDOM_ONLY and UNALIGNED
-    // WISDOM -- to prevent array from being overwritten; you must call the warmup routine
-    // UNALIGNED -- since we do each plane separately, make no alignment assumtions
-    // Note the UNALIGNED flag -- since we do each yz plane separately, make no assumptions
-    // about the alignment.
-    doFFT_YZ(FFTtype.R2R, arr, false, r2r[1..2], FFTW_WISDOM_ONLY | FFTW_UNALIGNED);
-    tt.stop(TimeStages.YZ);
+      // Setup FFTW plans
+      var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
 
-    tt.start();
-    doFFT_X(FFTtype.R2R, arr, false, r2r[0..0], FFTW_MEASURE);
-    tt.stop(TimeStages.X);
-    // End of doR2R
+      // Use temp work array to avoid overwriting the Src array
+      var myplane : [{0..0, ySrc, zSrc}] T;
+
+      forall iy in ySrc {
+        copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
+      }
+
+      for ix in xSrc {
+        // Y-transform
+        timeTrack.start();
+        forall (plan, myzRange) in yPlan.batch() {
+          plan.execute(myplane[0, ySrc.first, myzRange.first]);
+        }
+        timeTrack.stop(TimeStages.Y);
+
+        // Z-transform, offset to reduce comm congestion/collision
+        timeTrack.start();
+        forall iy in offset(ySrc) {
+          zPlan.execute(myplane[0, iy, zSrc.first]);
+          // This is the transpose step
+          copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
+          // If not last slice, copy over
+          if (ix != xSrc.last) {
+            copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
+          }
+        }
+        timeTrack.stop(TimeStages.Z);
+      }
+
+      // Wait until all communication is complete
+      allLocalesBarrier.barrier();
+
+      // X-transform
+      timeTrack.start();
+      forall (plan, myzRange) in xPlan.batch() {
+        for iy in yDst {
+          plan.execute(Dst[iy, xDst.first, myzRange.first]);
+        }
+      }
+      timeTrack.stop(TimeStages.X);
+    }
+  }
+
+  iter offset(r: range) { halt("Serial offset not implemented"); }
+  iter offset(param tag: iterKind, r: range) where (tag==iterKind.standalone) {
+    forall i in r + (r.size/numLocales * here.id) do {
+      yield i % r.size + r.first;
+    }
+  }
+
+  proc copy(ref dst, const ref src, numBytes: int) {
+    if dst.locale.id == here.id {
+      __primitive("chpl_comm_get", dst, src.locale.id, src, numBytes.safeCast(size_t));
+    } else if src.locale.id == here.id {
+      __primitive("chpl_comm_put", src, dst.locale.id, dst, numBytes.safeCast(size_t));
+    } else {
+      halt("Remote src and remote dst not yet supported");
+    }
   }
 
 
-  // Set up the YZ transform plan
-  proc setupYZPlan(param ftType : FFTtype, yzplane : [?Dom] ?T, signOrKind, flags : c_uint) {
+  pragma "default intent is ref"
+  record BatchedFFTWplan {
+    param ftType : FFTtype;
+    const parRange: range;
+    const numTasks: int;
+    const batchSizeSm, batchSizeLg: int;
+    var planSm, planLg: FFTWplan(ftType);
+
+    proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+      this.ftType = ftType;
+      this.parRange = dom.dim(parDim);
+      this.numTasks = min(here.maxTaskPar, parRange.size);
+      this.batchSizeSm = parRange.size/numTasks;
+      this.batchSizeLg = parRange.size/numTasks+1;
+      this.planSm = setupPlanColumns(arrType, ftType, dom, batchSizeSm, signOrKind, flags);
+      this.planLg = setupPlanColumns(arrType, ftType, dom, batchSizeLg, signOrKind, flags);
+    }
+
+    iter batch() {
+      halt("Serial iterator not implemented");
+    }
+
+    iter batch(param tag : iterKind) where (tag==iterKind.standalone) {
+      coforall chunk in chunks(parRange, numTasks) {
+        if chunk.size == batchSizeSm then yield (planSm, chunk);
+        if chunk.size == batchSizeLg then yield (planLg, chunk);
+      }
+    }
+  }
+
+  proc setupBatchPlanColumns(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+    return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags);
+  }
+
+
+  // Set up 1D in-place plans
+  proc setup1DPlan(type arrType, param ftType : FFTtype, nx : int, strideIn : int, signOrKind, in flags : c_uint) {
     // Pull signOrKind locally since this may be an array
     // we need to take a pointer to.
     var mySignOrKind = signOrKind;
     var arg0 : _signOrKindType(ftType);
     select ftType {
-        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-        when FFTtype.DFT do arg0 = mySignOrKind;
-      }
+      when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+      when FFTtype.DFT do arg0 = mySignOrKind;
+    }
 
-    // Set up for the yz transforms on each domain.
-    const myDom = yzplane.localSubdomain();
-
-    // Get the x-range to loop over
-    const yRange = myDom.dim(2);
-    const zRange = myDom.dim(3);
-
+    // Define a dummy array
+    var arr : [0.. #(nx*strideIn)] arrType;
 
     // Write down all the parameters explicitly
     var howmany = 1 : c_int;
-    var nn : c_array(c_int, 2);
-    nn[0] = yRange.size : c_int;
-    nn[1] = zRange.size : c_int;
+    var nn : c_array(c_int, 1);
+    nn[0] = nx : c_int;
     var nnp = c_ptrTo(nn[0]);
-    var rank = 2 : c_int;
-    var stride = 1 : c_int;
+    var rank = 1 : c_int;
+    var stride = strideIn  : c_int;
     var idist = 0 : c_int;
-    var arr0 = c_ptrTo(yzplane.localAccess[myDom.first]);
+    var arr0 = c_ptrTo(arr);
+    flags = flags | FFTW_UNALIGNED;
     return new FFTWplan(ftType, rank, nnp, howmany, arr0,
                         nnp, stride, idist,
                         arr0, nnp, stride, idist,
                         arg0, flags);
   }
 
-
-  /* Helper routines. This assumes that the data are block-distributed.
-
-     R2C and C2R transforms are more complicated. Currently not supported.
-
-     args -- are the sign and planner flags.
-
-     We do each plane separately copying it back and forth.
-   */
-  proc doFFT_YZ(param ftType : FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, signOrKind, flags : c_uint) {
-
-
-    // Run on all locales
-    coforall loc in Locales {
-      on loc {
-        // Get the x-range to loop over
-        const myDom = arr.localSubdomain();
-        const xRange = myDom.dim(1);
-        const yRange = myDom.dim(2);
-        const zRange = myDom.dim(3);
-
-        var plan_yz = setupYZPlan(ftType, arr, signOrKind, flags);
-
-        if (!plan_yz.isValid) then
-          halt("Error! Plan generation failed! Did you call the warmup routine?");
-        if (!warmUpOnly) {
-          forall i in xRange {
-            var elt = c_ptrTo(arr.localAccess[i,yRange.first, zRange.first]);
-            select ftType {
-                when FFTtype.DFT do fftw_execute_dft(plan_yz.plan, elt, elt);
-                when FFTtype.R2R do fftw_execute_r2r(plan_yz.plan, elt, elt);
-              }
-          }
-        }
-
-        // on loc ends
-      }
-    }
-  }
-
-  // Set up the X FFT plan.
-  // Assumes that we get the XZ plane.
-  proc setupXPlan(param ftType : FFTtype, xzplane : [?Dom] ?T, signOrKind, flags : c_uint) {
+  // Set up many 1D in place plans
+  proc setupPlanColumns(type arrType, param ftType : FFTtype, dom : domain(2), numTransforms : int, signOrKind, in flags : c_uint) {
     // Pull signOrKind locally since this may be an array
     // we need to take a pointer to.
     var mySignOrKind = signOrKind;
     var arg0 : _signOrKindType(ftType);
     select ftType {
-        when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-        when FFTtype.DFT do arg0 = mySignOrKind;
-      }
+      when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
+      when FFTtype.DFT do arg0 = mySignOrKind;
+    }
 
-    // Set FFTW parameters
-    const myDom = xzplane.localSubdomain();
-    const xRange = Dom.dim(1);
-    const zRange = myDom.dim(3);
-    var nn = xRange.size : c_int;
-    var nnp = c_ptrTo(nn);
-    var howmany = myDom.dim(3).size : c_int;
+    // Define a dummy array
+    var arr : [dom] arrType;
+
+    // Write down all the parameters explicitly
+    var howmany = numTransforms : c_int;
+    var nn : c_array(c_int, 1);
+    nn[0] = dom.dim(1).size : c_int;
+    var nnp = c_ptrTo(nn[0]);
     var rank = 1 : c_int;
-    var stride = myDom.dim(3).size : c_int;
+    var stride = dom.dim(2).size  : c_int;
     var idist = 1 : c_int;
-    var arr0 = c_ptrTo(xzplane.localAccess[myDom.first]);
+    var arr0 = c_ptrTo(arr);
+    flags = flags | FFTW_UNALIGNED;
     return new FFTWplan(ftType, rank, nnp, howmany, arr0,
                         nnp, stride, idist,
                         arr0, nnp, stride, idist,
                         arg0, flags);
   }
 
-  /* X helper.
 
-     See TODO for question on sign
-  */
-  proc doFFT_X(param ftType: FFTtype, arr : [?Dom] ?T, warmUpOnly : bool, signOrKind, flags : c_uint) {
-
-    coforall loc in Locales {
-      on loc {
-
-        // Set up for the yz transforms on each domain.
-        const myDom = arr.localSubdomain();
-        const localIndex = myDom.first;
-        const xRange = Dom.dim(1);
-        const zRange = myDom.dim(3);
-
-        // Split the y-range. Make this dimension agnostic
-        const yChunk = chunk(myDom.dim(2), numLocales, here.id);
-
-        if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, zRange}] T;
-          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
-        } else {
-
-
-          // Pull down each plane, process and send back
-          forall j in yChunk with
-            // Task private variables
-            // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] T,
-             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
-             var tt = new TimeTracker()) 
-              {
-                // Pull down the data
-                tt.start();
-                myplane = arr[{xRange,j..j,zRange}];
-                tt.stop(TimeStages.Comms);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
-                tt.start();
-                arr[{xRange,j..j,zRange}] = myplane;
-                tt.stop(TimeStages.Comms);
-              }
-        }
-
-        // End of on-loc
-      }
-    }
-  }
-
-  /* X helper, transposed.
-
-     FFT the x direction of arr, and store transposed in dest.
-
-     x_y_z -> y_x_z
-  */
-  proc doFFT_X_Transposed(param ftType: FFTtype, arr : [?Dom] ?T,
-                          dest : [?DomDest] T, warmUpOnly : bool, signOrKind, flags : c_uint) {
-
-    coforall loc in Locales {
-      on loc {
-
-        // Set up for the yz transforms on each domain.
-        const myDom = arr.localSubdomain();
-        const localIndex = myDom.first;
-
-        // Transposed dimensions
-        const myDomDest = dest.localSubdomain();
-
-        // Split the y-range. Make this dimension agnostic
-        // We're transposing, so the y-dimension of the output
-        // array is now dimension 1.
-        const yChunk = myDomDest.dim(1); 
-        const xRange = Dom.dim(1);
-        const zRange = myDom.dim(3);
-        const myPlaneSize = xRange.size*zRange.size*c_sizeof(T):int;
-
-
-        if (warmUpOnly) {
-          var myplane : [{xRange, 0..0, zRange}] T;
-          var plan_x = setupXPlan(ftType, myplane, signOrKind, flags);
-        } else {
-
-
-          // Pull down each plane, process and send back
-          forall j in yChunk with
-            // Task private variables
-            // TODO : Type here is complex. Does this make sense always???
-            (var myplane : [{xRange, 0..0, zRange}] T,
-             var plan_x = setupXPlan(ftType, myplane, signOrKind, flags),
-             var tt = new TimeTracker()) 
-              {
-                // Pull down the data
-                tt.start();
-                myplane = arr[{xRange,j..j,zRange}];
-                tt.stop(TimeStages.Comms);
-
-                // Do the 1D FFTs here
-                plan_x.execute();
-
-                // Push back the pencil here
-                c_memcpy(c_ptrTo(dest.localAccess[j, xRange.first, zRange.first]),
-                                 c_ptrTo(myplane), myPlaneSize);
-              }
-        }
-
-        // End of on-loc
-      }
-    }
-  }
 
   // I could not combine these, so keep them separate for now.
   private proc _signOrKindType(param ftType : FFTtype) type
@@ -420,14 +362,21 @@ prototype module DistributedFFT {
     return c_ptr(fftw_r2r_kind);
   }
 
+  module FFT_Locks {
+    // https://github.com/chapel-lang/chapel/issues/9881
+    // https://github.com/chapel-lang/chapel/issues/12300
+    private use ChapelLocks;
+    pragma "locale private"
+    var plannerLock : chpl_LocalSpinlock;
+  }
 
   module FFT_Timers {
     use Time;
     // Time the various FFT steps.
     config const timeTrackFFT=false;
 
-    enum TimeStages {X, YZ, Execute, Comms};
-    const stageDomain = {TimeStages.X..TimeStages.Comms};
+    enum TimeStages {X, Y, Z};
+    const stageDomain = {TimeStages.X..TimeStages.Z};
     private var _globalTimeArr : [stageDomain] atomic real;
 
     resetTimers();

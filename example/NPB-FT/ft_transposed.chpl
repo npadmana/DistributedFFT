@@ -41,18 +41,11 @@ var Twiddle : [DomT] real;
 
 var timeit : Timer;
 
-// Warm up the FFTW planners.
-// We don't time this
-timeit.clear(); timeit.start();
-warmUpPlanner(V);
-warmUpPlanner(W);
-timeit.stop();
-writef("Time to setup FFT plans   : %10.4dr \n",timeit.elapsed());
-
 // Touch the arrays once
 timeit.clear(); timeit.start();
 initialize_U();
 initialize_twiddle();
+evolve();
 timeit.stop();
 writef("Time to touch arrays once : %10.4dr \n",timeit.elapsed());
 
@@ -90,10 +83,12 @@ writef("MFLOPS : %10.4dr\n",mflops);
 
 proc evolve() {
   forall ijk in DomT {
-    V.localAccess[ijk] *= Twiddle.localAccess[ijk];
-    Wt.localAccess[ijk] = V.localAccess[ijk];
+    const elt = V.localAccess[ijk]*Twiddle.localAccess[ijk];
+    V.localAccess[ijk] = elt;
+    Wt.localAccess[ijk] = elt;
   }
-  doFFT_Transposed(Wt, W, FFTW_BACKWARD); // This is unnormalized
+  doFFT_Transposed(FFTtype.DFT, Wt, W, FFTW_BACKWARD); // This is unnormalized
+
 }
 
 /* A few comments are in order here.
@@ -142,7 +137,7 @@ proc initialize_twiddle() {
 proc initialize_U() {
   use Random;
   fillRandom(W, 314159265, RNG.NPB);
-  doFFT_Transposed(W, V, FFTW_FORWARD);
+  doFFT_Transposed(FFTtype.DFT, W, V, FFTW_FORWARD);
 }
 
 proc verify(x : complex, y : complex) : bool {

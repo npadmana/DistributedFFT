@@ -1,0 +1,178 @@
+chpl version 1.20.0 pre-release (56bfe4bbae)
+Copyright (c) 2004-2019, Cray Inc.  (See LICENSE file for more details)
+Currently Loaded Modulefiles:
+  1) modules/3.2.11.3
+  2) alps/6.6.43-6.0.7.0_26.4__ga796da3.ari
+  3) nodestat/2.3.85-6.0.7.0_32.1__gc6218bb.ari
+  4) sdb/3.3.775-6.0.7.0_32.3__gb339c00.ari
+  5) udreg/2.3.2-6.0.7.0_33.18__g5196236.ari
+  6) ugni/6.0.14.0-6.0.7.0_23.1__gea11d3d.ari
+  7) gni-headers/5.0.12.0-6.0.7.0_24.1__g3b1768f.ari
+  8) dmapp/7.1.1-6.0.7.0_34.3__g5a674e0.ari
+  9) xpmem/2.2.15-6.0.7.1_5.8__g7549d06.ari
+ 10) llm/21.3.530-6.0.7.0_39.1__g3b4230e.ari
+ 11) nodehealth/5.6.13-6.0.7.0_61.2__ge9c9532.ari
+ 12) system-config/3.5.2786-6.0.7.0_42.1__gc54785a.ari
+ 13) Base-opts/2.4.135-6.0.7.0_38.1__g718f891.ari
+ 14) intel/19.0.3.199
+ 15) craype-broadwell
+ 16) craype-network-aries
+ 17) craype/2.6.1
+ 18) cray-mpich/7.7.10
+ 19) totalview-support/1.2.0.138
+ 20) totalview/2019.0.4
+ 21) cray-libsci/19.06.1
+ 22) pmi/5.0.14
+ 23) atp/2.1.3
+ 24) rca/2.2.18-6.0.7.0_33.3__g2aa4f39.ari
+ 25) perftools-base/7.1.1
+ 26) PrgEnv-intel/6.0.5
+ 27) craype-hugepages16M
+ 28) gcc/8.3.0
+ 29) cray-fftw/3.3.8.3
+ 30) cray-hdf5-parallel/1.10.5.1
+Running cases now....
+---------
+Running on 4 nodes
+NPB FT Benchmark, Class=D
+Running on numLocales = 4
+Problem size = 1024 x 1024 x 2048 
+Time to setup FFT plans   :     3.8764 
+Time to touch arrays once :     2.5662 
+Checksum(1) =  5.122230065252e+02 + 5.118534037109e+02i
+Checksum(2) =  5.120463975765e+02 + 5.117061181082e+02i
+Checksum(3) =  5.119865766760e+02 + 5.117096364601e+02i
+Checksum(4) =  5.119518799488e+02 + 5.117373863950e+02i
+Checksum(5) =  5.119269088223e+02 + 5.117680347632e+02i
+Checksum(6) =  5.119082416858e+02 + 5.117967875532e+02i
+Checksum(7) =  5.118943814638e+02 + 5.118225281841e+02i
+Checksum(8) =  5.118842385057e+02 + 5.118451629348e+02i
+Checksum(9) =  5.118769435632e+02 + 5.118649119387e+02i
+Checksum(10) =  5.118718203448e+02 + 5.118820803844e+02i
+Checksum(11) =  5.118683569061e+02 + 5.118969781011e+02i
+Checksum(12) =  5.118661708593e+02 + 5.119098918835e+02i
+Checksum(13) =  5.118649768950e+02 + 5.119210777066e+02i
+Checksum(14) =  5.118645605626e+02 + 5.119307604484e+02i
+Checksum(15) =  5.118647586618e+02 + 5.119391362671e+02i
+Checksum(16) =  5.118654451572e+02 + 5.119463757241e+02i
+Checksum(17) =  5.118665212451e+02 + 5.119526269238e+02i
+Checksum(18) =  5.118679083821e+02 + 5.119580184108e+02i
+Checksum(19) =  5.118695433664e+02 + 5.119626617538e+02i
+Checksum(20) =  5.118713748264e+02 + 5.119666538138e+02i
+Checksum(21) =  5.118733606701e+02 + 5.119700787219e+02i
+Checksum(22) =  5.118754661974e+02 + 5.119730095953e+02i
+Checksum(23) =  5.118776626738e+02 + 5.119755100241e+02i
+Checksum(24) =  5.118799262314e+02 + 5.119776353561e+02i
+Checksum(25) =  5.118822370068e+02 + 5.119794338060e+02i
+Successful completion of NPB FT Benchmark Class D
+Elapsed time :    59.1348
+MFLOPS : 151581.5205
+---------
+---------
+Running on 8 nodes
+NPB FT Benchmark, Class=D
+Running on numLocales = 8
+Problem size = 1024 x 1024 x 2048 
+Time to setup FFT plans   :     3.8816 
+Time to touch arrays once :     1.5310 
+Checksum(1) =  5.122230065252e+02 + 5.118534037109e+02i
+Checksum(2) =  5.120463975765e+02 + 5.117061181082e+02i
+Checksum(3) =  5.119865766760e+02 + 5.117096364601e+02i
+Checksum(4) =  5.119518799488e+02 + 5.117373863950e+02i
+Checksum(5) =  5.119269088223e+02 + 5.117680347632e+02i
+Checksum(6) =  5.119082416858e+02 + 5.117967875532e+02i
+Checksum(7) =  5.118943814638e+02 + 5.118225281841e+02i
+Checksum(8) =  5.118842385057e+02 + 5.118451629348e+02i
+Checksum(9) =  5.118769435632e+02 + 5.118649119387e+02i
+Checksum(10) =  5.118718203448e+02 + 5.118820803844e+02i
+Checksum(11) =  5.118683569061e+02 + 5.118969781011e+02i
+Checksum(12) =  5.118661708593e+02 + 5.119098918835e+02i
+Checksum(13) =  5.118649768950e+02 + 5.119210777066e+02i
+Checksum(14) =  5.118645605626e+02 + 5.119307604484e+02i
+Checksum(15) =  5.118647586618e+02 + 5.119391362671e+02i
+Checksum(16) =  5.118654451572e+02 + 5.119463757241e+02i
+Checksum(17) =  5.118665212451e+02 + 5.119526269238e+02i
+Checksum(18) =  5.118679083821e+02 + 5.119580184108e+02i
+Checksum(19) =  5.118695433664e+02 + 5.119626617538e+02i
+Checksum(20) =  5.118713748264e+02 + 5.119666538138e+02i
+Checksum(21) =  5.118733606701e+02 + 5.119700787219e+02i
+Checksum(22) =  5.118754661974e+02 + 5.119730095953e+02i
+Checksum(23) =  5.118776626738e+02 + 5.119755100241e+02i
+Checksum(24) =  5.118799262314e+02 + 5.119776353561e+02i
+Checksum(25) =  5.118822370068e+02 + 5.119794338060e+02i
+Successful completion of NPB FT Benchmark Class D
+Elapsed time :    35.5786
+MFLOPS : 251942.2441
+---------
+---------
+Running on 16 nodes
+NPB FT Benchmark, Class=D
+Running on numLocales = 16
+Problem size = 1024 x 1024 x 2048 
+Time to setup FFT plans   :     3.8726 
+Time to touch arrays once :     1.2177 
+Checksum(1) =  5.122230065252e+02 + 5.118534037109e+02i
+Checksum(2) =  5.120463975765e+02 + 5.117061181082e+02i
+Checksum(3) =  5.119865766760e+02 + 5.117096364601e+02i
+Checksum(4) =  5.119518799488e+02 + 5.117373863950e+02i
+Checksum(5) =  5.119269088223e+02 + 5.117680347632e+02i
+Checksum(6) =  5.119082416858e+02 + 5.117967875532e+02i
+Checksum(7) =  5.118943814638e+02 + 5.118225281841e+02i
+Checksum(8) =  5.118842385057e+02 + 5.118451629348e+02i
+Checksum(9) =  5.118769435632e+02 + 5.118649119387e+02i
+Checksum(10) =  5.118718203448e+02 + 5.118820803844e+02i
+Checksum(11) =  5.118683569061e+02 + 5.118969781011e+02i
+Checksum(12) =  5.118661708593e+02 + 5.119098918835e+02i
+Checksum(13) =  5.118649768950e+02 + 5.119210777066e+02i
+Checksum(14) =  5.118645605626e+02 + 5.119307604484e+02i
+Checksum(15) =  5.118647586618e+02 + 5.119391362671e+02i
+Checksum(16) =  5.118654451572e+02 + 5.119463757241e+02i
+Checksum(17) =  5.118665212451e+02 + 5.119526269238e+02i
+Checksum(18) =  5.118679083821e+02 + 5.119580184108e+02i
+Checksum(19) =  5.118695433664e+02 + 5.119626617538e+02i
+Checksum(20) =  5.118713748264e+02 + 5.119666538138e+02i
+Checksum(21) =  5.118733606701e+02 + 5.119700787219e+02i
+Checksum(22) =  5.118754661974e+02 + 5.119730095953e+02i
+Checksum(23) =  5.118776626738e+02 + 5.119755100241e+02i
+Checksum(24) =  5.118799262314e+02 + 5.119776353561e+02i
+Checksum(25) =  5.118822370068e+02 + 5.119794338060e+02i
+Successful completion of NPB FT Benchmark Class D
+Elapsed time :    22.0014
+MFLOPS : 407417.4944
+---------
+---------
+Running on 32 nodes
+NPB FT Benchmark, Class=D
+Running on numLocales = 32
+Problem size = 1024 x 1024 x 2048 
+Time to setup FFT plans   :     3.9406 
+Time to touch arrays once :     0.8539 
+Checksum(1) =  5.122230065252e+02 + 5.118534037109e+02i
+Checksum(2) =  5.120463975765e+02 + 5.117061181082e+02i
+Checksum(3) =  5.119865766760e+02 + 5.117096364601e+02i
+Checksum(4) =  5.119518799488e+02 + 5.117373863950e+02i
+Checksum(5) =  5.119269088223e+02 + 5.117680347632e+02i
+Checksum(6) =  5.119082416858e+02 + 5.117967875532e+02i
+Checksum(7) =  5.118943814638e+02 + 5.118225281841e+02i
+Checksum(8) =  5.118842385057e+02 + 5.118451629348e+02i
+Checksum(9) =  5.118769435632e+02 + 5.118649119387e+02i
+Checksum(10) =  5.118718203448e+02 + 5.118820803844e+02i
+Checksum(11) =  5.118683569061e+02 + 5.118969781011e+02i
+Checksum(12) =  5.118661708593e+02 + 5.119098918835e+02i
+Checksum(13) =  5.118649768950e+02 + 5.119210777066e+02i
+Checksum(14) =  5.118645605626e+02 + 5.119307604484e+02i
+Checksum(15) =  5.118647586618e+02 + 5.119391362671e+02i
+Checksum(16) =  5.118654451572e+02 + 5.119463757241e+02i
+Checksum(17) =  5.118665212451e+02 + 5.119526269238e+02i
+Checksum(18) =  5.118679083821e+02 + 5.119580184108e+02i
+Checksum(19) =  5.118695433664e+02 + 5.119626617538e+02i
+Checksum(20) =  5.118713748264e+02 + 5.119666538138e+02i
+Checksum(21) =  5.118733606701e+02 + 5.119700787219e+02i
+Checksum(22) =  5.118754661974e+02 + 5.119730095953e+02i
+Checksum(23) =  5.118776626738e+02 + 5.119755100241e+02i
+Checksum(24) =  5.118799262314e+02 + 5.119776353561e+02i
+Checksum(25) =  5.118822370068e+02 + 5.119794338060e+02i
+Successful completion of NPB FT Benchmark Class D
+Elapsed time :    15.6066
+MFLOPS : 574355.0743
+---------
