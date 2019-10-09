@@ -11,6 +11,7 @@ prototype module DistributedFFT {
   require "npFFTW.h";
 
   config param usePerformant=true;
+  config param usePrimitiveComm=true;
 
   proc deinit() {
     cleanup();
@@ -195,8 +196,12 @@ prototype module DistributedFFT {
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
 
-      forall iy in ySrc {
-        copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
+      if usePrimitiveComm {
+        forall iy in ySrc {
+          copy(myplane[0, iy, zSrc.first], Src[xSrc.first, iy, zSrc.first], myLineSize);
+        }
+      } else {
+        myplane = Src[{xSrc.first..xSrc.first, ySrc, zSrc}];
       }
 
       for ix in xSrc {
@@ -212,9 +217,17 @@ prototype module DistributedFFT {
         forall iy in offset(ySrc) {
           zPlan.execute(myplane[0, iy, zSrc.first]);
           // Transpose data into Dst, and copy the next Src slice into myplane
-          copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
+          if usePrimitiveComm {
+            copy(Dst[iy, ix, zSrc.first], myplane[0, iy, zSrc.first], myLineSize);
+          } else {
+            Dst[{iy..iy, ix..ix, zSrc}] = myplane[{0..0, iy..iy, zSrc}];
+          }
           if (ix != xSrc.last) {
-            copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
+            if usePrimitiveComm {
+              copy(myplane[0, iy, zSrc.first], Src[ix+1, iy, zSrc.first], myLineSize);
+            } else {
+              myplane[{0..0, iy..iy, zSrc}] = Src[{ix+1..ix+1, iy..iy, zSrc}];
+            }
           }
         }
         timeTrack.stop(TimeStages.Z);
