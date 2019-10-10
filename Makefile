@@ -30,6 +30,10 @@ ftt: target/example/NPB-FT/ft_transposed
 .PHONY: examples target
 examples: target ${EXAMPLES}
 
+.PHONY: doc
+doc:
+	chpldoc --comment-style "/***" src/DistributedFFT.chpl	
+
 target:
 	mkdir -p target/example
 

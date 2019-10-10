@@ -1,0 +1,136 @@
+.. default-domain:: chpl
+
+.. module:: DistributedFFT
+   :synopsis: Provides a distributed 3D FFT.
+
+DistributedFFT
+==============
+**Usage**
+
+.. code-block:: chapel
+
+   use DistributedFFT;
+
+
+Provides a distributed 3D FFT.
+
+.. note::
+
+ * Currently only supports complex-complex and real-real transforms
+ * Only out-of-place transforms are supported, and the output array
+   has its first two indices transposed. The input array is unchanged.
+ * Requires FFTW for the local 1D transforms. 
+ * The data are slab-distributed along the first dimension.
+
+
+A simple example of using the module is
+
+.. code-block:: chapel
+
+  // Set up a slab-distributed domain
+  const Dom  = newSlabDom({0.. #NX, 0.. #NY, 0.. #NZ});
+  // And for the transposed array
+  const DomT = newSlabDom({0.. #NY, 0.. #NX, 0.. #NZ});
+
+  // Define the array
+  var inputarr  : [Dom]  complex;
+  var outputarr : [DomT] complex;
+
+  //Process inputarr as necessary
+  //then FFT in the forward direction
+  doFFT_Transposed(FFTtype.DFT, inputarr, outputarr, FFTW_FORWARD);
+
+  //Process outputarr as necessary
+  //then FFT in the reverse direction
+  doFFT_Transposed(FFTtype.DFT, outputarr, inputarr, FFTW_BACKWARD);
+
+
+
+.. data:: config param usePerformant = true
+
+   
+   Compile time parameters for higher performance.
+   
+   ``usePerformant`` selects between a naive pencil-and-paper
+   algorithm and a more performant version.
+   
+
+.. data:: config param usePrimitiveComm = true
+
+   
+   
+   ``usePrimitiveComm`` calls into non-user-facing Chapel
+   communication primitives for data movement, instead of using
+   array slicing and copying.
+   
+
+.. enum:: enum FFTtype { DFT, R2R }
+
+   
+   The type of the transform.
+   
+   Current complex-complex (DFT) and
+   real-to-real (R2R) transforms are supported.
+   
+
+
+.. function:: proc newSlabDom(dom: domain)
+
+   
+   Construct a distributed slab distributed domain.
+   These are currently backed by BlockDist.
+   
+   :arg dom: Input 3D rectangular domain
+   
+   :returns: Returns a slab-distributed domain.
+   
+
+.. function:: proc newSlabDom(sz)
+
+   
+   Construct a distributed slab distributed domain.
+   These are currently backed by BlockDist.
+   
+   :arg sz: Size tuple ``(NX, NY, NZ)``
+   
+   :returns: Returns a slab-distributed domain.
+   
+
+.. function:: proc doFFT_Transposed(param ftType: FFTtype, src: [?SrcDom] ?T, dest: [?DestDom] T, signOrKind)
+
+   
+   Do the FFT.
+   
+   :arg ftType: Type of transform
+   :type ftType: FFTtype
+   :arg src: Input array [XYZ]
+   :arg dest: Output array, transposed [YXZ]
+   :arg signOrKind: Sign (for DFT), or kind (for R2R) of transform.
+   
+   Refer to the FFTW documentation for the different
+   signs/kinds.
+   
+   Note that if ``ftType`` is ``FFTtype.R2R``, then
+   the ``signOrKind`` argument must be a 3 element array
+   (the type for each dimension separately).
+   
+
+.. iterfunction:: iter offset(param tag: iterKind, r: range)
+
+   
+   Iterate over the range ``r`` but in an offset manner based
+   on the locale id.
+   
+
+.. function:: proc copy(ref dst, const ref src, numBytes: int)
+
+   
+   Low-level copy routine for contiguous data (a generalized ``memcpy``).
+   
+   :arg dst: Starting element of destination block
+   :arg src: Starting element of source block
+   :arg numBytes: Number of bytes to copy.
+   
+   Note that both ``dst`` and ``src`` cannot be remote.
+   
+
