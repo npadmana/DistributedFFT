@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/npadmana/DistributedFFT.svg?branch=master)](https://travis-ci.com/npadmana/DistributedFFT)
+
 Branches:
 ---------
 
