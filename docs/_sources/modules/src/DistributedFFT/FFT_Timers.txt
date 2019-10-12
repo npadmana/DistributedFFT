@@ -1,0 +1,36 @@
+.. default-domain:: chpl
+
+.. module:: FFT_Timers
+
+FFT_Timers
+==========
+**Usage**
+
+.. code-block:: chapel
+
+   use DistributedFFT.FFT_Timers;
+
+.. data:: config const timeTrackFFT = false
+
+.. enum:: enum TimeStages { X, Y, Z }
+
+.. data:: const stageDomain = {TimeStages.X..TimeStages.Z}
+
+.. function:: proc deinit()
+
+.. function:: proc resetTimers()
+
+.. function:: proc printTimers()
+
+.. record:: TimeTracker
+
+   .. attribute:: var tt: Timer()
+
+   .. attribute:: var arr: [stageDomain] real
+
+   .. method:: proc deinit()
+
+   .. method:: proc start()
+
+   .. method:: proc stop(stage)
+

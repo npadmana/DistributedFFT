@@ -1,0 +1,14 @@
+.. default-domain:: chpl
+
+.. module:: FFT_Locks
+
+FFT_Locks
+=========
+**Usage**
+
+.. code-block:: chapel
+
+   use DistributedFFT.FFT_Locks;
+
+.. data:: var plannerLock: chpl_LocalSpinlock
+

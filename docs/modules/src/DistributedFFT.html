@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>DistributedFFT &mdash; chpldoc 0.0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="chpldoc 0.0.1 documentation" href="../../index.html"/>
+        <link rel="prev" title="chpldoc documentation" href="../../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> chpldoc
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">chpldoc documentation</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">DistributedFFT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">chpldoc</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+    <li>DistributedFFT</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../_sources/modules/src/DistributedFFT.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-DistributedFFT"></span><div class="section" id="distributedfft">
+<h1>DistributedFFT<a class="headerlink" href="#distributedfft" title="Permalink to this headline">¶</a></h1>
+<p><strong>Usage</strong></p>
+<div class="highlight-chapel"><div class="highlight"><pre><span></span><span class="k">use</span> <span class="nx">DistributedFFT</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Provides a distributed 3D FFT.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ul class="last simple">
+<li>Currently only supports complex-complex and real-real transforms</li>
+<li>Only out-of-place transforms are supported, and the output array
+has its first two indices transposed. The input array is unchanged.</li>
+<li>Requires FFTW for the local 1D transforms.</li>
+<li>The data are slab-distributed along the first dimension.</li>
+</ul>
+</div>
+<p>A simple example of using the module is</p>
+<div class="highlight-chapel"><div class="highlight"><pre><span></span><span class="c1">// Set up a slab-distributed domain</span>
+<span class="kd">const</span> <span class="nx">Dom</span>  <span class="o">=</span> <span class="nx">newSlabDom</span><span class="p">({</span><span class="mi">0</span><span class="o">..</span> <span class="o">#</span><span class="nx">NX</span><span class="p">,</span> <span class="mi">0</span><span class="o">..</span> <span class="o">#</span><span class="nx">NY</span><span class="p">,</span> <span class="mi">0</span><span class="o">..</span> <span class="o">#</span><span class="nx">NZ</span><span class="p">});</span>
+<span class="c1">// And for the transposed array</span>
+<span class="kd">const</span> <span class="nx">DomT</span> <span class="o">=</span> <span class="nx">newSlabDom</span><span class="p">({</span><span class="mi">0</span><span class="o">..</span> <span class="o">#</span><span class="nx">NY</span><span class="p">,</span> <span class="mi">0</span><span class="o">..</span> <span class="o">#</span><span class="nx">NX</span><span class="p">,</span> <span class="mi">0</span><span class="o">..</span> <span class="o">#</span><span class="nx">NZ</span><span class="p">});</span>
+
+<span class="c1">// Define the array</span>
+<span class="kd">var</span> <span class="nx">inputarr</span>  <span class="p">:</span> <span class="p">[</span><span class="nx">Dom</span><span class="p">]</span>  <span class="kt">complex</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">outputarr</span> <span class="p">:</span> <span class="p">[</span><span class="nx">DomT</span><span class="p">]</span> <span class="kt">complex</span><span class="p">;</span>
+
+<span class="c1">//Process inputarr as necessary</span>
+<span class="c1">//then FFT in the forward direction</span>
+<span class="nx">doFFT_Transposed</span><span class="p">(</span><span class="nx">FFTtype</span><span class="p">.</span><span class="nx">DFT</span><span class="p">,</span> <span class="nx">inputarr</span><span class="p">,</span> <span class="nx">outputarr</span><span class="p">,</span> <span class="nx">FFTW_FORWARD</span><span class="p">);</span>
+
+<span class="c1">//Process outputarr as necessary</span>
+<span class="c1">//then FFT in the reverse direction</span>
+<span class="nx">doFFT_Transposed</span><span class="p">(</span><span class="nx">FFTtype</span><span class="p">.</span><span class="nx">DFT</span><span class="p">,</span> <span class="nx">outputarr</span><span class="p">,</span> <span class="nx">inputarr</span><span class="p">,</span> <span class="nx">FFTW_BACKWARD</span><span class="p">);</span>
+</pre></div>
+</div>
+<dl class="data">
+<dt id="DistributedFFT.usePerformant">
+<em class="property">config param </em><code class="descname">usePerformant</code> = true<a class="headerlink" href="#DistributedFFT.usePerformant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile time parameters for higher performance.</p>
+<p><code class="docutils literal"><span class="pre">usePerformant</span></code> selects between a naive pencil-and-paper
+algorithm and a more performant version.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="DistributedFFT.usePrimitiveComm">
+<em class="property">config param </em><code class="descname">usePrimitiveComm</code> = true<a class="headerlink" href="#DistributedFFT.usePrimitiveComm" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">usePrimitiveComm</span></code> calls into non-user-facing Chapel
+communication primitives for data movement, instead of using
+array slicing and copying.</p>
+</dd></dl>
+
+<dl class="enum">
+<dt id="DistributedFFT.FFTtype">
+<em class="property">enum </em><code class="descname">FFTtype</code> { DFT, R2R }<a class="headerlink" href="#DistributedFFT.FFTtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the transform.</p>
+<p>Current complex-complex (DFT) and
+real-to-real (R2R) transforms are supported.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DistributedFFT.newSlabDom">
+<em class="property">proc </em><code class="descname">newSlabDom</code><span class="sig-paren">(</span><em>dom: domain</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.newSlabDom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a distributed slab distributed domain.
+These are currently backed by BlockDist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>dom</strong> &#8211; Input 3D rectangular domain</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns a slab-distributed domain.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<em class="property">proc </em><code class="descname">newSlabDom</code><span class="sig-paren">(</span><em>sz</em><span class="sig-paren">)</span></dt>
+<dd><p>Construct a distributed slab distributed domain.
+These are currently backed by BlockDist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><strong>sz</strong> &#8211; Size tuple <code class="docutils literal"><span class="pre">(NX,</span> <span class="pre">NY,</span> <span class="pre">NZ)</span></code></td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Returns a slab-distributed domain.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="DistributedFFT.doFFT_Transposed">
+<em class="property">proc </em><code class="descname">doFFT_Transposed</code><span class="sig-paren">(</span><em>param ftType: FFTtype</em>, <em>src: [?SrcDom] ?T</em>, <em>dst: [?DstDom] T</em>, <em>signOrKind</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.doFFT_Transposed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Do the FFT.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ftType</strong> : <em>FFTtype</em> &#8211; Type of transform</li>
+<li><strong>src</strong> &#8211; Input array [XYZ]</li>
+<li><strong>dst</strong> &#8211; Output array, transposed [YXZ]</li>
+<li><strong>signOrKind</strong> &#8211; Sign (for DFT), or kind (for R2R) of transform.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Refer to the FFTW documentation for the different
+signs/kinds.</p>
+<p>Note that if <code class="docutils literal"><span class="pre">ftType</span></code> is <code class="docutils literal"><span class="pre">FFTtype.R2R</span></code>, then
+the <code class="docutils literal"><span class="pre">signOrKind</span></code> argument must be a 3 element array
+(the type for each dimension separately).</p>
+</dd></dl>
+
+<dl class="iterfunction">
+<dt id="DistributedFFT.offset">
+<em class="property">iter </em><code class="descname">offset</code><span class="sig-paren">(</span><em>r: range</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over the range <code class="docutils literal"><span class="pre">r</span></code> but in an offset manner based
+on the locale id.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DistributedFFT.copy">
+<em class="property">proc </em><code class="descname">copy</code><span class="sig-paren">(</span><em>ref dst</em>, <em>const ref src</em>, <em>numBytes: int</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Low-level copy routine for contiguous data (a generalized <code class="docutils literal"><span class="pre">memcpy</span></code>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dst</strong> &#8211; Starting element of destination block</li>
+<li><strong>src</strong> &#8211; Starting element of source block</li>
+<li><strong>numBytes</strong> &#8211; Number of bytes to copy.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Note that both <code class="docutils literal"><span class="pre">dst</span></code> and <code class="docutils literal"><span class="pre">src</span></code> cannot be remote.</p>
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../../index.html" class="btn btn-neutral" title="chpldoc documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2015, .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+  
+ 
+
+
+
+</body>
+</html>
