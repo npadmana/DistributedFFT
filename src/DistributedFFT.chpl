@@ -167,7 +167,7 @@ prototype module DistributedFFT {
       :arg ftType: Type of transform
       :type ftType: FFTtype
       :arg src: Input array [XYZ]
-      :arg dest: Output array, transposed [YXZ]
+      :arg dst: Output array, transposed [YXZ]
       :arg signOrKind: Sign (for DFT), or kind (for R2R) of transform.
 
       Refer to the FFTW documentation for the different
@@ -179,12 +179,12 @@ prototype module DistributedFFT {
   ***/
   proc doFFT_Transposed(param ftType : FFTtype,
                         src: [?SrcDom] ?T,
-                        dest : [?DestDom] T,
+                        dst : [?DstDom] T,
                         signOrKind) {
     if (usePerformant) {
-      doFFT_Transposed_Performant(ftType, src, dest, signOrKind);
+      doFFT_Transposed_Performant(ftType, src, dst, signOrKind);
     } else {
-      doFFT_Transposed_Naive(ftType, src, dest, signOrKind);
+      doFFT_Transposed_Naive(ftType, src, dst, signOrKind);
     }
   }
 
@@ -338,13 +338,13 @@ prototype module DistributedFFT {
     }
   }
 
-  pragma "no doc"
-  iter offset(r: range) { halt("Serial offset not implemented"); }
-
   /***
       Iterate over the range ``r`` but in an offset manner based
       on the locale id.
   ***/
+  iter offset(r: range) { halt("Serial offset not implemented"); }
+
+  pragma "no doc"
   iter offset(param tag: iterKind, r: range) where (tag==iterKind.standalone) {
     forall i in r + (r.size/numLocales * here.id) do {
       yield i % r.size + r.first;
