@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.com/npadmana/DistributedFFT.svg?branch=master)](https://travis-ci.com/npadmana/DistributedFFT)
 
+Documentation for this package may be found [here](https://npadmana.github.io/DistributedFFT/docs/modules/src/DistributedFFT.html).
+
 Branches:
 ---------
 
