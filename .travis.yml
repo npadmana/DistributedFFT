@@ -1,0 +1,11 @@
+language: minimal
+
+services:
+  - docker
+
+jobs:
+  include:
+    - script: |
+        docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -w /repo.git chapel/chapel-gasnet:1.20.0 /bin/bash -c '
+        apt-get update && apt-get install -y libfftw3-dev &&
+        make ftt && ./target/example/NPB-FT/ft_transposed -nl 4'
