@@ -225,7 +225,7 @@ These are currently backed by BlockDist.</p>
 
 <dl class="function">
 <dt id="DistributedFFT.doFFT_Transposed">
-<em class="property">proc </em><code class="descname">doFFT_Transposed</code><span class="sig-paren">(</span><em>param ftType: FFTtype</em>, <em>src: [?SrcDom] ?T</em>, <em>dest: [?DestDom] T</em>, <em>signOrKind</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.doFFT_Transposed" title="Permalink to this definition">¶</a></dt>
+<em class="property">proc </em><code class="descname">doFFT_Transposed</code><span class="sig-paren">(</span><em>param ftType: FFTtype</em>, <em>src: [?SrcDom] ?T</em>, <em>dst: [?DstDom] T</em>, <em>signOrKind</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.doFFT_Transposed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Do the FFT.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -234,7 +234,7 @@ These are currently backed by BlockDist.</p>
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
 <li><strong>ftType</strong> : <em>FFTtype</em> &#8211; Type of transform</li>
 <li><strong>src</strong> &#8211; Input array [XYZ]</li>
-<li><strong>dest</strong> &#8211; Output array, transposed [YXZ]</li>
+<li><strong>dst</strong> &#8211; Output array, transposed [YXZ]</li>
 <li><strong>signOrKind</strong> &#8211; Sign (for DFT), or kind (for R2R) of transform.</li>
 </ul>
 </td>
@@ -250,7 +250,7 @@ the <code class="docutils literal"><span class="pre">signOrKind</span></code> ar
 
 <dl class="iterfunction">
 <dt id="DistributedFFT.offset">
-<em class="property">iter </em><code class="descname">offset</code><span class="sig-paren">(</span><em>param tag: iterKind</em>, <em>r: range</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.offset" title="Permalink to this definition">¶</a></dt>
+<em class="property">iter </em><code class="descname">offset</code><span class="sig-paren">(</span><em>r: range</em><span class="sig-paren">)</span><a class="headerlink" href="#DistributedFFT.offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iterate over the range <code class="docutils literal"><span class="pre">r</span></code> but in an offset manner based
 on the locale id.</p>
 </dd></dl>

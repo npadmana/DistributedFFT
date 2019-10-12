@@ -45,7 +45,6 @@ A simple example of using the module is
   doFFT_Transposed(FFTtype.DFT, outputarr, inputarr, FFTW_BACKWARD);
 
 
-
 .. data:: config param usePerformant = true
 
    
@@ -96,7 +95,7 @@ A simple example of using the module is
    :returns: Returns a slab-distributed domain.
    
 
-.. function:: proc doFFT_Transposed(param ftType: FFTtype, src: [?SrcDom] ?T, dest: [?DestDom] T, signOrKind)
+.. function:: proc doFFT_Transposed(param ftType: FFTtype, src: [?SrcDom] ?T, dst: [?DstDom] T, signOrKind)
 
    
    Do the FFT.
@@ -104,7 +103,7 @@ A simple example of using the module is
    :arg ftType: Type of transform
    :type ftType: FFTtype
    :arg src: Input array [XYZ]
-   :arg dest: Output array, transposed [YXZ]
+   :arg dst: Output array, transposed [YXZ]
    :arg signOrKind: Sign (for DFT), or kind (for R2R) of transform.
    
    Refer to the FFTW documentation for the different
@@ -115,7 +114,7 @@ A simple example of using the module is
    (the type for each dimension separately).
    
 
-.. iterfunction:: iter offset(param tag: iterKind, r: range)
+.. iterfunction:: iter offset(r: range)
 
    
    Iterate over the range ``r`` but in an offset manner based

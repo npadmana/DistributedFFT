@@ -32,7 +32,7 @@ examples: target ${EXAMPLES}
 
 .PHONY: doc
 doc:
-	chpldoc --comment-style "/***" src/DistributedFFT.chpl	
+	chpldoc src/DistributedFFT.chpl	
 
 target:
 	mkdir -p target/example
