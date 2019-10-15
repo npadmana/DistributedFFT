@@ -6,17 +6,22 @@ EXAMPLES=target/example/MPI/fftw-mpi-benchmark \
 	target/example/Dist/test_simple \
 	target/example/Dist/time_simple \
 
+# Use the naive branch
+ifdef NAIVE
+NAIVEFLAG=-susePerformant=false
+else
+NAIVEFLAG=
+endif
 
 # The following are experimental flags for better performance
 PERF_FLAGS=-schpl_serializeSlices -suseBulkTransfer
-
 
 Mason.toml: Mason.toml.template
 	envsubst < $< > $@
 
 target/example/NPB-FT/%: example/NPB-FT/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/NPB-FT
-	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
+	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS} ${NAIVEFLAG}
 
 # Note : turn off the inplace version for now.
 ## ft: target/example/NPB-FT/ft target/example/NPB-FT/ft_transposed
@@ -39,13 +44,13 @@ target:
 
 target/example/R2R/%: example/R2R/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/R2R
-	chpl -o $@ $< ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS}
+	chpl -o $@ $< ${CHPL_WARN_FLAGS} -lfftw3 -Msrc ${PERF_FLAGS} ${NAIVEFLAG}
 
 target/example/Comm/plane_v2: example/Comm/plane_v2.chpl
 	chpl -o $@ $< --fast ${PERF_FLAGS}
 
 target/example/MPI/fftw-mpi-benchmark: example/MPI/fftw-mpi-benchmark.chpl src/DistributedFFT.chpl
-	chpl -o $@ $< --fast ${MPI_CHPL_FLAGS} ${CHPL_WARN_FLAGS} -lfftw3_mpi -lfftw3_threads -lfftw3 -Msrc
+	chpl -o $@ $< --fast ${MPI_CHPL_FLAGS} ${CHPL_WARN_FLAGS} -lfftw3_mpi -lfftw3_threads -lfftw3 -Msrc 
 
 target/example/FFTW/%: example/FFTW/%.chpl
 	mkdir -p target/example/FFTW
@@ -53,6 +58,6 @@ target/example/FFTW/%: example/FFTW/%.chpl
 
 target/example/Dist/%: example/Dist/%.chpl src/DistributedFFT.chpl
 	mkdir -p target/example/Dist
-	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3 -Msrc ${PERF_FLAGS}
+	chpl -o $@ $< --fast ${CHPL_WARN_FLAGS} -lfftw3_threads -lfftw3 -Msrc ${PERF_FLAGS} ${NAIVEFLAG}
 
 
