@@ -280,8 +280,8 @@ prototype module DistributedFFT {
       const myLineSize = zSrc.size*numBytes(T);
 
       // Setup FFTW plans
-      var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
-      var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var xPlan = setupBatchPlan(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=1, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
@@ -402,7 +402,7 @@ prototype module DistributedFFT {
   }
 
   pragma "no doc"
-  proc setupBatchPlanColumns(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+  proc setupBatchPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
     return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags);
   }
 
