@@ -214,9 +214,9 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
       // Set up FFTW plans
-      var xPlan = setup1DPlan(T, ftType, xDst.size, zSrc.size, signOrKind, FFTW_MEASURE);
-      var yPlan = setup1DPlan(T, ftType, ySrc.size, zSrc.size, signOrKind, FFTW_MEASURE);
-      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
+      var xPlan = setupPlan(T, ftType, {xDst, zSrc}, parDim=2, 1, signOrKind, FFTW_MEASURE);
+      var yPlan = setupPlan(T, ftType, {ySrc, zSrc}, parDim=2, 1, signOrKind, FFTW_MEASURE);
+      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=1, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
@@ -282,7 +282,7 @@ prototype module DistributedFFT {
       // Setup FFTW plans
       var yPlan = setupBatchPlanColumns(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var xPlan = setupBatchPlanColumns(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
-      var zPlan = setup1DPlan(T, ftType, zSrc.size, 1, signOrKind, FFTW_MEASURE);
+      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=1, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
@@ -406,37 +406,6 @@ prototype module DistributedFFT {
     return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags);
   }
 
-
-  // Set up 1D in-place plans
-  pragma "no doc"
-  proc setup1DPlan(type arrType, param ftType : FFTtype, nx : int, strideIn : int, signOrKind, in flags : c_uint) {
-    // Pull signOrKind locally since this may be an array
-    // we need to take a pointer to.
-    var mySignOrKind = signOrKind;
-    var arg0 : _signOrKindType(ftType);
-    select ftType {
-      when FFTtype.R2R do arg0 = c_ptrTo(mySignOrKind);
-      when FFTtype.DFT do arg0 = mySignOrKind;
-    }
-
-    // Define a dummy array
-    var arr : [0.. #(nx*strideIn)] arrType;
-
-    // Write down all the parameters explicitly
-    var howmany = 1 : c_int;
-    var nn : c_array(c_int, 1);
-    nn[0] = nx : c_int;
-    var nnp = c_ptrTo(nn[0]);
-    var rank = 1 : c_int;
-    var stride = strideIn  : c_int;
-    var idist = 0 : c_int;
-    var arr0 = c_ptrTo(arr);
-    flags = flags | FFTW_UNALIGNED;
-    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
-                        nnp, stride, idist,
-                        arr0, nnp, stride, idist,
-                        arg0, flags);
-  }
 
   // Set up many 1D in place plans on a 2D array
   pragma "no doc"
