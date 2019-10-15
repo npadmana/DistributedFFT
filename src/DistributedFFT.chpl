@@ -385,8 +385,8 @@ prototype module DistributedFFT {
       this.numTasks = min(here.maxTaskPar, parRange.size);
       this.batchSizeSm = parRange.size/numTasks;
       this.batchSizeLg = parRange.size/numTasks+1;
-      this.planSm = setupPlanColumns(arrType, ftType, dom, batchSizeSm, signOrKind, flags);
-      this.planLg = setupPlanColumns(arrType, ftType, dom, batchSizeLg, signOrKind, flags);
+      this.planSm = setupPlan(arrType, ftType, dom, parDim, batchSizeSm, signOrKind, flags);
+      this.planLg = setupPlan(arrType, ftType, dom, parDim, batchSizeLg, signOrKind, flags);
     }
 
     iter batch() {
@@ -438,9 +438,9 @@ prototype module DistributedFFT {
                         arg0, flags);
   }
 
-  // Set up many 1D in place plans
+  // Set up many 1D in place plans on a 2D array
   pragma "no doc"
-  proc setupPlanColumns(type arrType, param ftType : FFTtype, dom : domain(2), numTransforms : int, signOrKind, in flags : c_uint) {
+  proc setupPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, numTransforms : int, signOrKind, in flags : c_uint) {
     // Pull signOrKind locally since this may be an array
     // we need to take a pointer to.
     var mySignOrKind = signOrKind;
@@ -456,11 +456,20 @@ prototype module DistributedFFT {
     // Write down all the parameters explicitly
     var howmany = numTransforms : c_int;
     var nn : c_array(c_int, 1);
-    nn[0] = dom.dim(1).size : c_int;
     var nnp = c_ptrTo(nn[0]);
     var rank = 1 : c_int;
-    var stride = dom.dim(2).size  : c_int;
-    var idist = 1 : c_int;
+    var stride, idist : c_int;
+    if (parDim == 2) {
+      // FFT columns
+      nn[0] = dom.dim(1).size : c_int;
+      stride = dom.dim(2).size  : c_int;
+      idist = 1 : c_int;
+    } else {
+      assert(parDim==1, "parDim can only be 1 or 2");
+      nn[0] = dom.dim(2).size : c_int;
+      stride = 1  : c_int;
+      idist = dom.dim(2).size : c_int;
+    }
     var arr0 = c_ptrTo(arr);
     flags = flags | FFTW_UNALIGNED;
     return new FFTWplan(ftType, rank, nnp, howmany, arr0,
@@ -468,8 +477,6 @@ prototype module DistributedFFT {
                         arr0, nnp, stride, idist,
                         arg0, flags);
   }
-
-
 
   // I could not combine these, so keep them separate for now.
   private proc _signOrKindType(param ftType : FFTtype) type
