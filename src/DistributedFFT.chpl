@@ -280,8 +280,8 @@ prototype module DistributedFFT {
       const myLineSize = zSrc.size*numBytes(T);
 
       // Setup FFTW plans
-      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var xPlan = setupBatchPlan(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
+      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
       var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=1, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
