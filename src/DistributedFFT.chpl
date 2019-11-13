@@ -420,7 +420,8 @@ prototype module DistributedFFT {
     }
 
     // Define a dummy array
-    var arr : [dom] arrType;
+    var arr = c_malloc(arrType, dom.size);
+    defer { c_free(arr); }
 
     // Write down all the parameters explicitly
     var howmany = numTransforms : c_int;
@@ -439,11 +440,10 @@ prototype module DistributedFFT {
       stride = 1  : c_int;
       idist = dom.dim(2).size : c_int;
     }
-    var arr0 = c_ptrTo(arr);
     flags = flags | FFTW_UNALIGNED;
-    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
+    return new FFTWplan(ftType, rank, nnp, howmany, arr,
                         nnp, stride, idist,
-                        arr0, nnp, stride, idist,
+                        arr, nnp, stride, idist,
                         arg0, flags);
   }
 
