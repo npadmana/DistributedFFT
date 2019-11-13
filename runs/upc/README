@@ -1,0 +1,71 @@
+
+Unified Parallel C (UPC) FT Parallel Benchmark
+
+INTRODUCTION
+This is the Berkeley UPC implementation of the NAS Parallel Benchmark: FT.
+The transpose communication is implemented using both blocking functions
+(upc_memget) and nonblocking functions (upc_memput_nb). The default
+is nonblocking functions, which is defined in UPC description 3.1. 
+If nonblocking functions are not supported on your system, it will
+switch to blocking functions automatically. Users are allowed to
+change the selection by modifying fft3d.uph file.
+
+The NERSC-8 benchmark will run the Class DD16 (16 times bigger than
+NAS FT Class D) version of the UPC FT benchmark. 
+Other Classes are  supported in the released benchmark, but they
+are not required. 
+
+PREREQUISITES
+=============
+
+The benchmark uses the FFTW version 3 library and requires a UPC compiler 
+and runtime environment.
+
+COMPLIING and LINKING
+=====================
+
+1. Set the path to your FFTW library in Make.fftw3
+2. Set the UPCC macro in Makefile to point to your  upc compiler. It may be necessary
+   to set a flag in UPCFLAGS to enable your compiler to build a UPC code. 
+3. make
+
+An executable file called ft-2d-upc.fftw3.DD16 will be generated.
+
+RUNNING
+=========
+
+The benchmark must be run using 8192 UPC threads.
+
+There are two command line parameters (nx, ny) to represent the 
+number of upc threads in the X and Y direction of a thread 
+partition grid (nx * ny = total number of upc threads). 
+Users are allowed to change the values of nx and ny.
+
+For example, on on the Cray at NERSC, the command line will be:
+aprun -n 8192 ./ft-2d-upc.fftw3.DD16 64 128
+
+where nx=64 and ny=128 (nx*ny = 8192)
+
+Depending on your system type and configuration, it may be necessary to change
+the environment variable XT_SYMMETRIC_HEAP_SIZE 
+to define the shared heap size.  A sample run script is provided.
+
+VERIFICATION
+==========
+
+The code is self checking.  The statement in the output is,
+"Result verification successful."
+
+REPORTING
+==========
+
+The running results using 8192 upc threads for CLASS DD16 should be reported.
+In the benchmark spreadsheet, please report the following values reported by the
+program at the end of execution:
+1. Total running time
+2. Mflops/s
+3. Mflops/s/thread
+
+Finally, please submit the output file along with the run script 
+ used and a description of the UPC compiler and runtime environment
+

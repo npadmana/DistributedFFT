@@ -1,0 +1,52 @@
+Warning: no access to tty (Bad file descriptor).
+Thus no job control in this shell.
+starting NPB CLASS D16 4096x4096x2048 25 iterations (NX:4096,NY:4096,NZ:2048) on 64 x 128 processor grid
+ 0>                       Checksum  1:   511.96996345540   512.06102653643
+ 0>                       Checksum  2:   511.88349615901   512.12478832853
+ 0>                       Checksum  3:   511.87857105645   512.12107476816
+ 0>                       Checksum  4:   511.89057492722   512.10802505204
+ 0>                       Checksum  5:   511.90503337222   512.09479030894
+ 0>                       Checksum  6:   511.91805224180   512.08286099328
+ 0>                       Checksum  7:   511.92882932373   512.07228708773
+ 0>                       Checksum  8:   511.93747061523   512.06288213811
+ 0>                       Checksum  9:   511.94430912168   512.05446991156
+ 0>                       Checksum 10:   511.94969260747   512.04691745298
+ 0>                       Checksum 11:   511.95392331880   512.04012522929
+ 0>                       Checksum 12:   511.95724749616   512.03401440785
+ 0>                       Checksum 13:   511.95986038437   512.02851842527
+ 0>                       Checksum 14:   511.96191500136   512.02357841440
+ 0>                       Checksum 15:   511.96353075265   512.01914099794
+ 0>                       Checksum 16:   511.96480076079   512.01515731106
+ 0>                       Checksum 17:   511.96579775635   512.01158258020
+ 0>                       Checksum 18:   511.96657869144   512.00837590940
+ 0>                       Checksum 19:   511.96718830885   512.00550011373
+ 0>                       Checksum 20:   511.96766188827   512.00292153787
+ 0>                       Checksum 21:   511.96802735551   512.00060984475
+ 0>                       Checksum 22:   511.96830690299   511.99853777889
+ 0>                       Checksum 23:   511.96851823636   511.99668091526
+ 0>                       Checksum 24:   511.96867553589   511.99501740461
+benchmark finished calling final barrier
+ 0>                       Checksum 25:   511.96879019986   511.99352772436
+ 0>		Result verification successful
+Total running time is 151.721904 s
+NAS FT (BACKEND: FFTW3) (UPC: slabs) CLASS (X) on 8192 processors TY: 64 TZ: 128 Mflops: 1.063e+06 MFlop/s MFlop/s/Thread: 129.76
+Application 14713847 resources: utime ~1348107s, stime ~35480s Rss ~43388 inblocks ~4336010 outblocks ~5285614
+0.388u 0.096s 2:59.55 0.2%	0+0k 0+0io 0pf+0w
+
+ + --------------------------------------------------------------------------
+ +        Job name: testUPC-FT
+ +          Job Id: 2694750.sdb
+ +          System: hopper
+ +     Queued Time: Thu Jan 17 19:25:39 2013
+ +      Start Time: Fri Jan 18 16:35:10 2013
+ + Completion Time: Fri Jan 18 16:38:28 2013
+ +            User: hjw
+ +        MOM Host: nid04132
+ +           Queue: reg_short
+ +  Req. Resources: other=QSUBPID:14922:hopper01,walltime=00:35:00
+ +  Used Resources: cput=00:00:00,mem=10280kb,vmem=62316kb,walltime=00:03:06
+ +     Acct String: mpccc
+ +   PBS_O_WORKDIR: /global/homes/h/hjw/NERSC8_benchmarks/microbench/UPC-FT
+ +     Submit Args: run.pbs
+ + --------------------------------------------------------------------------
+

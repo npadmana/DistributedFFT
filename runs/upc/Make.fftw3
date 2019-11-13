@@ -1,0 +1,6 @@
+FFT_BACKEND=fftw3
+
+FFTW_HOME ?= /opt/fftw/3.3.0.1/x86_64
+FFT_INCFLAGS ?= -I$(FFTW_HOME)/include
+FFT_LIBS ?= -L$(FFTW_HOME)/lib -lfftw3
+
