@@ -419,9 +419,6 @@ prototype module DistributedFFT {
       when FFTtype.DFT do arg0 = mySignOrKind;
     }
 
-    // Define a dummy array
-    var arr : [dom] arrType;
-
     // Write down all the parameters explicitly
     var howmany = numTransforms : c_int;
     var nn : c_array(c_int, 1);
@@ -439,12 +436,26 @@ prototype module DistributedFFT {
       stride = 1  : c_int;
       idist = dom.dim(2).size : c_int;
     }
-    var arr0 = c_ptrTo(arr);
     flags = flags | FFTW_UNALIGNED;
-    return new FFTWplan(ftType, rank, nnp, howmany, arr0,
-                        nnp, stride, idist,
-                        arr0, nnp, stride, idist,
-                        arg0, flags);
+
+    // See if we already have wisdom for this plan. If we do, we avoid an
+    // allocation.
+    var arr: c_ptr(arrType) = c_nil;
+    var plan = new FFTWplan(ftType, rank, nnp, howmany, arr,
+                            nnp, stride, idist,
+                            arr, nnp, stride, idist,
+                            arg0, flags | FFTW_WISDOM_ONLY);
+
+    if plan.isValid {
+      return plan;
+    } else {
+      arr = c_malloc(arrType, dom.size);
+      defer { c_free(arr); }
+      return new FFTWplan(ftType, rank, nnp, howmany, arr,
+                          nnp, stride, idist,
+                          arr, nnp, stride, idist,
+                          arg0, flags);
+    }
   }
 
   // I could not combine these, so keep them separate for now.
