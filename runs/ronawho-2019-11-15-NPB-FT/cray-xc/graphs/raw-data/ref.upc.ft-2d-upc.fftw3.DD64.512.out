@@ -1,0 +1,96 @@
+starting NPB CLASS D64 8192x4096x4096 25 iterations (NX:8192,NY:4096,NZ:4096) on 32 x 512 processor grid
+ 0>                       Checksum  1:   511.98928669277   512.14578227471
+ 0>                       Checksum  2:   511.95601574869   512.10090444340
+ 0>                       Checksum  3:   511.94379601230   512.07610742847
+ 0>                       Checksum  4:   511.93956288453   512.06143204964
+ 0>                       Checksum  5:   511.93903718788   512.05140856243
+ 0>                       Checksum  6:   511.94050918404   512.04381171022
+ 0>                       Checksum  7:   511.94304445276   512.03763489146
+ 0>                       Checksum  8:   511.94607022416   512.03238310623
+ 0>                       Checksum  9:   511.94923770364   512.02779808179
+ 0>                       Checksum 10:   511.95234462683   512.02373682675
+ 0>                       Checksum 11:   511.95528253610   512.02011378451
+ 0>                       Checksum 12:   511.95800087772   512.01687234921
+ 0>                       Checksum 13:   511.96048341768   512.01397072089
+ 0>                       Checksum 14:   511.96273328210   512.01137493344
+ 0>                       Checksum 15:   511.96476375384   512.00905548866
+ 0>                       Checksum 16:   511.96659277396   512.00698578626
+ 0>                       Checksum 17:   511.96823976426   512.00514142595
+ 0>                       Checksum 18:   511.96972387181   512.00349991321
+ 0>                       Checksum 19:   511.97106306644   512.00204053553
+ 0>                       Checksum 20:   511.97227373845   512.00074429756
+ 0>                       Checksum 21:   511.97337058025   511.99959386523
+ 0>                       Checksum 22:   511.97436662257   511.99857350008
+ 0>                       Checksum 23:   511.97527334809   511.99766897916
+ 0>                       Checksum 24:   511.97610083821   511.99686750263
+ 0>                       Checksum 25:   511.97685792799   511.99615759285
+ 0>		Result verification successful
+Total running time is 72.081943 s
+benchmark finished calling final barrier
+NAS FT (BACKEND: FFTW3) (UPC: slabs) CLASS (Z) on 16384 processors TY: 32 TZ: 512 Mflops: 9.44534e+06 MFlop/s MFlop/s/Thread: 576.498
+Application 2734431 resources: utime ~1299063s, stime ~11178s, Rss ~1237288, inblocks ~586170, outblocks ~0
+
+starting NPB CLASS D64 8192x4096x4096 25 iterations (NX:8192,NY:4096,NZ:4096) on 32 x 512 processor grid
+ 0>                       Checksum  1:   511.98928669277   512.14578227471
+ 0>                       Checksum  2:   511.95601574869   512.10090444340
+ 0>                       Checksum  3:   511.94379601230   512.07610742847
+ 0>                       Checksum  4:   511.93956288453   512.06143204964
+ 0>                       Checksum  5:   511.93903718788   512.05140856243
+ 0>                       Checksum  6:   511.94050918404   512.04381171022
+ 0>                       Checksum  7:   511.94304445276   512.03763489146
+ 0>                       Checksum  8:   511.94607022416   512.03238310623
+ 0>                       Checksum  9:   511.94923770364   512.02779808179
+ 0>                       Checksum 10:   511.95234462683   512.02373682676
+ 0>                       Checksum 11:   511.95528253610   512.02011378451
+ 0>                       Checksum 12:   511.95800087772   512.01687234921
+ 0>                       Checksum 13:   511.96048341768   512.01397072089
+ 0>                       Checksum 14:   511.96273328210   512.01137493344
+ 0>                       Checksum 15:   511.96476375384   512.00905548866
+ 0>                       Checksum 16:   511.96659277396   512.00698578626
+ 0>                       Checksum 17:   511.96823976426   512.00514142595
+ 0>                       Checksum 18:   511.96972387181   512.00349991321
+ 0>                       Checksum 19:   511.97106306644   512.00204053553
+ 0>                       Checksum 20:   511.97227373845   512.00074429756
+ 0>                       Checksum 21:   511.97337058025   511.99959386523
+ 0>                       Checksum 22:   511.97436662257   511.99857350008
+ 0>                       Checksum 23:   511.97527334809   511.99766897916
+ 0>                       Checksum 24:   511.97610083821   511.99686750263
+ 0>                       Checksum 25:   511.97685792799   511.99615759285
+ 0>		Result verification successful
+benchmark finished calling final barrier
+Total running time is 72.966933 s
+NAS FT (BACKEND: FFTW3) (UPC: slabs) CLASS (Z) on 16384 processors TY: 32 TZ: 512 Mflops: 9.33078e+06 MFlop/s MFlop/s/Thread: 569.506
+Application 2734434 resources: utime ~1314569s, stime ~11209s, Rss ~1237288, inblocks ~584398, outblocks ~0
+
+starting NPB CLASS D64 8192x4096x4096 25 iterations (NX:8192,NY:4096,NZ:4096) on 32 x 512 processor grid
+ 0>                       Checksum  1:   511.98928669277   512.14578227471
+ 0>                       Checksum  2:   511.95601574869   512.10090444340
+ 0>                       Checksum  3:   511.94379601230   512.07610742847
+ 0>                       Checksum  4:   511.93956288453   512.06143204964
+ 0>                       Checksum  5:   511.93903718788   512.05140856243
+ 0>                       Checksum  6:   511.94050918404   512.04381171022
+ 0>                       Checksum  7:   511.94304445276   512.03763489146
+ 0>                       Checksum  8:   511.94607022416   512.03238310623
+ 0>                       Checksum  9:   511.94923770364   512.02779808179
+ 0>                       Checksum 10:   511.95234462683   512.02373682676
+ 0>                       Checksum 11:   511.95528253610   512.02011378451
+ 0>                       Checksum 12:   511.95800087772   512.01687234921
+ 0>                       Checksum 13:   511.96048341768   512.01397072089
+ 0>                       Checksum 14:   511.96273328210   512.01137493344
+ 0>                       Checksum 15:   511.96476375384   512.00905548866
+ 0>                       Checksum 16:   511.96659277396   512.00698578626
+ 0>                       Checksum 17:   511.96823976426   512.00514142595
+ 0>                       Checksum 18:   511.96972387181   512.00349991321
+ 0>                       Checksum 19:   511.97106306644   512.00204053553
+ 0>                       Checksum 20:   511.97227373845   512.00074429756
+ 0>                       Checksum 21:   511.97337058025   511.99959386523
+ 0>                       Checksum 22:   511.97436662257   511.99857350008
+ 0>                       Checksum 23:   511.97527334809   511.99766897916
+ 0>                       Checksum 24:   511.97610083821   511.99686750263
+ 0>                       Checksum 25:   511.97685792799   511.99615759285
+ 0>		Result verification successful
+Total running time is 72.216964 s
+benchmark finished calling final barrier
+NAS FT (BACKEND: FFTW3) (UPC: slabs) CLASS (Z) on 16384 processors TY: 32 TZ: 512 Mflops: 9.42768e+06 MFlop/s MFlop/s/Thread: 575.42
+Application 2734437 resources: utime ~1303298s, stime ~11195s, Rss ~1237288, inblocks ~587390, outblocks ~0
+

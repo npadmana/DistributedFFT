@@ -1,0 +1,38 @@
+starting NPB CLASS D64 8192x4096x4096 25 iterations (NX:8192,NY:4096,NZ:4096) on 32 x 128 processor grid
+Application 2734601 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 2634 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf99ff
+  mkcldw@0x2aaaaacfacf0
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfe26c
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaacfd010
+  fftw_dft_zerotens@0x2aaaaacfebe0
+  recur@0x2aaaaacfeb57
+ATP Stack walkback for Rank 2634 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 2634, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00154] [c0-0c2s6n2] [Fri Nov 15 12:40:34 2019] PE RANK 842 exit signal Killed
+[NID 00154] 2019-11-15 12:40:34 Apid 2734601: initiated application termination
+Application 2734601 exit codes: 137
+Application 2734601 exit signals: Killed
+Application 2734601 resources: utime ~3s, stime ~243s, Rss ~2465132, inblocks ~130658, outblocks ~0
+

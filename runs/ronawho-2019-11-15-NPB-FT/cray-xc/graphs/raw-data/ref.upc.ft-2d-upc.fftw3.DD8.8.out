@@ -1,0 +1,85 @@
+
+starting NPB CLASS D8 4096x2048x2048 25 iterations (NX:4096,NY:2048,NZ:2048) on 32 x 8 processor grid
+Application 2734551 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 195 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfc3cf
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaad320d3
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaad37608
+  fftw_rdft_zerotens@0x2aaaaad3758c
+  recur@0x2aaaaad374a2
+ATP Stack walkback for Rank 195 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 195, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00018] [c0-0c0s4n2] [Fri Nov 15 11:06:01 2019] PE RANK 72 exit signal Killed
+_pmiu_daemon(SIGCHLD): [NID 00017] [c0-0c0s4n1] [Fri Nov 15 11:06:01 2019] PE RANK 35 exit signal Killed
+[NID 00018] 2019-11-15 11:06:01 Apid 2734551: initiated application termination
+Application 2734551 exit codes: 137
+Application 2734551 exit signals: Killed
+Application 2734551 resources: utime ~8s, stime ~23s, Rss ~2727384, inblocks ~9606, outblocks ~0
+
+starting NPB CLASS D8 4096x2048x2048 25 iterations (NX:4096,NY:2048,NZ:2048) on 32 x 8 processor grid
+Application 2734573 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 96 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfc3cf
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaad320d3
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaad37608
+  fftw_rdft_zerotens@0x2aaaaad3758c
+  recur@0x2aaaaad374a2
+ATP Stack walkback for Rank 96 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 96, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00018] [c0-0c0s4n2] [Fri Nov 15 11:41:48 2019] PE RANK 66 exit signal Killed
+_pmiu_daemon(SIGCHLD): [NID 00017] [c0-0c0s4n1] [Fri Nov 15 11:41:48 2019] PE RANK 38 exit signal Killed
+[NID 00017] 2019-11-15 11:41:48 Apid 2734573: initiated application termination
+Application 2734573 exit codes: 137
+Application 2734573 exit signals: Killed
+Application 2734573 resources: utime ~8s, stime ~23s, Rss ~2727392, inblocks ~8626, outblocks ~0
+

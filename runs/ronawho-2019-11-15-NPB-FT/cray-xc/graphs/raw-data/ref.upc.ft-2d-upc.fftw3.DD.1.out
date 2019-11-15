@@ -1,0 +1,18 @@
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 1 processor grid
+[NID 00016] 2019-11-15 09:32:36 Apid 2734441: initiated application termination
+[NID 00016] 2019-11-15 09:32:39 Apid 2734441: Error detected during page fault processing.  Process terminated via bus error.
+Application 2734441 exit signals: Killed
+Application 2734441 resources: utime ~0s, stime ~3s, Rss ~9788, inblocks ~1022, outblocks ~0
+
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 1 processor grid
+[NID 00016] 2019-11-15 10:00:58 Apid 2734481: initiated application termination
+[NID 00016] 2019-11-15 10:01:01 Apid 2734481: OOM killer terminated this process.
+Application 2734481 exit signals: Killed
+Application 2734481 resources: utime ~0s, stime ~2s, Rss ~9788, inblocks ~1274, outblocks ~0
+
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 1 processor grid
+[NID 00016] 2019-11-15 10:29:33 Apid 2734518: initiated application termination
+[NID 00016] 2019-11-15 10:29:36 Apid 2734518: Error detected during page fault processing.  Process terminated via bus error.
+Application 2734518 exit signals: Killed
+Application 2734518 resources: utime ~0s, stime ~3s, Rss ~9812, inblocks ~1274, outblocks ~0
+
