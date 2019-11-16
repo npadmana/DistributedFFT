@@ -83,3 +83,1281 @@ Application 2734573 exit codes: 137
 Application 2734573 exit signals: Killed
 Application 2734573 resources: utime ~8s, stime ~23s, Rss ~2727392, inblocks ~8626, outblocks ~0
 
+starting NPB CLASS D8 4096x2048x2048 25 iterations (NX:4096,NY:2048,NZ:2048) on 32 x 8 processor grid
+Application 2734718 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 64 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfc3cf
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaad320d3
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaad37608
+  fftw_rdft_zerotens@0x2aaaaad3758c
+  recur@0x2aaaaad374a2
+ATP Stack walkback for Rank 64 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 64, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00629] [c3-0c0s13n1] [Fri Nov 15 19:24:55 2019] PE RANK 234 exit signal Killed
+[NID 00629] 2019-11-15 19:24:55 Apid 2734718: initiated application termination
+Application 2734718 exit codes: 137
+Application 2734718 exit signals: Killed
+Application 2734718 resources: utime ~4s, stime ~14s, Rss ~4824496, inblocks ~9370, outblocks ~0
+
+starting NPB CLASS D8 4096x2048x2048 25 iterations (NX:4096,NY:2048,NZ:2048) on 32 x 8 processor grid
+
+ PE 102 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 99 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 103 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 108 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 97 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 98 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 110 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 109 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 113 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 104 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 101 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 107 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 112 [Fri Nov 15 19
+ PE 4 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 2 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 17 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 1 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 10 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 9 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 15 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 0 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 7 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 5 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 6 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 12 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 3 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE   2.49445 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   7.49450 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   2.49445 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   0.49443 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   7.49450 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   2.49445 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE   0.49443 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   7.49450 -   Initial Buddyinfo stats: Small blocks  free pagecount 195494, free bytes 800743424 
+ PE   2.49445 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   0.49443 -   Initial Buddyinfo stats: Small blocks  free pagecount 195462, free bytes 800612352 
+ PE   7.49450 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   0.49443 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  15.49458 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE  17.49460 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE  10.49453 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE  15.49458 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  17.49460 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  10.49453 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  15.49458 -   Initial Buddyinfo stats: Small blocks  free pagecount 195462, free bytes 800612352 
+ PE  17.49460 -   Initial Buddyinfo stats: Small blocks  free pagecount 195506, free bytes 800792576 
+ PE  10.49453 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE  15.49458 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  17.49460 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  10.49453 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   4.49447 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   1.49444 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   4.49447 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   6.49449 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   5.49448 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   4.49447 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE   1.49444 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   6.49449 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   9.49452 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   5.49448 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  12.49455 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   4.49447 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   3.49446 -   Current Buddyinfo stats: Small blocks  free pagecount 159893, free bytes 654921728 
+ PE   1.49444 -   Initial Buddyinfo stats: Small blocks  free pagecount 195462, free bytes 800612352 
+ PE   6.49449 -   Initial Buddyinfo stats: Small blocks  free pagecount 195494, free bytes 800743424 
+ PE   9.49452 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   5.49448 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE  12.49455 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   3.49446 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   1.49444 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   6.49449 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   9.49452 -   Initial Buddyinfo stats: Small blocks  free pagecount 195542, free bytes 800940032 
+ PE   5.49448 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  12.49455 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE   3.49446 -   Initial Buddyinfo stats: Small blocks  free pagecount 195490, free bytes 800727040 
+ PE   9.49452 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  12.49455 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   3.49446 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+
+ PE 128 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 136 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 143 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 138 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 139 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 142 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 145 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 131 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 130 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 132 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 137 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 144 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 135 [Fri Nov 15
+ PE 197 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 199 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 201 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 207 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 192 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 196 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 195 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 204 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 209 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 200 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 198 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 202 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 203 [Fri Nov 15
+ PE 169 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 173 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 165 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 175 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 174 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 162 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 172 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 170 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 160 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 176 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 171 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 161 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 168 [Fri Nov 15:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 105 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 96 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 111 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  99.49028 -   Current Buddyinfo stats: Small blocks  free pagecount 134900, free bytes 552550400 
+ PE  99.49028 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  99.49028 -   Initial Buddyinfo stats: Small blocks  free pagecount 171547, free bytes 702656512 
+ PE  99.49028 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 112.49041 -   Current Buddyinfo stats: Small blocks  free pagecount 134900, free bytes 552550400 
+ PE 112.49041 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 112.49041 -   Initial Buddyinfo stats: Small blocks  free pagecount 171551, free bytes 702672896 
+ PE 104.49033 -   Current Buddyinfo stats: Small blocks  free pagecount 134900, free bytes 552550400 
+ PE 112.49041 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 104.49033 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 104.49033 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 104.49033 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 101.49030 -   Current Buddyinfo stats: Small blocks  free pagecount 134774, free bytes 552034304 
+ PE 101.49030 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 101.49030 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 103.49032 -   Current Buddyinfo stats: Small blocks  free pagecount 134774, free bytes 552034304 
+ PE 101.49030 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 102.49031 -   Current Buddyinfo stats: Small blocks  free pagecount 134774, free bytes 552034304 
+ PE 103.49032 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 102.49031 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 103.49032 -   Initial Buddyinfo stats: Small blocks  free pagecount 171495, free bytes 702443520 
+ PE 102.49031 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 103.49032 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 102.49031 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 111.49040 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 111.49040 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 111.49040 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 111.49040 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE  98.49027 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE  98.49027 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  98.49027 -   Initial Buddyinfo stats: Small blocks  free pagecount 171563, free bytes 702722048 
+ PE 107.49036 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE  98.49027 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 107.49036 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 107.49036 -   Initial Buddyinfo stats: Small blocks  free pagecount 171603, free bytes 702885888 
+ PE 107.49036 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 109.49038 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 109.49038 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 109.49038 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 109.49038 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 108.49037 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 113.49042 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 108.49037 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 113.49042 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 105.49034 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 108.49037 -   Initial Buddyinfo stats: Small blocks  free pagecount 171511, free bytes 702509056 
+ PE 113.49042 -   Initial Buddyinfo stats: Small blocks  free pagecount 171495, free bytes 702443520 
+ PE 110.49039 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 105.49034 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 108.49037 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 113.49042 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 110.49039 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 105.49034 -   Initial Buddyinfo stats: Small blocks  free pagecount 171495, free bytes 702443520 
+ PE 110.49039 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 105.49034 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE  96.49025 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE 110.49039 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE  96.49025 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  96.49025 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE  97.49026 -   Current Buddyinfo stats: Small blocks  free pagecount 134837, free bytes 552292352 
+ PE  96.49025 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE  97.49026 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  97.49026 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE  97.49026 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+
+ PE 240 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 227 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 233 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 235 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 241 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 229 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 231 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 238 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 239 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 232 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 230 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 237 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 228 [Fri Nov 15
+ PE 74 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 79 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 77 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 70 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 64 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 78 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 65 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 68 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 71 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 75 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 81 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 69 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 163 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 167 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 177 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 164 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 166 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n3] [nid00627] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 141 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 129 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 144.48990 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 144.48990 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 144.48990 -   Initial Buddyinfo stats: Small blocks  free pagecount 163388, free bytes 669237248 
+ PE 145.48991 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 144.48990 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 145.48991 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 145.48991 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 145.48991 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 132.48978 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 143.48989 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 138.48984 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 132.48978 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 143.48989 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 138.48984 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 132.48978 -   Initial Buddyinfo stats: Small blocks  free pagecount 163416, free bytes 669351936 
+ PE 143.48989 -   Initial Buddyinfo stats: Small blocks  free pagecount 163380, free bytes 669204480 
+ PE 138.48984 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 132.48978 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 143.48989 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 138.48984 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 137.48983 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 142.48988 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 137.48983 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 142.48988 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 137.48983 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 142.48988 -   Initial Buddyinfo stats: Small blocks  free pagecount 163416, free bytes 669351936 
+ PE 137.48983 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 142.48988 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 139.48985 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 139.48985 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 136.48982 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 139.48985 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 136.48982 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 139.48985 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 131.48977 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 136.48982 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 131.48977 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 136.48982 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 131.48977 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 131.48977 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 128.48974 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 141.48987 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 130.48976 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 128.48974 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 135.48981 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 141.48987 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 135.48981 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 130.48976 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 128.48974 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 141.48987 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 135.48981 -   Initial Buddyinfo stats: Small blocks  free pagecount 163404, free bytes 669302784 
+ PE 130.48976 -   Initial Buddyinfo stats: Small blocks  free pagecount 163388, free bytes 669237248 
+ PE 128.48974 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 141.48987 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 135.48981 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 130.48976 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 129.48975 -   Current Buddyinfo stats: Small blocks  free pagecount 128170, free bytes 524984320 
+ PE 129.48975 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 129.48975 -   Initial Buddyinfo stats: Small blocks  free pagecount 163392, free bytes 669253632 
+ PE 129.48975 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 193 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 205 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 209.49039 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 209.49039 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 209.49039 -   Initial Buddyinfo stats: Small blocks  free pagecount 159289, free bytes 652447744 
+ PE 209.49039 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 200.49030 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 196.49026 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 200.49030 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 201.49031 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 196.49026 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 200.49030 -   Initial Buddyinfo stats: Small blocks  free pagecount 159329, free bytes 652611584 
+ PE 201.49031 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 196.49026 -   Initial Buddyinfo stats: Small blocks  free pagecount 159361, free bytes 652742656 
+ PE 200.49030 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 201.49031 -   Initial Buddyinfo stats: Small blocks  free pagecount 159317, free bytes 652562432 
+ PE 202.49032 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 196.49026 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 201.49031 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 202.49032 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 202.49032 -   Initial Buddyinfo stats: Small blocks  free pagecount 159297, free bytes 652480512 
+ PE 202.49032 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 203.49033 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 205.49035 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 203.49033 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 205.49035 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 203.49033 -   Initial Buddyinfo stats: Small blocks  free pagecount 159301, free bytes 652496896 
+ PE 205.49035 -   Initial Buddyinfo stats: Small blocks  free pagecount 159293, free bytes 652464128 
+ PE 203.49033 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 205.49035 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 197.49027 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 197.49027 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 197.49027 -   Initial Buddyinfo stats: Small blocks  free pagecount 159309, free bytes 652529664 
+ PE 197.49027 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 199.49029 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 193.49023 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 199.49029 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 193.49023 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 199.49029 -   Initial Buddyinfo stats: Small blocks  free pagecount 159313, free bytes 652546048 
+ PE 193.49023 -   Initial Buddyinfo stats: Small blocks  free pagecount 159301, free bytes 652496896 
+ PE 192.49022 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 207.49037 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 199.49029 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 193.49023 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 198.49028 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 192.49022 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 207.49037 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 195.49025 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 204.49034 -   Current Buddyinfo stats: Small blocks  free pagecount 123189, free bytes 504582144 
+ PE 198.49028 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 192.49022 -   Initial Buddyinfo stats: Small blocks  free pagecount 159369, free bytes 652775424 
+ PE 207.49037 -   Initial Buddyinfo stats: Small blocks  free pagecount 159377, free bytes 652808192 
+ PE 192.49022 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 195.49025 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 204.49034 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 198.49028 -   Initial Buddyinfo stats: Small blocks  free pagecount 159301, free bytes 652496896 
+ PE 204.49034 -   Initial Buddyinfo stats: Small blocks  free pagecount 159377, free bytes 652808192 
+ PE 207.49037 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 195.49025 -   Initial Buddyinfo stats: Small blocks  free pagecount 159301, free bytes 652496896 
+ PE 198.49028 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 204.49034 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 195.49025 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 164.48980 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 164.48980 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 164.48980 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 164.48980 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 171.48987 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 171.48987 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 171.48987 -   Initial Buddyinfo stats: Small blocks  free pagecount 151282, free bytes 619651072 
+ PE 171.48987 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 177.48993 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 177.48993 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 177.48993 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 177.48993 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 173.48989 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 163.48979 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 176.48992 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 173.48989 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 163.48979 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 170.48986 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 173.48989 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 161.48977 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 176.48992 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 160.48976 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 168.48984 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 163.48979 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 170.48986 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 166.48982 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 173.48989 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 172.48988 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 167.48983 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 174.48990 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 161.48977 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 162.48978 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 176.48992 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 160.48976 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 175.48991 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 168.48984 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 169.48985 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 165.48981 -   Current Buddyinfo stats: Small blocks  free pagecount 114393, free bytes 468553728 
+ PE 163.48979 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 170.48986 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 166.48982 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 172.48988 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 167.48983 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 174.48990 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 161.48977 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 162.48978 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 176.48992 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 160.48976 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 175.48991 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 168.48984 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 169.48985 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 165.48981 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 170.48986 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 166.48982 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 172.48988 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 167.48983 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 174.48990 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 161.48977 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 162.48978 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 160.48976 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 175.48991 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 168.48984 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 169.48985 -   Initial Buddyinfo stats: Small blocks  free pagecount 151282, free bytes 619651072 
+ PE 165.48981 -   Initial Buddyinfo stats: Small blocks  free pagecount 151274, free bytes 619618304 
+ PE 166.48982 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 172.48988 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 167.48983 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 174.48990 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 162.48978 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 175.48991 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 165.48981 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+ PE 169.48985 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7715, free bytes 129436221440 
+
+ PE 32 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 44 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 36 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 34 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 41 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 35 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 40 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 76 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 72 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 66 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 80 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 67 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 225 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 226 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 224 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 236 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  77.49052 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  64.49039 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  74.49049 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  77.49052 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  64.49039 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  71.49046 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  74.49049 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  77.49052 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  64.49039 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  78.49053 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  75.49050 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  81.49056 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  70.49045 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  71.49046 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  74.49049 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  77.49052 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  64.49039 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  65.49040 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  78.49053 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  66.49041 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  67.49042 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  68.49043 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  75.49050 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  72.49047 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  79.49054 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  81.49056 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  70.49045 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  80.49055 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  71.49046 -   Initial Buddyinfo stats: Small blocks  free pagecount 159087, free bytes 651620352 
+ PE  74.49049 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  76.49051 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  69.49044 -   Current Buddyinfo stats: Small blocks  free pagecount 122818, free bytes 503062528 
+ PE  65.49040 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  78.49053 -   Initial Buddyinfo stats: Small blocks  free pagecount 159123, free bytes 651767808 
+ PE 229.49016 -   Current Buddyinfo stats: Small blocks  free pagecount 132940, free bytes 544522240 
+ PE 231.49018 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 229.49016 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 227.49014 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 231.49018 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 229.49016 -   Initial Buddyinfo stats: Small blocks  free pagecount 163541, free bytes 669863936 
+ PE 230.49017 -   Current Buddyinfo stats: Small blocks  free pagecount 129983, free bytes 532410368 
+ PE 227.49014 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 228.49015 -   Current Buddyinfo stats: Small blocks  free pagecount 129920, free bytes 532152320 
+ PE 231.49018 -   Initial Buddyinfo stats: Small blocks  free pagecount 163553, free bytes 669913088 
+ PE 229.49016 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 225.49012 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 227.49014 -   Initial Buddyinfo stats: Small blocks  free pagecount 163541, free bytes 669863936 
+ PE 230.49017 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 228.49015 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 225.49012 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 231.49018 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 232.49019 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 227.49014 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 239.49026 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 230.49017 -   Initial Buddyinfo stats: Small blocks  free pagecount 163577, free bytes 670011392 
+ PE 228.49015 -   Initial Buddyinfo stats: Small blocks  free pagecount 163597, free bytes 670093312 
+ PE 225.49012 -   Initial Buddyinfo stats: Small blocks  free pagecount 163561, free bytes 669945856 
+ PE 241.49028 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 232.49019 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 238.49025 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 230.49017 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 239.49026 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 228.49015 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 224.49011 -   Current Buddyinfo stats: Small blocks  free pagecount 129920, free bytes 532152320 
+ PE 235.49022 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 225.49012 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 240.49027 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE  65.49040 -   Initial Buddyinfo stats: Small blocks  free pagecount 159131, free bytes 651800576 
+ PE  66.49041 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  67.49042 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  68.49043 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  75.49050 -   Initial Buddyinfo stats: Small blocks  free pagecount 159091, free bytes 651636736 
+ PE  72.49047 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  79.49054 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  81.49056 -   Initial Buddyinfo stats: Small blocks  free pagecount 159135, free bytes 651816960 
+ PE  70.49045 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  80.49055 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  71.49046 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  76.49051 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  69.49044 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  78.49053 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  65.49040 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  66.49041 -   Initial Buddyinfo stats: Small blocks  free pagecount 159119, free bytes 651751424 
+ PE  68.49043 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  67.49042 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  75.49050 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  72.49047 -   Initial Buddyinfo stats: Small blocks  free pagecount 159127, free bytes 651784192 
+ PE  79.49054 -   Initial Buddyinfo stats: Small blocks  free pagecount 159127, free bytes 651784192 
+ PE  81.49056 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  70.49045 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  80.49055 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  76.49051 -   Initial Buddyinfo stats: Small blocks  free pagecount 159083, free bytes 651603968 
+ PE  69.49044 -   Initial Buddyinfo stats: Small blocks  free pagecount 159095, free bytes 651653120 
+ PE  66.49041 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  68.49043 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  67.49042 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  72.49047 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  79.49054 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  80.49055 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  76.49051 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE  69.49044 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 226.49013 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 237.49024 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 235.49022 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 232.49019 -   Initial Buddyinfo stats: Small blocks  free pagecount 163537, free bytes 669847552 
+ PE 240.49027 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 237.49024 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 226.49013 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 233.49020 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 235.49022 -   Initial Buddyinfo stats: Small blocks  free pagecount 163537, free bytes 669847552 
+ PE 240.49027 -   Initial Buddyinfo stats: Small blocks  free pagecount 163553, free bytes 669913088 
+ PE 236.49023 -   Current Buddyinfo stats: Small blocks  free pagecount 130046, free bytes 532668416 
+ PE 237.49024 -   Initial Buddyinfo stats: Small blocks  free pagecount 163537, free bytes 669847552 
+ PE 232.49019 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 226.49013 -   Initial Buddyinfo stats: Small blocks  free pagecount 163545, free bytes 669880320 
+ PE 235.49022 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 224.49011 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 240.49027 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 238.49025 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 233.49020 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 239.49026 -   Initial Buddyinfo stats: Small blocks  free pagecount 163637, free bytes 670257152 
+ PE 237.49024 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 236.49023 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 241.49028 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 226.49013 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 224.49011 -   Initial Buddyinfo stats: Small blocks  free pagecount 163537, free bytes 669847552 
+ PE 238.49025 -   Initial Buddyinfo stats: Small blocks  free pagecount 163553, free bytes 669913088 
+ PE 233.49020 -   Initial Buddyinfo stats: Small blocks  free pagecount 163541, free bytes 669863936 
+ PE 239.49026 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 236.49023 -   Initial Buddyinfo stats: Small blocks  free pagecount 163549, free bytes 669896704 
+ PE 241.49028 -   Initial Buddyinfo stats: Small blocks  free pagecount 163545, free bytes 669880320 
+ PE 238.49025 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 224.49011 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 233.49020 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 236.49023 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE 241.49028 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+
+ PE 38 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 47 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 48 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 33 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 49 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 39 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 37 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 42 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 43 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 45 [Fri Nov 15 19:29:18 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  34.49447 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  36.49449 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  34.49447 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  32.49445 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  36.49449 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  34.49447 -   Initial Buddyinfo stats: Small blocks  free pagecount 180488, free bytes 739278848 
+ PE  33.49446 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  36.49449 -   Initial Buddyinfo stats: Small blocks  free pagecount 180496, free bytes 739311616 
+ PE  32.49445 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  34.49447 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  32.49445 -   Initial Buddyinfo stats: Small blocks  free pagecount 180488, free bytes 739278848 
+ PE  41.49454 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  32.49445 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  36.49449 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  33.49446 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  49.49462 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  41.49454 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  33.49446 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  49.49462 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  41.49454 -   Initial Buddyinfo stats: Small blocks  free pagecount 180496, free bytes 739311616 
+ PE  33.49446 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  49.49462 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  41.49454 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  39.49452 -   Current Buddyinfo stats: Small blocks  free pagecount 148753, free bytes 609292288 
+ PE  49.49462 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  39.49452 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  39.49452 -   Initial Buddyinfo stats: Small blocks  free pagecount 180488, free bytes 739278848 
+ PE  39.49452 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  47.49460 -   Current Buddyinfo stats: Small blocks  free pagecount 146611, free bytes 600518656 
+ PE  47.49460 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  47.49460 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  47.49460 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  43.49456 -   Current Buddyinfo stats: Small blocks  free pagecount 146296, free bytes 599228416 
+ PE  43.49456 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  43.49456 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  43.49456 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  48.49461 -   Current Buddyinfo stats: Small blocks  free pagecount 146233, free bytes 598970368 
+ PE  48.49461 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  48.49461 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  48.49461 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  44.49457 -   Current Buddyinfo stats: Small blocks  free pagecount 147367, free bytes 603615232 
+ PE  44.49457 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  44.49457 -   Initial Buddyinfo stats: Small blocks  free pagecount 180500, free bytes 739328000 
+ PE  44.49457 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  42.49455 -   Current Buddyinfo stats: Small blocks  free pagecount 147304, free bytes 603357184 
+ PE  45.49458 -   Current Buddyinfo stats: Small blocks  free pagecount 147304, free bytes 603357184 
+ PE  42.49455 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  45.49458 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  42.49455 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  45.49458 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  42.49455 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  45.49458 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  35.49448 -   Current Buddyinfo stats: Small blocks  free pagecount 147052, free bytes 602324992 
+ PE  35.49448 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  35.49448 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  35.49448 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  40.49453 -   Current Buddyinfo stats: Small blocks  free pagecount 146989, free bytes 602066944 
+ PE  40.49453 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  40.49453 -   Initial Buddyinfo stats: Small blocks  free pagecount 180512, free bytes 739377152 
+ PE  40.49453 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+ PE  37.49450 -   Current Buddyinfo stats: Small blocks  free pagecount 146863, free bytes 601550848 
+ PE  37.49450 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  37.49450 -   Initial Buddyinfo stats: Small blocks  free pagecount 180488, free bytes 739278848 
+ PE  37.49450 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+
+ PE 234 [Fri Nov 15 19:29:18 2019] [c3-0c0s13n1] [nid00629] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 234.49021 -   Current Buddyinfo stats: Small blocks  free pagecount 122467, free bytes 501624832 
+ PE 234.49021 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 234.49021 -   Initial Buddyinfo stats: Small blocks  free pagecount 163577, free bytes 670011392 
+ PE 234.49021 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+ PE  38.49451 -   Current Buddyinfo stats: Small blocks  free pagecount 146737, free bytes 601034752 
+ PE  38.49451 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  38.49451 -   Initial Buddyinfo stats: Small blocks  free pagecount 180512, free bytes 739377152 
+ PE  38.49451 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+
+ PE 140 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 140.48986 -   Current Buddyinfo stats: Small blocks  free pagecount 133015, free bytes 544829440 
+ PE 140.48986 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 140.48986 -   Initial Buddyinfo stats: Small blocks  free pagecount 163416, free bytes 669351936 
+ PE 140.48986 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+
+ PE 134 [Fri Nov 15 19:29:18 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 134.48980 -   Current Buddyinfo stats: Small blocks  free pagecount 93699, free bytes 383791104 
+ PE 134.48980 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 134.48980 -   Initial Buddyinfo stats: Small blocks  free pagecount 163372, free bytes 669171712 
+ PE 134.48980 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+
+ PE 133 [Fri Nov 15 19:29:19 2019] [c3-0c0s12n2] [nid00626] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 133.48979 -   Current Buddyinfo stats: Small blocks  free pagecount 123048, free bytes 504004608 
+ PE 133.48979 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE 133.48979 -   Initial Buddyinfo stats: Small blocks  free pagecount 163408, free bytes 669319168 
+ PE 133.48979 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7712, free bytes 129385889792 
+
+ PE 11 [Fri Nov 15 19:29:19 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  11.49454 -   Current Buddyinfo stats: Small blocks  free pagecount 159786, free bytes 654483456 
+ PE  11.49454 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  11.49454 -   Initial Buddyinfo stats: Small blocks  free pagecount 195462, free bytes 800612352 
+ PE  11.49454 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+
+ PE 14 [Fri Nov 15 19:29:19 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 16 [Fri Nov 15 19:29:19 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 13 [Fri Nov 15 19:29:19 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 8 [Fri Nov 15 19:29:19 2019] [c3-0c0s11n2] [nid00622] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  14.49457 -   Current Buddyinfo stats: Small blocks  free pagecount 158190, free bytes 647946240 
+ PE  14.49457 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  14.49457 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE  14.49457 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  13.49456 -   Current Buddyinfo stats: Small blocks  free pagecount 158190, free bytes 647946240 
+ PE  13.49456 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  13.49456 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE  13.49456 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE   8.49451 -   Current Buddyinfo stats: Small blocks  free pagecount 158190, free bytes 647946240 
+ PE  16.49459 -   Current Buddyinfo stats: Small blocks  free pagecount 158190, free bytes 647946240 
+ PE   8.49451 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  16.49459 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE   8.49451 -   Initial Buddyinfo stats: Small blocks  free pagecount 195466, free bytes 800628736 
+ PE  16.49459 -   Initial Buddyinfo stats: Small blocks  free pagecount 195490, free bytes 800727040 
+ PE   8.49451 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+ PE  16.49459 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7704, free bytes 129251672064 
+
+ PE 206 [Fri Nov 15 19:29:19 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 208 [Fri Nov 15 19:29:19 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 194 [Fri Nov 15 19:29:19 2019] [c3-0c0s13n0] [nid00628] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 206.49036 -   Current Buddyinfo stats: Small blocks  free pagecount 132567, free bytes 542994432 
+ PE 208.49038 -   Current Buddyinfo stats: Small blocks  free pagecount 132567, free bytes 542994432 
+ PE 194.49024 -   Current Buddyinfo stats: Small blocks  free pagecount 132567, free bytes 542994432 
+ PE 206.49036 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 208.49038 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 194.49024 -   Current Buddyinfo stats: Huge blocks  free pagecount 10, free bytes 167772160 
+ PE 206.49036 -   Initial Buddyinfo stats: Small blocks  free pagecount 159301, free bytes 652496896 
+ PE 208.49038 -   Initial Buddyinfo stats: Small blocks  free pagecount 159317, free bytes 652562432 
+ PE 194.49024 -   Initial Buddyinfo stats: Small blocks  free pagecount 159385, free bytes 652840960 
+ PE 206.49036 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 208.49038 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+ PE 194.49024 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7714, free bytes 129419444224 
+
+ PE 100 [Fri Nov 15 19:29:19 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+
+ PE 106 [Fri Nov 15 19:29:19 2019] [c3-0c0s12n1] [nid00625] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE 100.49029 -   Current Buddyinfo stats: Small blocks  free pagecount 139718, free bytes 572284928 
+ PE 106.49035 -   Current Buddyinfo stats: Small blocks  free pagecount 139718, free bytes 572284928 
+ PE 100.49029 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 106.49035 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE 100.49029 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 106.49035 -   Initial Buddyinfo stats: Small blocks  free pagecount 171491, free bytes 702427136 
+ PE 100.49029 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+ PE 106.49035 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7710, free bytes 129352335360 
+
+ PE 46 [Fri Nov 15 19:29:19 2019] [c3-0c0s11n3] [nid00623] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  46.49459 -   Current Buddyinfo stats: Small blocks  free pagecount 142242, free bytes 582623232 
+ PE  46.49459 -   Current Buddyinfo stats: Huge blocks  free pagecount 12, free bytes 201326592 
+ PE  46.49459 -   Initial Buddyinfo stats: Small blocks  free pagecount 180492, free bytes 739295232 
+ PE  46.49459 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7708, free bytes 129318780928 
+
+ PE 73 [Fri Nov 15 19:29:19 2019] [c3-0c0s12n0] [nid00624] LIBDMAPP ERROR: failed to update sym heap addr 0x300000de1c0, length 0X40000038, rc = GNI_RC_INVALID_PARAM.
+ PE  73.49048 -   Current Buddyinfo stats: Small blocks  free pagecount 129517, free bytes 530501632 
+ PE  73.49048 -   Current Buddyinfo stats: Huge blocks  free pagecount 11, free bytes 184549376 
+ PE  73.49048 -   Initial Buddyinfo stats: Small blocks  free pagecount 159135, free bytes 651816960 
+ PE  73.49048 -   Initial Buddyinfo stats: Huge blocks  free pagecount 7713, free bytes 129402667008 
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+aprun: Apid 2734723: Caught signal Interrupt, sending to application
+atpFrontend.exe: main: Build of MRNet network failed 'MRNet: Network failure'
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+atpAppSigHandler: Back-end never delivered its pid. Re-raising signal.
+_pmiu_daemon(SIGCHLD): [NID 00629] [c3-0c0s13n1] [Fri Nov 15 19:33:23 2019] PE RANK 229 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00624] [c3-0c0s12n0] [Fri Nov 15 19:33:23 2019] PE RANK 72 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00623] [c3-0c0s11n3] [Fri Nov 15 19:33:23 2019] PE RANK 41 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00628] [c3-0c0s13n0] [Fri Nov 15 19:33:23 2019] PE RANK 206 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00627] [c3-0c0s12n3] [Fri Nov 15 19:33:24 2019] PE RANK 185 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00625] [c3-0c0s12n1] [Fri Nov 15 19:33:24 2019] PE RANK 126 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00622] [c3-0c0s11n2] [Fri Nov 15 19:33:24 2019] PE RANK 10 exit signal Segmentation fault
+_pmiu_daemon(SIGCHLD): [NID 00626] [c3-0c0s12n2] [Fri Nov 15 19:33:24 2019] PE RANK 131 exit signal Segmentation fault
+[NID 00624] 2019-11-15 19:33:24 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00622] 2019-11-15 19:33:24 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00625] 2019-11-15 19:33:24 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00627] 2019-11-15 19:33:24 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00628] 2019-11-15 19:33:25 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00626] 2019-11-15 19:33:25 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00629] 2019-11-15 19:33:25 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+[NID 00623] 2019-11-15 19:33:25 Apid 2734723: Page fault 16777216 byte huge page: none reserved and unable to allocate. Process terminated via bus error.
+Application 2734723 exit codes: 139
+Application 2734723 resources: utime ~38s, stime ~27s, Rss ~8491288, inblocks ~8260, outblocks ~0
+
+starting NPB CLASS D8 4096x2048x2048 25 iterations (NX:4096,NY:2048,NZ:2048) on 32 x 8 processor grid
+Application 2734727 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 115 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfe26c
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf68aa
+  apply_buf@0x2aaaaacfbda7
+  n1fv_128@0x2aaaaadda4a0
+ATP Stack walkback for Rank 115 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 115, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00624] [c3-0c0s12n0] [Fri Nov 15 19:34:01 2019] PE RANK 74 exit signal Killed
+[NID 00624] 2019-11-15 19:34:01 Apid 2734727: initiated application termination
+_pmiu_daemon(SIGCHLD): [NID 00627] [c3-0c0s12n3] [Fri Nov 15 19:34:01 2019] PE RANK 161 exit signal Killed
+_pmiu_daemon(SIGCHLD): [NID 00623] [c3-0c0s11n3] [Fri Nov 15 19:34:01 2019] PE RANK 48 exit signal Killed
+Application 2734727 exit codes: 137
+Application 2734727 exit signals: Killed
+Application 2734727 resources: utime ~12s, stime ~17s, Rss ~6921692, inblocks ~7174, outblocks ~0
+

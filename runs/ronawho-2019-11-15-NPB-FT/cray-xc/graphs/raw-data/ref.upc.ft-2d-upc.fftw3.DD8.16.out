@@ -85,3 +85,35 @@ Application 2734578 exit codes: 137
 Application 2734578 exit signals: Killed
 Application 2734578 resources: utime ~4s, stime ~34s, Rss ~2465128, inblocks ~18270, outblocks ~0
 
+starting NPB CLASS D8 4096x2048x2048 25 iterations (NX:4096,NY:2048,NZ:2048) on 32 x 16 processor grid
+ 0>                       Checksum  1:   512.16010453464   511.73959982662
+ 0>                       Checksum  2:   512.09054036780   511.86147161825
+ 0>                       Checksum  3:   512.06232293065   511.90742037474
+ 0>                       Checksum  4:   512.04384189971   511.93459007325
+ 0>                       Checksum  5:   512.03115218721   511.95513255499
+ 0>                       Checksum  6:   512.02260888092   511.97201799188
+ 0>                       Checksum  7:   512.01692965340   511.98613716646
+ 0>                       Checksum  8:   512.01312251720   511.99793644015
+ 0>                       Checksum  9:   512.01047671081   512.00776740916
+ 0>                       Checksum 10:   512.00851279686   512.01594431209
+ 0>                       Checksum 11:   512.00692241265   512.02274536703
+ 0>                       Checksum 12:   512.00551581638   512.02840960408
+ 0>                       Checksum 13:   512.00418201587   512.03313737930
+ 0>                       Checksum 14:   512.00286054023   512.03709386794
+ 0>                       Checksum 15:   512.00152230114   512.04041388305
+ 0>                       Checksum 16:   512.00015700225   512.04320688373
+ 0>                       Checksum 17:   511.99876505545   512.04556158601
+ 0>                       Checksum 18:   511.99735250912   512.04754994423
+ 0>                       Checksum 19:   511.99592794720   512.04923046291
+ 0>                       Checksum 20:   511.99450065575   512.05065089019
+ 0>                       Checksum 21:   511.99307959115   512.05185037816
+ 0>                       Checksum 22:   511.99167284619   512.05286120162
+ 0>                       Checksum 23:   511.99028741850   512.05371011953
+ 0>                       Checksum 24:   511.98892915653   512.05441945137
+ 0>                       Checksum 25:   511.98760280489   512.05500792837
+ 0>		Result verification successful
+Total running time is 193.206247 s
+NAS FT (BACKEND: FFTW3) (UPC: slabs) CLASS (8) on 512 processors TY: 32 TZ: 16 Mflops: 405822 MFlop/s MFlop/s/Thread: 792.622
+benchmark finished calling final barrier
+Application 2734719 resources: utime ~104173s, stime ~884s, Rss ~4563080, inblocks ~17882, outblocks ~0
+
