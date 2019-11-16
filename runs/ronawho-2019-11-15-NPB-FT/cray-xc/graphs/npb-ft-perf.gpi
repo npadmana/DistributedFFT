@@ -10,25 +10,22 @@ set ylabel "Gop/s"
 set title "NPB-FT (Size D) Performance"
 set output "npb-ft-D-perf.pdf"
 plot \
-  'data/1.20.0-ugni-qthreads-paw-nbp-ft-D.dat'  using 1:($3/1000) title "Chapel (Optimized)" with linespoints linestyle 4,  \
-  'data/reference-upc-nbp-ft-D.dat'             using 1:($3/1000) title "Reference (UPC)"    with linespoints linestyle 11, \
-  'data/reference-mpi-nbp-ft-D.dat'             using 1:($3/1000) title "Reference (MPI)"    with linespoints linestyle 1,  \
-  'data/1.20.0-ugni-qthreads-init-nbp-ft-D.dat' using 1:($3/1000) title "Chapel (Initial)"   with linespoints linestyle 3,
+  'data/1.20.0-ugni-qthreads-paw-nbp-ft-D.dat'  using 1:($3/1000) title "Chapel" with linespoints linestyle 4,  \
+  'data/reference-upc-nbp-ft-D.dat'             using 1:($3/1000) title "UPC"    with linespoints linestyle 1, \
+  'data/reference-mpi-nbp-ft-D.dat'             using 1:($3/1000) title "MPI"    with linespoints linestyle 5,  \
 
 set title "NPB-FT (Size E) Performance"
 set output "npb-ft-E-perf.pdf"
 plot \
-  'data/1.20.0-ugni-qthreads-paw-nbp-ft-E.dat'  using 1:($3/1000) title "Chapel (Optimized)" with linespoints linestyle 4,  \
-  'data/reference-upc-nbp-ft-E.dat'             using 1:($3/1000) title "Reference (UPC)"    with linespoints linestyle 11, \
-  'data/reference-mpi-nbp-ft-E.dat'             using 1:($3/1000) title "Reference (MPI)"    with linespoints linestyle 1,  \
-  'data/1.20.0-ugni-qthreads-init-nbp-ft-E.dat' using 1:($3/1000) title "Chapel (Initial)"   with linespoints linestyle 3,
+  'data/1.20.0-ugni-qthreads-paw-nbp-ft-E.dat'  using 1:($3/1000) title "Chapel" with linespoints linestyle 4,  \
+  'data/reference-upc-nbp-ft-E.dat'             using 1:($3/1000) title "UPC"    with linespoints linestyle 1, \
+  'data/reference-mpi-nbp-ft-E.dat'             using 1:($3/1000) title "MPI"    with linespoints linestyle 5,  \
 
 set xtics (64,128,256,512)
 set title "NPB-FT (Size F) Performance"
 set output "npb-ft-F-perf.pdf"
 plot \
-  'data/1.20.0-ugni-qthreads-paw-nbp-ft-F.dat'  using 1:($3/1000) title "Chapel (Optimized)" with linespoints linestyle 4,  \
-  'data/reference-upc-nbp-ft-F.dat'             using 1:($3/1000) title "Reference (UPC)"    with linespoints linestyle 11, \
-  'data/reference-mpi-nbp-ft-F.dat'             using 1:($3/1000) title "Reference (MPI)"    with linespoints linestyle 1,  \
-  'data/1.20.0-ugni-qthreads-init-nbp-ft-F.dat' using 1:($3/1000) title "Chapel (Initial)"   with linespoints linestyle 3,
+  'data/1.20.0-ugni-qthreads-paw-nbp-ft-F.dat'  using 1:($3/1000) title "Chapel" with linespoints linestyle 4,  \
+  'data/reference-upc-nbp-ft-F.dat'             using 1:($3/1000) title "UPC"    with linespoints linestyle 1, \
+  'data/reference-mpi-nbp-ft-F.dat'             using 1:($3/1000) title "MPI"    with linespoints linestyle 5,  \
 
