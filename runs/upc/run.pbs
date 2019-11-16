@@ -1,0 +1,14 @@
+#PBS -N testUPC-FT
+#PBS -q regular
+#PBS -l mppwidth=8208
+#PBS -l walltime=00:35:00
+#PBS -j eo
+#PBS -V
+
+cd $PBS_O_WORKDIR
+
+setenv XT_SYMMETRIC_HEAP_SIZE 512M
+
+
+time aprun -n 8192 ./ft-2d-upc.fftw3.DD16 64 128
+

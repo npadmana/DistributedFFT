@@ -1,0 +1,72 @@
+#include <upc_relaxed.h>
+#include <upc_collective.h>
+#include <myfft.h>
+#include <stdio.h>
+
+#define COMM_HANDLE_THRESHOLD 32768
+
+#if defined(__UPC_NB__)
+
+/* The nonblocking functions are defined in upc_nb.h in spec 3.1 */
+/* If your implementation does not agree with spec 3.1, Here is the place you need to modify */
+/* #include <upc_nb.h> */
+/* For example, following two lines are needed to run Cray UPC on hopper */
+#include <upc_cray.h>
+#define upc_sync upc_sync_nb
+
+#define DO_PUT(HANDLE, DST_PTR, SRC_PTR, NBYTES) do {                   \
+    (HANDLE)->comm_handles[(HANDLE)->comm_handle_idx] = upc_memput_nb(DST_PTR, SRC_PTR, NBYTES); \
+    (HANDLE)->comm_handle_idx++;                                        \
+  } while(0)
+#define WAIT_FOR_PUTS(HANDLE) do {              \
+    int __idx;                                                          \
+    for(__idx=0;__idx<(HANDLE)->comm_handle_idx; __idx++) {             \
+      upc_sync((HANDLE)->comm_handles[__idx]);                  \
+    }                                                                   \
+    (HANDLE)->comm_handle_idx = 0;                                      \
+  } while(0)
+  
+
+#else
+
+typedef int upc_handle_t;
+#define DO_PUT(HANDLE, DST_PTR, SRC_PTR, NBYTES) upc_memput(DST_PTR, SRC_PTR, NBYTES); 
+#define WAIT_FOR_PUTS(HANDLE) do {} while(0)
+
+#endif
+
+struct fft3d_handle_t_ {
+  unsigned int NX;
+  unsigned int NY;
+  unsigned int NZ;
+  unsigned int NTOTAL;
+
+  int PX;
+  int PY;
+  int PZ;
+  int PT;
+  int myloc[4]; /*torus location of this thread*/
+
+  int TY;
+  int TZ;
+  int mythreadplane, mythreadrow;
+  unsigned int num_local_planes;
+  unsigned int num_local_rows;
+  unsigned int blocking_factor_x;
+  unsigned int blocking_factor_y;
+
+  upc_handle_t *comm_handles;
+  int comm_handle_idx;
+
+  struct myfft_plan_t plans[3];
+
+};
+
+typedef struct fft3d_handle_t_ fft3d_handle_t;
+
+fft3d_handle_t *plan3DFFT(unsigned int NX, unsigned int NY, unsigned int NZ, int PX, int PY, int PZ, int PT, 
+			  unsigned int blocking_factor_x,  unsigned int blocking_factor_y, 							      myComplex_t *sample_arrayA, myComplex_t* sample_arrayB, myfftdir_t fftdir);
+void run3DFFT(fft3d_handle_t *handle, shared myComplex_t *array, shared myComplex_t *scratch1, 
+	      shared myComplex_t *scratch2);
+
+char *fft3d_id_str(char *buf);

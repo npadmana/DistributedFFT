@@ -1,0 +1,48 @@
+
+#include <inttypes.h>
+
+/*external functions*/
+extern uint64_t    timer_val(int tid);
+extern void	   timer_update(int tid, int action);
+extern void	   timer_clear();
+extern char	  *timer_descr(int tid);
+void print_all_timers(char class, int TY, int TZ);
+
+/*benchmark specifc things*/
+/*#define TIMER_STR_NAMES "Setup", "1D FFT Rows", "1D FFT Cols", "1D FFT Last", \
+		"Evolve Computation", "Checksums",																	\
+		"Exchange1", "Exchange1 Wait",																			\
+		"Exchange2", "Exchange2 Wait",																			\
+		"Local Transpose1", "Local Transpose2",															\
+	  "Barrier Waits", "Barrier at checksum", "Total"
+*/
+#define TIMER_STR_NAMES "Setup", "fftrows", "fftcols", "fftlast", \
+		"evolve", "checksums",																	\
+		"exchange1", "exchange1_wait",																			\
+		"exchange2", "exchange2_wait",																			\
+		"local_transpose1", "local_transpose2",															\
+	  "barrier_wait", "barrier_at_checksum", "poll", "total"
+
+typedef enum {
+  T_SETUP=0,
+  T_FFT1DROWS,
+  T_FFT1DCOLS,
+  T_FFT1DPOST,
+  T_EVOLVE,
+  T_CHECKSUM,
+  T_EXCH1,
+  T_EXCH1_WAIT,
+  T_EXCH2,
+  T_EXCH2_WAIT,
+  T_LOCAL_TRANSPOSE1,
+  T_LOCAL_TRANSPOSE2,
+  T_BARRIER_WAIT,
+  T_BARRIER_CHK,
+  T_POLL,
+  T_TOTAL,
+  T_NUMTIMERS} ft_timer_type_t;
+
+#define FT_TIME_BEGIN	0
+#define FT_TIME_END	1
+#define TIMER_START(TID) timer_update(TID, FT_TIME_BEGIN)
+#define TIMER_STOP(TID) timer_update(TID, FT_TIME_END)
