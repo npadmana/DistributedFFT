@@ -1,0 +1,155 @@
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 2 processor grid
+Application 2734444 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 35 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfc3cf
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaad320d3
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaad37608
+  fftw_rdft_zerotens@0x2aaaaad3758c
+  recur@0x2aaaaad374a2
+ATP Stack walkback for Rank 35 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 35, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00018] [c0-0c0s4n2] [Fri Nov 15 09:37:24 2019] PE RANK 36 exit signal Killed
+[NID 00018] 2019-11-15 09:37:25 Apid 2734444: initiated application termination
+Application 2734444 exit codes: 137
+Application 2734444 exit signals: Killed
+Application 2734444 resources: utime ~2s, stime ~6s, Rss ~2465088, inblocks ~2122, outblocks ~0
+
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 2 processor grid
+Application 2734490 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 20 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfc3cf
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaad320d3
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaad37608
+  fftw_rdft_zerotens@0x2aaaaad3758c
+  recur@0x2aaaaad374a2
+ATP Stack walkback for Rank 20 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 20, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00017] [c0-0c0s4n1] [Fri Nov 15 10:05:45 2019] PE RANK 6 exit signal Killed
+[NID 00017] 2019-11-15 10:05:45 Apid 2734490: initiated application termination
+Application 2734490 exit codes: 137
+Application 2734490 exit signals: Killed
+Application 2734490 resources: utime ~2s, stime ~6s, Rss ~2465108, inblocks ~2096, outblocks ~0
+
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 2 processor grid
+Application 2734521 is crashing. ATP analysis proceeding...
+
+ATP Stack walkback for Rank 32 starting:
+  _start@start.S:120
+  __libc_start_main@0x2aaaaef3ef89
+  main@ft-2d.upc:218
+  plan3DFFT@fft3d.upc:72
+  myfft_plan_1d@myfft_fftw3.c:30
+  fftw_plan_many_dft@0x2aaaaadd1414
+  fftw_mkapiplan@0x2aaaaadc8a66
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacf9917
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaacfc3cf
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf2fec
+  mkplan@0x2aaaaad320d3
+  fftw_mkplan_d@0x2aaaaacf3ea1
+  mkplan@0x2aaaaacf3472
+  search0@0x2aaaaacf31a9
+  fftw_measure_execution_time@0x2aaaaacf6841
+  zero@0x2aaaaad37608
+  fftw_rdft_zerotens@0x2aaaaad3758c
+  recur@0x2aaaaad374a2
+ATP Stack walkback for Rank 32 done
+Process died with signal 11: 'Segmentation fault'
+Forcing core dumps of ranks 32, 0
+View application merged backtrace tree with: stat-view atpMergedBT.dot
+You may need to: module load stat
+
+_pmiu_daemon(SIGCHLD): [NID 00018] [c0-0c0s4n2] [Fri Nov 15 10:34:17 2019] PE RANK 56 exit signal Killed
+[NID 00018] 2019-11-15 10:34:18 Apid 2734521: initiated application termination
+Application 2734521 exit codes: 137
+Application 2734521 exit signals: Killed
+Application 2734521 resources: utime ~2s, stime ~6s, Rss ~2465160, inblocks ~2286, outblocks ~0
+
+starting NPB CLASS D 2048x1024x1024 25 iterations (NX:2048,NY:1024,NZ:1024) on 32 x 2 processor grid
+ 0>                       Checksum  1:   512.22300652519   511.85340371094
+ 0>                       Checksum  2:   512.04639757646   511.70611810818
+ 0>                       Checksum  3:   511.98657667605   511.70963646006
+ 0>                       Checksum  4:   511.95187994884   511.73738639500
+ 0>                       Checksum  5:   511.92690882234   511.76803476318
+ 0>                       Checksum  6:   511.90824168575   511.79678755322
+ 0>                       Checksum  7:   511.89438146378   511.82252818410
+ 0>                       Checksum  8:   511.88423850575   511.84516293476
+ 0>                       Checksum  9:   511.87694356316   511.86491193872
+ 0>                       Checksum 10:   511.87182034476   511.88208038437
+ 0>                       Checksum 11:   511.86835690613   511.89697810115
+ 0>                       Checksum 12:   511.86617085927   511.90989188351
+ 0>                       Checksum 13:   511.86497689501   511.92107770656
+ 0>                       Checksum 14:   511.86456056257   511.93076044841
+ 0>                       Checksum 15:   511.86475866182   511.93913626713
+ 0>                       Checksum 16:   511.86544515724   511.94637572415
+ 0>                       Checksum 17:   511.86652124513   511.95262692382
+ 0>                       Checksum 18:   511.86790838206   511.95801841084
+ 0>                       Checksum 19:   511.86954336641   511.96266175380
+ 0>                       Checksum 20:   511.87137482641   511.96665381383
+ 0>                       Checksum 21:   511.87336067009   511.97007872188
+ 0>                       Checksum 22:   511.87546619739   511.97300959529
+ 0>                       Checksum 23:   511.87766267382   511.97551002412
+ 0>                       Checksum 24:   511.87992623144   511.97763535612
+ 0>                       Checksum 25:   511.88223700679   511.97943380597
+ 0>		Result verification successful
+Total running time is 106.151649 s
+benchmark finished calling final barrier
+NAS FT (BACKEND: FFTW3) (UPC: slabs) CLASS (D) on 64 processors TY: 32 TZ: 2 Mflops: 84442.8 MFlop/s MFlop/s/Thread: 1319.42
+Application 2734724 resources: utime ~7149s, stime ~117s, Rss ~4563068, inblocks ~2210, outblocks ~0
+
