@@ -34,10 +34,11 @@
 */
 prototype module DistributedFFT {
 
-  use BlockDist;
+  public use BlockDist;
+  public use FFTW;
+
   use AllLocalesBarriers;
   use RangeChunk;
-  use FFTW;
   use FFTW.C_FFTW;
   use FFT_Locks;
   use FFT_Timers;
