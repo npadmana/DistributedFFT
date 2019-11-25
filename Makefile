@@ -14,7 +14,7 @@ NAIVEFLAG=
 endif
 
 # The following are experimental flags for better performance
-PERF_FLAGS=-schpl_serializeSlices -suseBulkTransfer
+PERF_FLAGS=-schpl_serializeSlices
 
 Mason.toml: Mason.toml.template
 	envsubst < $< > $@
