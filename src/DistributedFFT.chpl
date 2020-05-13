@@ -188,6 +188,22 @@ prototype module DistributedFFT {
     }
   }
 
+  /* In the code that follows below, we set up FFTW plans to do multiple
+     1D FFTs. The data for these 1D FFTs is either organized in rows or columns
+     of a 2D array.
+
+     Doing an FFT along a row involves data with a stride of 1 and a spacing between arrays (idist)
+     equal to the number of columns = length of a row. Doing the FFT along a column has a stride
+     equal to the number of columns = length of a row, but idist=1 (corresponding elements of each
+     array are separated by 1).
+
+     We define an enum to switch between these cases.
+     ParDim.Row => do the FFT along the row (contiguous data)
+     ParDim.Column => do the FFT along the column (non-contiguous).
+  */
+  pragma "no doc"
+  enum ParDim { Row, Column }; 
+
 
   /* FFT.
 
@@ -210,9 +226,9 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
       // Set up FFTW plans
-      var xPlan = setupPlan(T, ftType, {xDst, zSrc}, parDim=2, 1, signOrKind, FFTW_MEASURE);
-      var yPlan = setupPlan(T, ftType, {ySrc, zSrc}, parDim=2, 1, signOrKind, FFTW_MEASURE);
-      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=1, 1, signOrKind, FFTW_MEASURE);
+      var xPlan = setupPlan(T, ftType, {xDst, zSrc}, parDim=ParDim.Column, 1, signOrKind, FFTW_MEASURE);
+      var yPlan = setupPlan(T, ftType, {ySrc, zSrc}, parDim=ParDim.Column, 1, signOrKind, FFTW_MEASURE);
+      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=ParDim.Row, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
@@ -272,9 +288,9 @@ prototype module DistributedFFT {
       const myLineSize = zSrc.size*numBytes(T);
 
       // Setup FFTW plans
-      var xPlan = setupBatchPlan(T, ftType, {xDst, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
-      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, parDim=2, signOrKind, FFTW_MEASURE);
-      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=1, 1, signOrKind, FFTW_MEASURE);
+      var xPlan = setupBatchPlan(T, ftType, {xDst, zSrc}, parDim=ParDim.Column, signOrKind, FFTW_MEASURE);
+      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, parDim=ParDim.Column, signOrKind, FFTW_MEASURE);
+      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=ParDim.Row, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
@@ -371,10 +387,10 @@ prototype module DistributedFFT {
     const batchSizeSm, batchSizeLg: int;
     var planSm, planLg: FFTWplan(ftType);
 
-    proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+    proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, signOrKind, in flags : c_uint) {
       this.ftType = ftType;
       const (dim1, dim2) = dom.dims();
-      this.parRange = if parDim == 2 then dim2 else dim1;
+      this.parRange = if parDim == ParDim.Column then dim2 else dim1;
       this.numTasks = min(here.maxTaskPar, parRange.size);
       this.batchSizeSm = parRange.size/numTasks;
       this.batchSizeLg = parRange.size/numTasks+1;
@@ -395,14 +411,14 @@ prototype module DistributedFFT {
   }
 
   pragma "no doc"
-  proc setupBatchPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, signOrKind, in flags : c_uint) {
+  proc setupBatchPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, signOrKind, in flags : c_uint) {
     return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags);
   }
 
 
   // Set up many 1D in place plans on a 2D array
   pragma "no doc"
-  proc setupPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : int, numTransforms : int, signOrKind, in flags : c_uint) {
+  proc setupPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, numTransforms : int, signOrKind, in flags : c_uint) {
     // Pull signOrKind locally since this may be an array
     // we need to take a pointer to.
     var mySignOrKind = signOrKind;
@@ -419,13 +435,12 @@ prototype module DistributedFFT {
     var rank = 1 : c_int;
     var stride, idist : c_int;
     const (dim1, dim2) = dom.dims();
-    if (parDim == 2) {
+    if (parDim == ParDim.Column) {
       // FFT columns
       nn[0] = dim1.size : c_int;
       stride = dim2.size  : c_int;
       idist = 1 : c_int;
     } else {
-      assert(parDim==1, "parDim can only be 1 or 2");
       nn[0] = dim2.size : c_int;
       stride = 1  : c_int;
       idist = dim2.size : c_int;
