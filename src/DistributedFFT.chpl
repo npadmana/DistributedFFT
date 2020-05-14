@@ -199,10 +199,10 @@ prototype module DistributedFFT {
 
      We define an enum to switch between these cases.
      ParDim.Row => do the FFT along the row (contiguous data)
-     ParDim.Column => do the FFT along the column (non-contiguous).
+     ParDim.Col => do the FFT along the column (non-contiguous).
   */
   pragma "no doc"
-  enum ParDim { Row, Column }; 
+  enum ParDim { Row, Col }; 
 
 
   /* FFT.
@@ -226,9 +226,9 @@ prototype module DistributedFFT {
       const (yDst, xDst, _) = DstDom.localSubdomain().dims();
 
       // Set up FFTW plans
-      var xPlan = setupPlan(T, ftType, {xDst, zSrc}, parDim=ParDim.Column, 1, signOrKind, FFTW_MEASURE);
-      var yPlan = setupPlan(T, ftType, {ySrc, zSrc}, parDim=ParDim.Column, 1, signOrKind, FFTW_MEASURE);
-      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=ParDim.Row, 1, signOrKind, FFTW_MEASURE);
+      var xPlan = setupPlan(T, ftType, {xDst, zSrc}, ParDim.Col, 1, signOrKind, FFTW_MEASURE);
+      var yPlan = setupPlan(T, ftType, {ySrc, zSrc}, ParDim.Col, 1, signOrKind, FFTW_MEASURE);
+      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, ParDim.Row, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
@@ -288,9 +288,9 @@ prototype module DistributedFFT {
       const myLineSize = zSrc.size*numBytes(T);
 
       // Setup FFTW plans
-      var xPlan = setupBatchPlan(T, ftType, {xDst, zSrc}, parDim=ParDim.Column, signOrKind, FFTW_MEASURE);
-      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, parDim=ParDim.Column, signOrKind, FFTW_MEASURE);
-      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, parDim=ParDim.Row, 1, signOrKind, FFTW_MEASURE);
+      var xPlan = setupBatchPlan(T, ftType, {xDst, zSrc}, ParDim.Col, signOrKind, FFTW_MEASURE);
+      var yPlan = setupBatchPlan(T, ftType, {ySrc, zSrc}, ParDim.Col, signOrKind, FFTW_MEASURE);
+      var zPlan = setupPlan(T, ftType, {0..0, zSrc}, ParDim.Row, 1, signOrKind, FFTW_MEASURE);
 
       // Use temp work array to avoid overwriting the Src array
       var myplane : [{0..0, ySrc, zSrc}] T;
@@ -390,7 +390,7 @@ prototype module DistributedFFT {
     proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, signOrKind, in flags : c_uint) {
       this.ftType = ftType;
       const (dim1, dim2) = dom.dims();
-      this.parRange = if parDim == ParDim.Column then dim2 else dim1;
+      this.parRange = if parDim == ParDim.Col then dim2 else dim1;
       this.numTasks = min(here.maxTaskPar, parRange.size);
       this.batchSizeSm = parRange.size/numTasks;
       this.batchSizeLg = parRange.size/numTasks+1;
@@ -435,7 +435,7 @@ prototype module DistributedFFT {
     var rank = 1 : c_int;
     var stride, idist : c_int;
     const (dim1, dim2) = dom.dims();
-    if (parDim == ParDim.Column) {
+    if (parDim == ParDim.Col) {
       // FFT columns
       nn[0] = dim1.size : c_int;
       stride = dim2.size  : c_int;
