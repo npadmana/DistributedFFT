@@ -1,0 +1,39 @@
+#+STARTUP: indent
+* Setup 
+git clone git@github.com:mpip/pfft.git
+cd pfft
+./bootstrap.sh
+./configure
+make
+
+* Running the code
+
+cd tests
+make time_c2c_transposed
+
+
+# Here's an example run 
+mpirun -np 4 ./time_c2c_transposed -pfft_opt 1 -pfft_tune 1 -pfft_n 256 256 512 -pfft_loops 20 -pfft_np 1 4          
+
+Some notes
+pfft_opt -- ensures using FFTW_MEASURE (as we usually do) for the local FFTs
+pfft_tune -- run some tuning
+
+pfft_loops -- go back and forth n-times
+
+pfft_n -- dimensions of transforms -- we'll certainly want to experiment with this
+pfft_np -- the 2d processor grid -- I'm not sure what is optimal here. We could do <cpuspernode>x<numnodes>, 
+          <numnodes>x<cpuspernode>, or <sqrtmpiranks>^2
+
+          Will need to do some experiments here.
+          
+
+* Initial tests
+
+Let me start with 1024x1024x1024 on swan, and run tests with 4, 8, 16, 32 nodes and see what we find. 
+
+
+* TODO Run strong scaling tests
+  
+  
+* TODO Run weak scaling tests
