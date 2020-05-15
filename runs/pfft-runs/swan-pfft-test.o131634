@@ -1,0 +1,400 @@
+--------
+Running Ngrid=1024, processor grid=2 32, cpus=64, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(7) = 7;  procs(7) = 64;  np_pfft(7, 1:2) = [2 32 ];
+n_pfft(7, 1:3) = [1024 1024 1024 ];  ni_pfft(7, 1:3) = [1024 1024 1024 ];  no_pfft(7, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(7)    = 20;  pfft_forw(7)   = 2.105e+00;
+pfft_forw_itwiddle(7)   = 3.934e-07;
+pfft_forw_remap_3dto2d(7, 2)   = 2.980e-07;
+pfft_forw_trafo1(7, 2)   = 4.479e-01;  pfft_forw_remap1(7, 1) = 8.781e-01;
+pfft_forw_trafo2(7, 2)   = 3.754e-01;  pfft_forw_remap2(7, 1) = 6.197e-01;
+pfft_forw_trafo3(7, 2)   = 1.310e-01;
+pfft_forw_trafo4(7, 2)   = 4.292e-07;  pfft_forw_remap3(7, 1) = 6.437e-07;
+pfft_forw_trafo5(7, 2)   = 5.126e-07;  pfft_forw_remap4(7, 1) = 1.431e-07;
+pfft_forw_trafo6(7, 2)   = 2.146e-07;
+pfft_forw_remap_2dto3d(7, 2)   = 1.061e-06;
+pfft_forw_otwiddle(7)   = 8.464e-07;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(7) = 7;  procs(7) = 64;  np_pfft(7, 1:2) = [2 32 ];
+n_pfft(7, 1:3) = [1024 1024 1024 ];  ni_pfft(7, 1:3) = [1024 1024 1024 ];  no_pfft(7, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(7)    = 20;  pfft_back(7)   = 2.803e+00;
+pfft_back_itwiddle(7)   = 3.576e-07;
+pfft_back_remap_3dto2d(7, 2)   = 3.099e-07;
+pfft_back_trafo1(7, 2)   = 4.888e-07;  pfft_back_remap1(7, 1) = 4.292e-07;
+pfft_back_trafo2(7, 2)   = 1.431e-07;  pfft_back_remap2(7, 1) = 1.431e-07;
+pfft_back_trafo3(7, 2)   = 1.550e-07;
+pfft_back_trafo4(7, 2)   = 2.683e-01;  pfft_back_remap3(7, 1) = 1.053e+00;
+pfft_back_trafo5(7, 2)   = 3.727e-01;  pfft_back_remap4(7, 1) = 1.462e+00;
+pfft_back_trafo6(7, 2)   = 3.719e-01;
+pfft_back_remap_2dto3d(7, 2)   = 1.216e-06;
+pfft_back_otwiddle(7)   = 6.437e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 7.69e+00; tune_back = 6.27e+00, exec_forw = 2.11e+00, exec_back = 2.80e+00, error = 3.13e-13
+Application 6271154 resources: utime ~7648s, stime ~40s, Rss ~842568, inblocks ~812, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=4 32, cpus=128, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(8) = 8;  procs(8) = 128;  np_pfft(8, 1:2) = [4 32 ];
+n_pfft(8, 1:3) = [1024 1024 1024 ];  ni_pfft(8, 1:3) = [1024 1024 1024 ];  no_pfft(8, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(8)    = 20;  pfft_forw(8)   = 1.241e+00;
+pfft_forw_itwiddle(8)   = 6.914e-07;
+pfft_forw_remap_3dto2d(8, 2)   = 2.027e-07;
+pfft_forw_trafo1(8, 2)   = 2.371e-01;  pfft_forw_remap1(8, 1) = 3.543e-01;
+pfft_forw_trafo2(8, 2)   = 1.971e-01;  pfft_forw_remap2(8, 1) = 5.119e-01;
+pfft_forw_trafo3(8, 2)   = 6.606e-02;
+pfft_forw_trafo4(8, 2)   = 5.603e-07;  pfft_forw_remap3(8, 1) = 7.153e-07;
+pfft_forw_trafo5(8, 2)   = 4.530e-07;  pfft_forw_remap4(8, 1) = 1.550e-07;
+pfft_forw_trafo6(8, 2)   = 2.623e-07;
+pfft_forw_remap_2dto3d(8, 2)   = 1.109e-06;
+pfft_forw_otwiddle(8)   = 8.941e-07;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(8) = 8;  procs(8) = 128;  np_pfft(8, 1:2) = [4 32 ];
+n_pfft(8, 1:3) = [1024 1024 1024 ];  ni_pfft(8, 1:3) = [1024 1024 1024 ];  no_pfft(8, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(8)    = 20;  pfft_back(8)   = 1.593e+00;
+pfft_back_itwiddle(8)   = 3.338e-07;
+pfft_back_remap_3dto2d(8, 2)   = 3.934e-07;
+pfft_back_trafo1(8, 2)   = 5.007e-07;  pfft_back_remap1(8, 1) = 4.888e-07;
+pfft_back_trafo2(8, 2)   = 2.146e-07;  pfft_back_remap2(8, 1) = 1.907e-07;
+pfft_back_trafo3(8, 2)   = 1.669e-07;
+pfft_back_trafo4(8, 2)   = 1.272e-01;  pfft_back_remap3(8, 1) = 7.288e-01;
+pfft_back_trafo5(8, 2)   = 1.964e-01;  pfft_back_remap4(8, 1) = 8.119e-01;
+pfft_back_trafo6(8, 2)   = 1.966e-01;
+pfft_back_remap_2dto3d(8, 2)   = 1.812e-06;
+pfft_back_otwiddle(8)   = 6.318e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 6.69e+00; tune_back = 4.69e+00, exec_forw = 1.24e+00, exec_back = 1.59e+00, error = 2.42e-13
+Application 6271155 resources: utime ~9134s, stime ~51s, Rss ~418724, inblocks ~1736, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=8 32, cpus=256, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(9) = 9;  procs(9) = 256;  np_pfft(9, 1:2) = [8 32 ];
+n_pfft(9, 1:3) = [1024 1024 1024 ];  ni_pfft(9, 1:3) = [1024 1024 1024 ];  no_pfft(9, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(9)    = 20;  pfft_forw(9)   = 7.286e-01;
+pfft_forw_itwiddle(9)   = 3.576e-07;
+pfft_forw_remap_3dto2d(9, 2)   = 2.623e-07;
+pfft_forw_trafo1(9, 2)   = 1.254e-01;  pfft_forw_remap1(9, 1) = 1.849e-01;
+pfft_forw_trafo2(9, 2)   = 1.035e-01;  pfft_forw_remap2(9, 1) = 3.649e-01;
+pfft_forw_trafo3(9, 2)   = 3.244e-02;
+pfft_forw_trafo4(9, 2)   = 9.894e-07;  pfft_forw_remap3(9, 1) = 7.749e-07;
+pfft_forw_trafo5(9, 2)   = 1.061e-06;  pfft_forw_remap4(9, 1) = 2.027e-07;
+pfft_forw_trafo6(9, 2)   = 2.503e-07;
+pfft_forw_remap_2dto3d(9, 2)   = 1.478e-06;
+pfft_forw_otwiddle(9)   = 6.914e-07;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(9) = 9;  procs(9) = 256;  np_pfft(9, 1:2) = [8 32 ];
+n_pfft(9, 1:3) = [1024 1024 1024 ];  ni_pfft(9, 1:3) = [1024 1024 1024 ];  no_pfft(9, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(9)    = 20;  pfft_back(9)   = 9.172e-01;
+pfft_back_itwiddle(9)   = 3.099e-07;
+pfft_back_remap_3dto2d(9, 2)   = 2.503e-07;
+pfft_back_trafo1(9, 2)   = 5.960e-07;  pfft_back_remap1(9, 1) = 4.888e-07;
+pfft_back_trafo2(9, 2)   = 2.027e-07;  pfft_back_remap2(9, 1) = 1.550e-07;
+pfft_back_trafo3(9, 2)   = 2.146e-07;
+pfft_back_trafo4(9, 2)   = 6.638e-02;  pfft_back_remap3(9, 1) = 4.673e-01;
+pfft_back_trafo5(9, 2)   = 1.225e-01;  pfft_back_remap4(9, 1) = 3.728e-01;
+pfft_back_trafo6(9, 2)   = 1.208e-01;
+pfft_back_remap_2dto3d(9, 2)   = 1.633e-06;
+pfft_back_otwiddle(9)   = 6.914e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 3.47e+00; tune_back = 2.94e+00, exec_forw = 7.29e-01, exec_back = 9.17e-01, error = 2.37e-13
+Application 6271156 resources: utime ~10451s, stime ~76s, Rss ~210772, inblocks ~3556, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=32 8, cpus=256, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(9) = 9;  procs(9) = 256;  np_pfft(9, 1:2) = [32 8 ];
+n_pfft(9, 1:3) = [1024 1024 1024 ];  ni_pfft(9, 1:3) = [1024 1024 1024 ];  no_pfft(9, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(9)    = 20;  pfft_forw(9)   = 8.077e-01;
+pfft_forw_itwiddle(9)   = 3.338e-07;
+pfft_forw_remap_3dto2d(9, 2)   = 3.934e-07;
+pfft_forw_trafo1(9, 2)   = 1.366e-01;  pfft_forw_remap1(9, 1) = 1.520e-01;
+pfft_forw_trafo2(9, 2)   = 1.001e-01;  pfft_forw_remap2(9, 1) = 5.615e-01;
+pfft_forw_trafo3(9, 2)   = 2.908e-02;
+pfft_forw_trafo4(9, 2)   = 1.156e-06;  pfft_forw_remap3(9, 1) = 1.395e-06;
+pfft_forw_trafo5(9, 2)   = 5.722e-07;  pfft_forw_remap4(9, 1) = 1.907e-07;
+pfft_forw_trafo6(9, 2)   = 2.027e-07;
+pfft_forw_remap_2dto3d(9, 2)   = 7.272e-07;
+pfft_forw_otwiddle(9)   = 1.001e-06;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(9) = 9;  procs(9) = 256;  np_pfft(9, 1:2) = [32 8 ];
+n_pfft(9, 1:3) = [1024 1024 1024 ];  ni_pfft(9, 1:3) = [1024 1024 1024 ];  no_pfft(9, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(9)    = 20;  pfft_back(9)   = 9.549e-01;
+pfft_back_itwiddle(9)   = 3.815e-07;
+pfft_back_remap_3dto2d(9, 2)   = 2.503e-07;
+pfft_back_trafo1(9, 2)   = 4.649e-07;  pfft_back_remap1(9, 1) = 5.603e-07;
+pfft_back_trafo2(9, 2)   = 1.550e-07;  pfft_back_remap2(9, 1) = 2.027e-07;
+pfft_back_trafo3(9, 2)   = 2.027e-07;
+pfft_back_trafo4(9, 2)   = 6.101e-02;  pfft_back_remap3(9, 1) = 5.101e-01;
+pfft_back_trafo5(9, 2)   = 1.198e-01;  pfft_back_remap4(9, 1) = 3.120e-01;
+pfft_back_trafo6(9, 2)   = 1.177e-01;
+pfft_back_remap_2dto3d(9, 2)   = 1.025e-06;
+pfft_back_otwiddle(9)   = 6.795e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 3.29e+00; tune_back = 2.82e+00, exec_forw = 8.08e-01, exec_back = 9.55e-01, error = 2.37e-13
+Application 6271157 resources: utime ~10972s, stime ~77s, Rss ~207764, inblocks ~3690, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=16 16, cpus=256, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(9) = 9;  procs(9) = 256;  np_pfft(9, 1:2) = [16 16 ];
+n_pfft(9, 1:3) = [1024 1024 1024 ];  ni_pfft(9, 1:3) = [1024 1024 1024 ];  no_pfft(9, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(9)    = 20;  pfft_forw(9)   = 8.255e-01;
+pfft_forw_itwiddle(9)   = 5.603e-07;
+pfft_forw_remap_3dto2d(9, 2)   = 7.868e-07;
+pfft_forw_trafo1(9, 2)   = 1.356e-01;  pfft_forw_remap1(9, 1) = 2.191e-01;
+pfft_forw_trafo2(9, 2)   = 1.095e-01;  pfft_forw_remap2(9, 1) = 4.992e-01;
+pfft_forw_trafo3(9, 2)   = 3.141e-02;
+pfft_forw_trafo4(9, 2)   = 5.364e-07;  pfft_forw_remap3(9, 1) = 1.025e-06;
+pfft_forw_trafo5(9, 2)   = 4.053e-07;  pfft_forw_remap4(9, 1) = 2.146e-07;
+pfft_forw_trafo6(9, 2)   = 2.146e-07;
+pfft_forw_remap_2dto3d(9, 2)   = 1.013e-06;
+pfft_forw_otwiddle(9)   = 7.629e-07;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(9) = 9;  procs(9) = 256;  np_pfft(9, 1:2) = [16 16 ];
+n_pfft(9, 1:3) = [1024 1024 1024 ];  ni_pfft(9, 1:3) = [1024 1024 1024 ];  no_pfft(9, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(9)    = 20;  pfft_back(9)   = 9.712e-01;
+pfft_back_itwiddle(9)   = 4.053e-07;
+pfft_back_remap_3dto2d(9, 2)   = 5.126e-07;
+pfft_back_trafo1(9, 2)   = 5.007e-07;  pfft_back_remap1(9, 1) = 5.960e-07;
+pfft_back_trafo2(9, 2)   = 1.550e-07;  pfft_back_remap2(9, 1) = 1.788e-07;
+pfft_back_trafo3(9, 2)   = 2.027e-07;
+pfft_back_trafo4(9, 2)   = 6.079e-02;  pfft_back_remap3(9, 1) = 5.229e-01;
+pfft_back_trafo5(9, 2)   = 1.199e-01;  pfft_back_remap4(9, 1) = 3.846e-01;
+pfft_back_trafo6(9, 2)   = 1.205e-01;
+pfft_back_remap_2dto3d(9, 2)   = 1.097e-06;
+pfft_back_otwiddle(9)   = 6.676e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 3.52e+00; tune_back = 2.78e+00, exec_forw = 8.25e-01, exec_back = 9.71e-01, error = 3.13e-13
+Application 6271158 resources: utime ~11193s, stime ~73s, Rss ~192608, inblocks ~3190, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=16 32, cpus=512, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(10) = 10;  procs(10) = 512;  np_pfft(10, 1:2) = [16 32 ];
+n_pfft(10, 1:3) = [1024 1024 1024 ];  ni_pfft(10, 1:3) = [1024 1024 1024 ];  no_pfft(10, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(10)    = 20;  pfft_forw(10)   = 4.518e-01;
+pfft_forw_itwiddle(10)   = 4.172e-07;
+pfft_forw_remap_3dto2d(10, 2)   = 3.219e-07;
+pfft_forw_trafo1(10, 2)   = 6.361e-02;  pfft_forw_remap1(10, 1) = 7.685e-02;
+pfft_forw_trafo2(10, 2)   = 5.238e-02;  pfft_forw_remap2(10, 1) = 2.800e-01;
+pfft_forw_trafo3(10, 2)   = 1.563e-02;
+pfft_forw_trafo4(10, 2)   = 5.722e-07;  pfft_forw_remap3(10, 1) = 7.510e-07;
+pfft_forw_trafo5(10, 2)   = 5.364e-07;  pfft_forw_remap4(10, 1) = 2.503e-07;
+pfft_forw_trafo6(10, 2)   = 3.099e-07;
+pfft_forw_remap_2dto3d(10, 2)   = 1.454e-06;
+pfft_forw_otwiddle(10)   = 1.204e-06;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(10) = 10;  procs(10) = 512;  np_pfft(10, 1:2) = [16 32 ];
+n_pfft(10, 1:3) = [1024 1024 1024 ];  ni_pfft(10, 1:3) = [1024 1024 1024 ];  no_pfft(10, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(10)    = 20;  pfft_back(10)   = 5.626e-01;
+pfft_back_itwiddle(10)   = 4.530e-07;
+pfft_back_remap_3dto2d(10, 2)   = 5.126e-07;
+pfft_back_trafo1(10, 2)   = 5.484e-07;  pfft_back_remap1(10, 1) = 8.702e-07;
+pfft_back_trafo2(10, 2)   = 2.384e-07;  pfft_back_remap2(10, 1) = 2.503e-07;
+pfft_back_trafo3(10, 2)   = 2.861e-07;
+pfft_back_trafo4(10, 2)   = 3.160e-02;  pfft_back_remap3(10, 1) = 3.496e-01;
+pfft_back_trafo5(10, 2)   = 6.206e-02;  pfft_back_remap4(10, 1) = 2.032e-01;
+pfft_back_trafo6(10, 2)   = 6.148e-02;
+pfft_back_remap_2dto3d(10, 2)   = 1.323e-06;
+pfft_back_otwiddle(10)   = 6.795e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 2.56e+00; tune_back = 1.96e+00, exec_forw = 4.52e-01, exec_back = 5.63e-01, error = 2.80e-13
+Application 6271159 resources: utime ~12986s, stime ~119s, Rss ~138532, inblocks ~7156, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=32 16, cpus=512, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(10) = 10;  procs(10) = 512;  np_pfft(10, 1:2) = [32 16 ];
+n_pfft(10, 1:3) = [1024 1024 1024 ];  ni_pfft(10, 1:3) = [1024 1024 1024 ];  no_pfft(10, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(10)    = 20;  pfft_forw(10)   = 5.214e-01;
+pfft_forw_itwiddle(10)   = 3.338e-07;
+pfft_forw_remap_3dto2d(10, 2)   = 3.219e-07;
+pfft_forw_trafo1(10, 2)   = 6.422e-02;  pfft_forw_remap1(10, 1) = 9.706e-02;
+pfft_forw_trafo2(10, 2)   = 5.167e-02;  pfft_forw_remap2(10, 1) = 3.710e-01;
+pfft_forw_trafo3(10, 2)   = 1.555e-02;
+pfft_forw_trafo4(10, 2)   = 1.192e-06;  pfft_forw_remap3(10, 1) = 7.987e-07;
+pfft_forw_trafo5(10, 2)   = 6.557e-07;  pfft_forw_remap4(10, 1) = 1.550e-07;
+pfft_forw_trafo6(10, 2)   = 2.384e-07;
+pfft_forw_remap_2dto3d(10, 2)   = 1.001e-06;
+pfft_forw_otwiddle(10)   = 7.987e-07;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(10) = 10;  procs(10) = 512;  np_pfft(10, 1:2) = [32 16 ];
+n_pfft(10, 1:3) = [1024 1024 1024 ];  ni_pfft(10, 1:3) = [1024 1024 1024 ];  no_pfft(10, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(10)    = 20;  pfft_back(10)   = 5.973e-01;
+pfft_back_itwiddle(10)   = 4.768e-07;
+pfft_back_remap_3dto2d(10, 2)   = 7.272e-07;
+pfft_back_trafo1(10, 2)   = 1.097e-06;  pfft_back_remap1(10, 1) = 7.033e-07;
+pfft_back_trafo2(10, 2)   = 2.146e-07;  pfft_back_remap2(10, 1) = 2.146e-07;
+pfft_back_trafo3(10, 2)   = 8.464e-07;
+pfft_back_trafo4(10, 2)   = 3.004e-02;  pfft_back_remap3(10, 1) = 3.881e-01;
+pfft_back_trafo5(10, 2)   = 6.285e-02;  pfft_back_remap4(10, 1) = 1.498e-01;
+pfft_back_trafo6(10, 2)   = 6.185e-02;
+pfft_back_remap_2dto3d(10, 2)   = 1.121e-06;
+pfft_back_otwiddle(10)   = 1.156e-06;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 2.48e+00; tune_back = 1.57e+00, exec_forw = 5.21e-01, exec_back = 5.97e-01, error = 2.46e-13
+Application 6271160 resources: utime ~13991s, stime ~132s, Rss ~135764, inblocks ~7884, outblocks ~0
+----
+--------
+Running Ngrid=1024, processor grid=32 32, cpus=1024, loops=20
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_OUT | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(11) = 11;  procs(11) = 1024;  np_pfft(11, 1:2) = [32 32 ];
+n_pfft(11, 1:3) = [1024 1024 1024 ];  ni_pfft(11, 1:3) = [1024 1024 1024 ];  no_pfft(11, 1:3) = [1024 1024 1024 ];
+pfft_forw_iter(11)    = 20;  pfft_forw(11)   = 2.279e-01;
+pfft_forw_itwiddle(11)   = 4.530e-07;
+pfft_forw_remap_3dto2d(11, 2)   = 4.530e-07;
+pfft_forw_trafo1(11, 2)   = 2.467e-02;  pfft_forw_remap1(11, 1) = 3.325e-02;
+pfft_forw_trafo2(11, 2)   = 1.769e-02;  pfft_forw_remap2(11, 1) = 1.572e-01;
+pfft_forw_trafo3(11, 2)   = 8.665e-03;
+pfft_forw_trafo4(11, 2)   = 6.318e-07;  pfft_forw_remap3(11, 1) = 6.914e-07;
+pfft_forw_trafo5(11, 2)   = 7.987e-07;  pfft_forw_remap4(11, 1) = 6.557e-07;
+pfft_forw_trafo6(11, 2)   = 9.656e-07;
+pfft_forw_remap_2dto3d(11, 2)   = 1.681e-06;
+pfft_forw_otwiddle(11)   = 9.656e-07;
+
+% n - FFT size
+% np - process grid
+% procs - number of processes
+% pfft - PFFT runtime
+% index(i) = log(procs(i)) + 1
+% pfft_flags == PFFT_MEASURE | PFFT_TRANSPOSED_IN | PFFT_TUNE | PFFT_PRESERVE_INPUT
+% fftw_flags == FFTW_MEASURE
+index(11) = 11;  procs(11) = 1024;  np_pfft(11, 1:2) = [32 32 ];
+n_pfft(11, 1:3) = [1024 1024 1024 ];  ni_pfft(11, 1:3) = [1024 1024 1024 ];  no_pfft(11, 1:3) = [1024 1024 1024 ];
+pfft_back_iter(11)    = 20;  pfft_back(11)   = 2.549e-01;
+pfft_back_itwiddle(11)   = 3.815e-07;
+pfft_back_remap_3dto2d(11, 2)   = 6.557e-07;
+pfft_back_trafo1(11, 2)   = 7.629e-07;  pfft_back_remap1(11, 1) = 7.033e-07;
+pfft_back_trafo2(11, 2)   = 6.914e-07;  pfft_back_remap2(11, 1) = 6.437e-07;
+pfft_back_trafo3(11, 2)   = 5.960e-07;
+pfft_back_trafo4(11, 2)   = 1.491e-02;  pfft_back_remap3(11, 1) = 1.752e-01;
+pfft_back_trafo5(11, 2)   = 2.127e-02;  pfft_back_remap4(11, 1) = 7.399e-02;
+pfft_back_trafo6(11, 2)   = 2.249e-02;
+pfft_back_remap_2dto3d(11, 2)   = 1.633e-06;
+pfft_back_otwiddle(11)   = 7.987e-07;
+
+Flags = PFFT_TUNE | PFFT_MEASURE | PFFT_PRESERVE_INPUT
+Run 20 loops of out-of-place forward and backward trafo of size n=(1024, 1024, 1024):
+tune_forw = 1.17e+00; tune_back = 1.09e+00, exec_forw = 2.28e-01, exec_back = 2.55e-01, error = 2.35e-13
+Application 6271161 resources: utime ~12620s, stime ~224s, Rss ~96360, inblocks ~13656, outblocks ~0
+----
