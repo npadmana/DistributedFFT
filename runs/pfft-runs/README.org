@@ -6,6 +6,9 @@ cd pfft
 ./configure
 make
 
+** On Swan
+./configure CC=cc MPICC=cc FC=ftn MPIFC=ftn --host=x86_64-cle-linux-gnu --disable-shared
+
 * Running the code
 
 cd tests
