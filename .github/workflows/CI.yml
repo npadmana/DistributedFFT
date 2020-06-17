@@ -1,0 +1,21 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  linux_unit_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [1.22.0, 1.24.1]
+    container:
+      image: chapel/chapel-gasnet:${{matrix.version}}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        apt-get update && apt-get install -y libfftw3-dev
+    - name: NPB-ft
+      run: |
+        make ftt
+        ./target/example/NPB-FT/ft_transposed -nl 4
