@@ -388,9 +388,16 @@ prototype module DistributedFFT {
     var planSm, planLg: FFTWplan(ftType);
 
     proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, signOrKind, in flags : c_uint) {
+      const (dim1, dim2) = dom.dims();
+      const batchRange = if parDim == ParDim.Col then dim2 else dim1;
+      this.init(arrType, ftType, dom, parDim, signOrKind, flags, batchRange);
+    }
+
+    /* Batched range allows for the number of batched FFTW calls to be different from the dimensions of the array */
+    proc init(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, signOrKind, in flags : c_uint, batchRange : range) {
       this.ftType = ftType;
       const (dim1, dim2) = dom.dims();
-      this.parRange = if parDim == ParDim.Col then dim2 else dim1;
+      this.parRange = batchRange;
       this.numTasks = min(here.maxTaskPar, parRange.size);
       this.batchSizeSm = parRange.size/numTasks;
       this.batchSizeLg = parRange.size/numTasks+1;
@@ -415,6 +422,10 @@ prototype module DistributedFFT {
     return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags);
   }
 
+  pragma "no doc"
+  proc setupBatchPlan(type arrType, param ftType : FFTtype, dom : domain(2), parDim : ParDim, signOrKind, in flags : c_uint, batchRange : range) {
+    return new BatchedFFTWplan(arrType, ftType, dom, parDim, signOrKind, flags, batchRange);
+  }
 
   // Set up many 1D in place plans on a 2D array
   pragma "no doc"
