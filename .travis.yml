@@ -6,10 +6,10 @@ services:
 jobs:
   include:
     - script: |
-        docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -w /repo.git chapel/chapel-gasnet:1.20.0 /bin/bash -c '
+        docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -w /repo.git chapel/chapel-gasnet:1.22.0 /bin/bash -c '
         apt-get update && apt-get install -y libfftw3-dev &&
         make ftt && ./target/example/NPB-FT/ft_transposed -nl 4'
     - script: |
-        docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -w /repo.git chapel/chapel-gasnet:1.22.0 /bin/bash -c '
+        docker run -it -v ${TRAVIS_BUILD_DIR}:/repo.git -w /repo.git chapel/chapel-gasnet:1.24.1 /bin/bash -c '
         apt-get update && apt-get install -y libfftw3-dev &&
         make ftt && ./target/example/NPB-FT/ft_transposed -nl 4'
