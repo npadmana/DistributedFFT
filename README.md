@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/npadmana/DistributedFFT.svg?branch=master)](https://travis-ci.com/npadmana/DistributedFFT)
+[![CI](https://github.com/npadmana/DistributedFFT/actions/workflows/CI.yml/badge.svg)](https://github.com/npadmana/DistributedFFT/actions/workflows/CI.yml)
 
 Documentation for this package may be found [here](https://npadmana.github.io/DistributedFFT/docs/modules/src/DistributedFFT.html).
 
