@@ -39,10 +39,10 @@ prototype module DistributedFFT {
 
   use AllLocalesBarriers;
   use RangeChunk;
-  use FFTW.C_FFTW;
+  use FFTW, FFTW.C_FFTW;
   use FFT_Locks;
   use FFT_Timers;
-  use SysCTypes, CPtr;
+  use CTypes;
 
   /*
     Compile time parameters for higher performance.
@@ -141,7 +141,7 @@ prototype module DistributedFFT {
 
       :returns: Returns a slab-distributed domain.
   */
-  proc newSlabDom(dom: domain) where isRectangularDom(dom) {
+  proc newSlabDom(dom: domain) where dom.isRectangular() {
     if dom.rank != 3 then compilerError("The domain must be 3D");
     const targetLocales = reshape(Locales, {0.. #numLocales, 0..0, 0..0});
     return dom dmapped Block(boundingBox=dom, targetLocales=targetLocales);
@@ -370,9 +370,9 @@ prototype module DistributedFFT {
   */
   proc copy(ref dst, const ref src, numBytes: int) {
     if dst.locale.id == here.id {
-      __primitive("chpl_comm_get", dst, src.locale.id, src, numBytes.safeCast(size_t));
+      __primitive("chpl_comm_get", dst, src.locale.id, src, numBytes.safeCast(c_size_t));
     } else if src.locale.id == here.id {
-      __primitive("chpl_comm_put", src, dst.locale.id, dst, numBytes.safeCast(size_t));
+      __primitive("chpl_comm_put", src, dst.locale.id, dst, numBytes.safeCast(c_size_t));
     } else {
       halt("Remote src and remote dst not yet supported");
     }
