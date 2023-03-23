@@ -90,6 +90,7 @@ prototype module DistributedFFT {
   record FFTWplan {
     param ftType : FFTtype;
     var plan : fftw_plan;
+    var isCopy : bool;
 
     // Mimic the advanced interface 
     proc init(param ftType : FFTtype, args ...?k) {
@@ -100,12 +101,28 @@ prototype module DistributedFFT {
         when FFTtype.DFT do plan = fftw_plan_many_dft((...args));
         when FFTtype.R2R do plan = fftw_plan_many_r2r((...args));
       }
+      isCopy = false;
       plannerLock.unlock();
+    }
+
+    // init= method 
+    // Make a shallow copy of the plan, but make sure 
+    // this doesn not get deleted. This is to protect against
+    // double-deletions if the compiler makes a copy. The user 
+    // is assumed to always keep the primary copy alive as long 
+    // as the plans are being used.
+    proc init=(other : FFTWplan) {
+      this.ftType = other.ftType;
+      this.complete();
+      this.plan = other.plan;
+      this.isCopy = true;
     }
 
     proc deinit() {
       plannerLock.lock();
-      destroy_plan(plan);
+      if !this.isCopy {
+        destroy_plan(plan);
+      }
       plannerLock.unlock();
     }
 
