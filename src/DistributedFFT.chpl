@@ -113,7 +113,6 @@ prototype module DistributedFFT {
     // as the plans are being used.
     proc init=(other : FFTWplan) {
       this.ftType = other.ftType;
-      this.complete();
       this.plan = other.plan;
       this.isCopy = true;
     }
