@@ -113,7 +113,6 @@ prototype module DistributedFFT {
     // as the plans are being used.
     proc init=(other : FFTWplan) {
       this.ftType = other.ftType;
-      this.complete();
       this.plan = other.plan;
       this.isCopy = true;
     }
@@ -553,7 +552,7 @@ prototype module DistributedFFT {
 
 
     record TimeTracker {
-      var tt : Timer();
+      var tt : stopwatch();
       var arr : [stageDomain] real;
 
       proc deinit() {
