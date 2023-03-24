@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        version: [1.28.0]
+        version: [1.30.0]
     container:
       image: chapel/chapel-gasnet:${{matrix.version}}
     steps:
